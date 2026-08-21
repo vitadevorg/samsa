@@ -7,8 +7,6 @@ import {
   Calendar, Phone, Mail, MapPin, Clock, File, Printer, HeartPulse,
   User, CheckCircle, AlertCircle, ClipboardList
 } from 'lucide-react';
-
-// --- MOCK DATA: Base de Pacientes con Historial ---
 const initialPatients = [
   { 
     id: 1, 
@@ -55,20 +53,14 @@ const initialPatients = [
     history: []
   },
 ];
-
-// --- COMPONENTE MODAL: HISTORIA CLÍNICA (NUEVO) ---
 const HistoryModal = ({ isOpen, onClose, patient }) => {
     if (!isOpen || !patient) return null;
-
     return (
         <>
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fadeIn print:hidden">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] ring-1 ring-white/10">
-                {/* Header Elegante */}
                 <div className="bg-gradient-to-r from-blue-900 to-indigo-800 p-8 flex justify-between items-start shrink-0 relative overflow-hidden">
-                    {/* Deco */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-                    
                     <div className="text-white relative z-10">
                         <h2 className="text-2xl font-black flex items-center gap-3 tracking-tight">
                             <FileText className="w-7 h-7 text-blue-300"/> Historia Clínica Digital
@@ -83,20 +75,14 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                         <X className="w-6 h-6" />
                     </button>
                 </div>
-
-                {/* Timeline */}
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                     {patient.history && patient.history.length > 0 ? (
                         <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-blue-200 before:to-transparent">
                             {patient.history.map((entry) => (
                                 <div key={entry.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                                    
-                                    {/* Icono Central */}
                                     <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-blue-500 shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-transform group-hover:scale-110 duration-300">
                                         <Activity className="w-4 h-4 text-white" />
                                     </div>
-                                    
-                                    {/* Tarjeta de Contenido */}
                                     <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
                                         <div className="flex items-center justify-between mb-3">
                                             <span className="font-black text-slate-800 text-lg uppercase tracking-tight">{entry.type}</span>
@@ -105,8 +91,6 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                                         <p className="text-slate-600 text-sm leading-relaxed mb-4">
                                             {entry.diagnosis}
                                         </p>
-                                        
-                                        {/* Archivos Adjuntos en el Historial */}
                                         {entry.files && entry.files.length > 0 && (
                                             <div className="mt-4 pt-4 border-t border-slate-100/60">
                                                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Adjuntos</p>
@@ -119,7 +103,6 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                                                 </div>
                                             </div>
                                         )}
-
                                         <div className="mt-4 flex items-center gap-2 text-xs font-medium text-slate-400">
                                             <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                                                 <Users className="w-3 h-3 text-slate-500"/>
@@ -139,8 +122,6 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                         </div>
                     )}
                 </div>
-                
-                {/* Footer Modal */}
                 <div className="bg-white p-6 border-t border-slate-100 flex justify-end gap-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] relative z-20">
                     <button onClick={onClose} className="px-6 py-3 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">
                         Cerrar
@@ -151,10 +132,7 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                 </div>
             </div>
         </div>
-
-        {/* --- SECCIÓN IMPRIMIBLE (Oculta en pantalla, visible al imprimir) --- */}
         <div className="hidden print:block absolute top-0 left-0 w-full bg-white z-[9999] text-black px-8 py-10">
-            {/* Encabezado */}
             <div className="flex items-center justify-between border-b-2 border-blue-800 pb-6 mb-8 mt-4">
                 <div className="flex items-center gap-3">
                     <HeartPulse className="w-12 h-12 text-blue-700" />
@@ -168,10 +146,7 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                     <p className="text-xl font-bold text-slate-800">{new Date().toLocaleDateString('es-AR')}</p>
                 </div>
             </div>
-
             <h2 className="text-center text-2xl font-black text-slate-800 uppercase tracking-widest mb-10">Historia Clínica Digital</h2>
-
-            {/* Datos del Paciente */}
             <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-6 mb-10">
                 <h3 className="text-lg font-bold text-blue-900 mb-4 border-b border-slate-200 pb-2">Información del Paciente</h3>
                 <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-sm">
@@ -193,8 +168,6 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                     </div>
                 </div>
             </div>
-
-            {/* Historial */}
             <div className="mb-12">
                 <h3 className="text-xl font-bold text-blue-900 mb-6 border-b-2 border-blue-100 pb-2">Registro de Evoluciones Clínicas</h3>
                 {patient.history && patient.history.length > 0 ? (
@@ -216,8 +189,6 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                     <p className="text-slate-500 italic text-center py-10 bg-slate-50 rounded-xl">No hay registros clínicos en el sistema para este paciente.</p>
                 )}
             </div>
-
-            {/* Legal */}
             <div className="border-t-4 border-slate-200 pt-6 mt-16 text-center break-inside-avoid">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Documento Oficial S.A.M.S.A</p>
                 <p className="text-[11px] text-slate-500 leading-relaxed max-w-3xl mx-auto">
@@ -230,20 +201,14 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
         </>
     );
 };
-
-// --- COMPONENTE MODAL: NUEVA EVOLUCIÓN (PREMIUM) ---
 const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
   const [files, setFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
-  
-  // Estados para confirmación
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
   if (!isOpen || !patient) return null;
-
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files).map(file => ({
@@ -255,7 +220,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
       setFiles(prev => [...prev, ...newFiles]);
     }
   };
-
   const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => setIsDragging(false);
@@ -268,12 +232,10 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
         setFiles(prev => [...prev, ...newFiles]);
     }
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setShowConfirm(true);
   };
-
   const confirmSave = () => {
     setShowConfirm(false);
     setShowSuccess(true);
@@ -283,20 +245,14 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
         setShowSuccess(false);
     }, 1500);
   };
-
   const cancelConfirm = () => {
     setShowConfirm(false);
   };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] ring-1 ring-white/10">
-        
-        {/* Header Elegante */}
         <div className="bg-gradient-to-r from-blue-900 to-indigo-800 p-8 flex justify-between items-start shrink-0 relative overflow-hidden">
-          {/* Deco */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-          
           <div className="text-white relative z-10">
             <h2 className="text-2xl font-black flex items-center gap-3 tracking-tight">
               <Activity className="w-7 h-7 text-blue-300"/> Nueva Evolución Clínica
@@ -310,8 +266,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
             <X className="w-6 h-6" />
           </button>
         </div>
-
-        {/* Pantallas de Confirmación */}
         {showSuccess ? (
             <div className="p-16 flex flex-col items-center justify-center text-center animate-fadeIn bg-slate-50 flex-1">
                 <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6">
@@ -327,7 +281,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                 </div>
                 <h3 className="text-3xl font-black text-slate-800 mb-2">¿Estás seguro?</h3>
                 <p className="text-slate-500 text-lg max-w-md mx-auto mb-8">Estás por asentar una nueva evolución médica. Una vez guardada, no podrás borrarla o modificarla por seguridad médica.</p>
-                
                 <div className="flex gap-4">
                     <button type="button" onClick={cancelConfirm} className="px-8 py-3 rounded-xl text-slate-600 font-bold bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
                         Volver a Editar
@@ -339,10 +292,8 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
             </div>
         ) : (
             <>
-                {/* Body del Formulario */}
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                 <form id="evolution-form" onSubmit={handleSubmit} className="space-y-8">
-                    
                     <div className="space-y-3">
                     <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-600"/> Diagnóstico / Evolución
@@ -355,7 +306,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                         onChange={e => setDiagnosis(e.target.value)} 
                     />
                     </div>
-
                     <div className="space-y-3">
                     <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <Paperclip className="w-5 h-5 text-blue-600"/> Archivos Adjuntos
@@ -377,7 +327,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                             <p className="text-xs text-slate-400 mt-2 font-medium">Soporta PDF, JPG, PNG (Max 10MB)</p>
                         </label>
                     </div>
-                    
                     {files.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                             {files.map((f, i) => (
@@ -399,7 +348,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                         </div>
                     )}
                     </div>
-
                     <div className="space-y-3">
                     <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-amber-500"/> Receta / Indicaciones
@@ -413,8 +361,6 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                     </div>
                 </form>
                 </div>
-
-                {/* Footer del Modal */}
                 <div className="bg-white p-6 border-t border-slate-100 flex justify-end gap-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] relative z-20">
                 <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">
                     Cancelar
@@ -429,20 +375,15 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
     </div>
   );
 };
-
-// --- COMPONENTE MODAL: NUEVO PACIENTE (PREMIUM CON CONFIRMACIÓN) ---
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const [newPatient, setNewPatient] = useState({ name: '', dni: '', email: '', phone: '' });
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-
     if (!isOpen) return null;
-
     const handleSubmit = (e) => {
         e.preventDefault();
         setShowConfirm(true);
     };
-
     const confirmSave = () => {
         setShowConfirm(false);
         setShowSuccess(true);
@@ -452,9 +393,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
             setShowSuccess(false);
         }, 1500);
     };
-
     const cancelConfirm = () => setShowConfirm(false);
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden ring-1 ring-white/10">
@@ -465,7 +404,6 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
                     </div>
                     <h2 className="text-xl font-black text-white tracking-tight relative z-10">Registrar Paciente</h2>
                 </div>
-                
                 {showSuccess ? (
                     <div className="p-12 flex flex-col items-center justify-center text-center animate-fadeIn bg-slate-50">
                         <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6">
@@ -481,7 +419,6 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
                         </div>
                         <h3 className="text-2xl font-black text-slate-800 mb-2">¿Estás seguro?</h3>
                         <p className="text-slate-500 text-sm mb-8">Vas a registrar un nuevo paciente en la base de datos de SAMSA.</p>
-                        
                         <div className="flex gap-3 w-full">
                             <button type="button" onClick={cancelConfirm} className="flex-1 py-3 rounded-xl text-slate-600 font-bold bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
                                 Volver
@@ -521,44 +458,34 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
         </div>
     );
 };
-
-// --- PÁGINA PRINCIPAL ---
 export default function DoctorPatients() {
   const [patients, setPatients] = useState(initialPatients);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
-  
-  // Estados Modales
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
   const filteredPatients = patients.filter(p => 
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       p.dni.includes(searchTerm)
   );
-
-  // Handlers
   const handleOpenReport = (patient) => {
       setSelectedPatient(patient);
       setIsReportModalOpen(true);
   };
-
   const handleOpenHistory = (patient) => {
       setSelectedPatient(patient);
       setIsHistoryModalOpen(true);
   }
-
   const handleSaveReport = (patientId, reportData) => {
       const newEntry = {
           id: Date.now(),
           date: new Date().toISOString(),
           type: 'Evolución',
           diagnosis: reportData.diagnosis,
-          doctor: 'Dr. Usuario Actual', // Idealmente vendría del AuthContext
+          doctor: 'Dr. Usuario Actual', 
           files: reportData.files
       };
-
       setPatients(prev => prev.map(p => 
           p.id === patientId 
           ? { ...p, lastVisit: new Date().toISOString().split('T')[0], history: [newEntry, ...(p.history || [])] } 
@@ -566,40 +493,32 @@ export default function DoctorPatients() {
       ));
       setIsReportModalOpen(false);
   };
-
   const handleAddPatient = (newPatient) => {
       setPatients(prev => [newPatient, ...prev]);
       setIsAddModalOpen(false);
   };
-
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       <div className="print:hidden">
         <Navbar />
       </div>
-      
-      {/* Modales */}
       <MedicalReportModal 
         isOpen={isReportModalOpen} 
         onClose={() => setIsReportModalOpen(false)} 
         patient={selectedPatient} 
         onSave={handleSaveReport} 
       />
-      
       <HistoryModal 
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
         patient={selectedPatient}
       />
-
       <AddPatientModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddPatient}
       />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 print:hidden">
-        
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
             <div className="relative z-10 w-full md:w-auto text-center md:text-left">
@@ -611,7 +530,6 @@ export default function DoctorPatients() {
                 </h1>
                 <p className="text-slate-500 mt-2 font-medium">Gestión integral de historias clínicas y evoluciones.</p>
             </div>
-
             <div className="flex gap-4 w-full md:w-auto relative z-10">
                 <div className="relative flex-1 md:w-96">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -631,19 +549,15 @@ export default function DoctorPatients() {
                 </button>
             </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredPatients.map((patient) => (
                 <div key={patient.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden">
-                    {/* Acento decorativo */}
                     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform"></div>
-
                     <div className="flex items-start gap-5 relative z-10">
                         <div className="relative shrink-0">
                             <img src={patient.img} alt={patient.name} className="w-20 h-20 rounded-2xl object-cover border-4 border-slate-50 shadow-sm group-hover:border-blue-50 transition-colors" />
                             <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-sm" title="Activo"></div>
                         </div>
-
                         <div className="flex-1 min-w-0 pt-1">
                             <div className="flex justify-between items-start">
                                 <div>
@@ -651,7 +565,6 @@ export default function DoctorPatients() {
                                     <p className="text-sm text-slate-400 font-mono font-medium mt-0.5 tracking-wide">DNI: {patient.dni}</p>
                                 </div>
                             </div>
-                            
                             <div className="grid grid-cols-2 gap-y-3 gap-x-4 mt-4 text-sm font-medium">
                                 <div className="flex items-center gap-2 truncate text-slate-600" title="Última visita">
                                     <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
@@ -682,7 +595,6 @@ export default function DoctorPatients() {
                             </div>
                         </div>
                     </div>
-
                     <div className="mt-6 pt-5 border-t border-slate-100 flex gap-4 relative z-10">
                         <button 
                             onClick={() => handleOpenReport(patient)}
@@ -700,7 +612,6 @@ export default function DoctorPatients() {
                 </div>
             ))}
         </div>
-        
         {filteredPatients.length === 0 && (
             <div className="text-center py-20">
                 <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">

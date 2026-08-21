@@ -30,6 +30,17 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        if (isSuccess) {
+            document.body.classList.add('hide-root-for-print');
+        } else {
+            document.body.classList.remove('hide-root-for-print');
+        }
+        return () => {
+            document.body.classList.remove('hide-root-for-print');
+        };
+    }, [isSuccess]);
+
     if (!isOpen) return null;
 
     const handleNext = () => {
@@ -39,7 +50,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
             return next;
         });
     };
-    
+
     const handlePrev = () => {
         setStep(prev => {
             const next = Math.max(prev - 1, 1);
@@ -47,7 +58,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
             return next;
         });
     };
-    
+
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const handleSubmit = () => {
@@ -74,8 +85,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
             <>
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0B1120] p-4 animate-circle-reveal print:hidden">
                     <div className="max-w-xl w-full text-center flex flex-col items-center relative z-10">
-                        
-                        {/* Círculo animado tipo Reserva de Turno */}
+
                         <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(16,185,129,0.4)] opacity-0 animate-scale-in-bounce" style={{ animationFillMode: 'both' }}>
                             <svg className="w-12 h-12 text-white" viewBox="0 0 52 52">
                                 <path 
@@ -91,18 +101,18 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                 />
                             </svg>
                         </div>
-                        
+
                         <h2 className="text-4xl md:text-5xl text-white font-serif mb-6 opacity-0 animate-fade-in-up tracking-tight" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                             Solicitud Enviada
                         </h2>
-                        
+
                         <p className="text-xl text-slate-200 mb-2 opacity-0 animate-fade-in-up font-light" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
                             Todo listo, <span className="font-bold text-white">{formData.firstName || 'Profesional'}</span>.
                         </p>
                         <p className="text-slate-400 text-base mb-12 opacity-0 animate-fade-in-up" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
                             Nuestro equipo evaluará tu perfil y te contactará a la brevedad.
                         </p>
-                        
+
                         <div className="flex items-center gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
                             <button onClick={handlePrint} className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-lg shadow-lg shadow-emerald-500/20">
                                 <Printer className="w-6 h-6" /> Imprimir Comprobante
@@ -111,20 +121,18 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                 Volver al Inicio
                             </button>
                         </div>
-                        
+
                         <p className="text-slate-500 text-sm mt-16 opacity-0 animate-fade-in-up" style={{ animationDelay: '1000ms', animationFillMode: 'both' }}>
                             Se ha enviado una copia a su correo {formData.email && <strong className="text-slate-400">{formData.email}</strong>}
                         </p>
-                        
+
                     </div>
                 </div>
 
-                {/* COMPROBANTE DE IMPRESIÓN OFICIAL Y ELEGANTE */}
                 {createPortal(
                     <div className="hidden print:block bg-white text-black p-10 min-h-screen font-serif absolute top-0 left-0 w-full">
                         <div className="max-w-4xl mx-auto">
-                        
-                        {/* HEADER SAMSA ELEGANTE */}
+
                         <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6 mb-12">
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
@@ -144,7 +152,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                             </div>
                         </div>
 
-                        {/* CUERPO DEL DOCUMENTO */}
                         <div className="mb-16 px-4">
                             <h2 className="text-3xl font-bold mb-8 text-slate-900 border-l-4 border-blue-600 pl-4">Certificado de Recepción de Solicitud</h2>
                             <p className="text-slate-700 leading-loose mb-10 text-lg">
@@ -174,22 +181,21 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                             </div>
                         </div>
 
-                        {/* FIRMAS Y AVISO LEGAL */}
                         <div className="border-t border-slate-200 pt-10 mt-16 flex justify-between items-end px-4">
                             <div className="text-slate-500 text-sm w-2/3 font-sans">
                                 <p className="mb-3 leading-relaxed"><strong>Aviso Legal y Condiciones:</strong> Este documento es estrictamente un comprobante de recepción e inicio de trámite administrativo. No constituye, bajo ningún concepto, una aprobación automática ni habilitación profesional. El perfil será rigurosamente evaluado por el Comité de Admisiones Médicas de SAMSA en un plazo de 48 a 72 horas hábiles.</p>
                                 <p className="text-xs text-slate-400">© {new Date().getFullYear()} SAMSA, Tucumán, Argentina. Documento generado automáticamente.</p>
                             </div>
-                            
+
                             <div className="w-64 text-center">
                                 <div className="border-b border-slate-400 pb-2 mb-2">
-                                    {/* Firma digital simulada o espacio vacío */}
+
                                     <span className="font-serif text-3xl italic text-slate-300">SAMSA Admisiones</span>
                                 </div>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest font-sans">Sello de Recepción</p>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>,
                 document.body
@@ -201,8 +207,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 sm:p-6 animate-fadeIn">
             <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
-                
-                {/* HEADER */}
+
                 <div className="flex justify-between items-center p-6 border-b border-slate-800 bg-slate-900/50">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
@@ -218,15 +223,12 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                     </button>
                 </div>
 
-                {/* PROGRESS BAR */}
                 <div className="h-1.5 bg-slate-800 w-full relative overflow-hidden">
                     <div className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{ width: `${progress}%` }}></div>
                 </div>
 
-                {/* BODY */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
-                    
-                    {/* STEP 1: Datos Personales */}
+
                     {step === 1 && (
                         <div className="space-y-6 animate-fadeIn">
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -262,7 +264,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    {/* STEP 2: Datos Profesionales */}
                     {step === 2 && (
                         <div className="space-y-6 animate-fadeIn">
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -303,7 +304,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    {/* STEP 3: Archivos */}
                     {step === 3 && (
                         <div className="space-y-6 animate-fadeIn">
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -311,7 +311,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                 Documentación
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {/* Upload Foto de Perfil */}
+
                                 <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-2xl p-6 text-center hover:border-blue-500 transition-colors group cursor-pointer">
                                     <div className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-full mx-auto flex items-center justify-center mb-4 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
                                         <ImageIcon className="w-6 h-6 text-slate-500 group-hover:text-blue-400" />
@@ -321,7 +321,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                     <div className="mt-4 inline-block px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">Seleccionar Archivo</div>
                                 </div>
 
-                                {/* Upload CV */}
                                 <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-2xl p-6 text-center hover:border-blue-500 transition-colors group cursor-pointer">
                                     <div className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-full mx-auto flex items-center justify-center mb-4 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
                                         <File className="w-6 h-6 text-slate-500 group-hover:text-blue-400" />
@@ -331,8 +330,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                     <div className="mt-4 inline-block px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">Seleccionar PDF</div>
                                 </div>
                             </div>
-                            
-                            {/* Dummy Disclaimer */}
+
                             <div className="bg-blue-900/10 border border-blue-900/30 p-4 rounded-xl mt-6">
                                 <p className="text-blue-400 text-sm">
                                     Toda la información proporcionada será tratada de manera confidencial y utilizada exclusivamente para evaluar su solicitud de adhesión a la red médica SAMSA.
@@ -343,7 +341,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
 
                 </div>
 
-                {/* FOOTER ACTIONS */}
                 <div className="p-6 border-t border-slate-800 flex justify-between bg-slate-900/50">
                     <button 
                         onClick={handlePrev} 

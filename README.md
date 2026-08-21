@@ -22,13 +22,16 @@ Elimina la dependencia del papel, reduce drásticamente el ausentismo y agiliza 
 ### 🧑‍⚕️ Para Especialistas Médicos
 * **Autonomía Total:** Gestión de agenda 100% autónoma y personalizable.
 * **Mayor Visibilidad:** Conexión directa con nuevos pacientes, eliminando la dependencia exclusiva de derivaciones de terceros.
+* **Visor de Protocolos Médicos:** Acceso a la base de protocolos de urgencia institucionales con opción de impresión directa sin corromper la interfaz.
 * **Reducción de Ausentismo:** Sistema inteligente de recordatorios automáticos (WhatsApp/Email) que minimiza los turnos perdidos.
-* **Portal de Adhesión:** Formularios de registro elegantes y fluidos con generación automática de certificados legales e imprimibles en formato institucional.
+* **Portal de Adhesión y Soporte:** Formularios de registro con certificados imprimibles y un sistema de tickets interno para soporte técnico.
 
 ### 💖 Para Pacientes
 * **Disponibilidad 24/7:** Reserva de turnos en cualquier momento y lugar (tiempo promedio de reserva reducido de 4 minutos a solo 30 segundos).
 * **Historial Unificado:** Acceso centralizado a su historia clínica, estudios médicos e indicaciones.
-* **Notificaciones Inteligentes:** Recordatorios en el celular y gestión sencilla de salud familiar.
+* **Sistema de Reseñas y Calificaciones:** Interfaz para que el paciente gestione su historial de calificaciones, evaluando la calidad de atención de cada especialista.
+* **Foro de Salud Preventiva:** Espacio interactivo y elegante con artículos científicos, médicos y preventivos avalados por la institución.
+* **Notificaciones Inteligentes y Personalizables:** Selección del canal de contacto preferido (Email, SMS, WhatsApp) para recibir avisos y recordatorios automáticos.
 * **Adiós a la sala de espera telefónica:** Todo desde una interfaz móvil o web extremadamente intuitiva.
 
 ### 🏢 Para Personal Administrativo y Recepción
@@ -51,9 +54,10 @@ El frontend de SAMSA ha sido desarrollado utilizando las tecnologías más moder
 * **Estilos y UI:** [Tailwind CSS](https://tailwindcss.com/) (con clases arbitrarias avanzadas para Glassmorphism y utilidades a medida)
 * **Animaciones y Micro-interacciones:** 
   * CSS Keyframes nativos súper-optimizados (Circle Reveals, Scale Bounces).
+  * Componentes SVG interactivos a medida (Escudo Médico para recuperación de contraseñas, Avatares dinámicos en login).
   * [Framer Motion](https://www.framer.com/motion/) & [GSAP](https://gsap.com/) para transiciones complejas de interfaz y scroll.
 * **Iconografía:** [Lucide React](https://lucide.dev/) (Iconos elegantes y ligeros).
-* **Renderizado de Impresión:** Motores de React Portals dedicados para la generación de comprobantes PDF legales e inmaculados directamente desde el navegador (sin renderizado basura).
+* **Renderizado de Impresión:** Motores de React Portals y aislamiento CSS dedicados para la generación de comprobantes PDF legales e inmaculados directamente desde el navegador (sin renderizado basura ni hojas en blanco).
 * **Componentes Avanzados:** Radix UI y Lenis Scroll para suavizado de desplazamiento.
 
 ---
@@ -87,15 +91,6 @@ Para correr el entorno de desarrollo localmente:
 
 ---
 
-## 🎨 Principios de Diseño (UI/UX)
-
-La plataforma SAMSA ha sido construida bajo estrictos estándares de "UI Premium Médica":
-* **Dark Mode & Glassmorphism:** Uso intensivo de desenfoques de fondo (`backdrop-blur`), tarjetas translúcidas y paleta de colores profunda (`slate-900`/`#0B1120`) combinada con acentos de color esmeralda, azul y púrpura.
-* **Micro-interacciones:** Retroalimentación visual inmediata ante cualquier acción del usuario, barras de progreso fluidas y animaciones atadas al scroll (Intersection Observers).
-* **Accesibilidad y Jerarquía:** Tipografías legibles (combinando Serif y Sans-Serif para encabezados y cuerpos), márgenes amplios y componentes bien estructurados para reducir la carga cognitiva de los médicos y recepcionistas.
-
----
-
 <div align="center">
-  <small>© 2026 SAMSA Inc. Todos los derechos reservados. Desarrollado con excelencia.</small>
+  <small>© 2026 SAMSA. Todos los derechos reservados. Desarrollado con excelencia by VitaDev.</small>
 </div>

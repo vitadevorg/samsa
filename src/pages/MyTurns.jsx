@@ -3,12 +3,9 @@ import { Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, User, XCircle, CheckCircle, AlertCircle, Search, Star, MessageSquare, Send, X, Heart, Activity, Stethoscope, Timer, Download, HeartPulse } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-
-// --- COMPONENTE DE RECIBO (Renderizado oculto para PDF) ---
 const PrintReceipt = ({ appointmentData }) => {
     const { doctorName, patientName, dni, insurance, date, time, email, location, bookingDate } = appointmentData;
     const transactionId = Math.random().toString(36).substring(2, 12).toUpperCase();
-
     return (
         <div id="print-area" className="hidden print:flex flex-col p-8 font-serif text-slate-900 bg-white w-full max-w-none box-border absolute top-0 left-0 right-0 z-[99999] min-h-[100vh]">
             <div className="border-b-[3px] border-slate-900 pb-6 mb-10 flex justify-between items-end">
@@ -26,7 +23,6 @@ const PrintReceipt = ({ appointmentData }) => {
                     <p className="text-sm text-slate-500 font-sans">Impreso: {new Date().toLocaleDateString('es-AR')}</p>
                 </div>
             </div>
-
             <div className="flex-1">
                 <div className="bg-slate-50 border border-slate-200 p-8 rounded-2xl mb-8">
                     <h3 className="font-bold text-slate-900 mb-6 uppercase tracking-widest border-b border-slate-200 pb-3 text-sm">Información de la Reserva</h3>
@@ -37,7 +33,6 @@ const PrintReceipt = ({ appointmentData }) => {
                         <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Horario</span> <span className="font-medium text-slate-800">{time} hs</span></p>
                     </div>
                 </div>
-
                 <div className="bg-slate-50 border border-slate-200 p-8 rounded-2xl mb-8">
                     <h3 className="font-bold text-slate-900 mb-6 uppercase tracking-widest border-b border-slate-200 pb-3 text-sm">Datos del Paciente</h3>
                     <div className="grid grid-cols-2 gap-y-6 text-lg font-sans">
@@ -47,7 +42,6 @@ const PrintReceipt = ({ appointmentData }) => {
                         <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Correo Electrónico</span> <span className="font-medium text-slate-800">{email}</span></p>
                     </div>
                 </div>
-
                 <div className="border-l-[3px] border-slate-900 pl-6 py-2 mt-12">
                     <p className="text-sm text-slate-700 italic font-sans leading-relaxed">
                         <strong>Aviso Importante:</strong> El paciente deberá anunciarse en recepción con al menos 15 minutos de antelación al horario pactado, 
@@ -56,7 +50,6 @@ const PrintReceipt = ({ appointmentData }) => {
                     </p>
                 </div>
             </div>
-
             <div className="border-t border-slate-300 pt-6 text-justify text-[10px] text-slate-400 mt-auto font-sans">
                 <p className="mb-3 leading-relaxed">
                     Este documento constituye un comprobante formal y válido de reserva de turno emitido por el Sistema de Atención Médica y Salud Argentina (SAMSA). 
@@ -70,14 +63,11 @@ const PrintReceipt = ({ appointmentData }) => {
         </div>
     );
 };
-
-// --- COMPONENTE MODAL DE RESEÑA (Mantiene lógica original) ---
 const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0, initialComment = "" }) => {
     const [rating, setRating] = useState(initialRating);
     const [hover, setHover] = useState(0);
     const [comment, setComment] = useState(initialComment);
     const [viewState, setViewState] = useState("form");
-
     useEffect(() => {
         if (isOpen) {
             setRating(initialRating);
@@ -85,9 +75,7 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0,
             setViewState("form");
         }
     }, [isOpen, initialRating, initialComment]);
-  
     if (!isOpen) return null;
-  
     const handleSubmit = () => {
         if (rating === 0) {
             alert("Por favor, seleccioná una calificación de estrellas.");
@@ -96,11 +84,9 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0,
         onSubmit(rating, comment);
         setViewState("success");
     };
-
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity animate-fadeIn p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 animate-slideUp relative">
-          
           {viewState === 'form' && (
             <>
                 <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition z-10"><X className="w-6 h-6" /></button>
@@ -146,7 +132,6 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0,
                 </div>
             </>
           )}
-
           {viewState === 'success' && (
             <div className="p-10 text-center flex flex-col items-center justify-center animate-fadeIn">
                 <div className="relative w-24 h-24 mb-6">
@@ -164,20 +149,15 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0,
       </div>
     );
 };
-
 const MyTurns = () => {
   const { user } = useAuth();
-  const [filter, setFilter] = useState("all"); // all, upcoming, history
+  const [filter, setFilter] = useState("all"); 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedTurnForReview, setSelectedTurnForReview] = useState(null);
-  
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedTurnForCancel, setSelectedTurnForCancel] = useState(null);
   const [showCancelSuccessToast, setShowCancelSuccessToast] = useState(false);
-  
   const [printAppointmentData, setPrintAppointmentData] = useState(null);
-
-  // --- DATOS MOCK (Estados Actualizados + Turno Test) ---
   const [appointments, setAppointments] = useState([
     { 
       id: 6, 
@@ -186,9 +166,9 @@ const MyTurns = () => {
       doctorId: "laura-quiroga",
       date: "2025-11-20", 
       time: "10:00", 
-      status: "finished", // Turno para probar reseña
+      status: "finished", 
       location: "Consultorio 5",
-      review: null // null habilita el botón "Opinar"
+      review: null 
     },
     { 
       id: 1, 
@@ -235,23 +215,19 @@ const MyTurns = () => {
         review: null 
     },
   ]);
-
   const openReview = (appt) => {
       setSelectedTurnForReview(appt);
       setIsReviewModalOpen(true);
   };
-
   const handleSubmitReview = (rating, comment) => {
       setAppointments(prev => prev.map(app => 
           app.id === selectedTurnForReview.id ? { ...app, review: { rating, comment } } : app
       ));
   };
-
   const handleCancelTurnClick = (id) => {
       setSelectedTurnForCancel(id);
       setShowCancelModal(true);
   };
-
   const confirmCancelTurn = () => {
       if (selectedTurnForCancel) {
           setAppointments(prev => prev.map(app => 
@@ -263,13 +239,10 @@ const MyTurns = () => {
           setTimeout(() => setShowCancelSuccessToast(false), 3000);
       }
   };
-
   const handlePrintReceipt = (app) => {
-      // Mock de fecha de reserva (3 días antes del turno para el prototipo)
       const appDateObj = new Date(app.date + "T12:00:00");
       appDateObj.setDate(appDateObj.getDate() - 3);
       const fakeBookingDate = appDateObj.toLocaleDateString('es-AR');
-
       setPrintAppointmentData({
           doctorName: app.doctor,
           patientName: user ? `${user.name} ${user.lastname}` : "Paciente",
@@ -281,7 +254,6 @@ const MyTurns = () => {
           location: app.location,
           bookingDate: fakeBookingDate
       });
-      
       setTimeout(() => {
           const originalTitle = document.title;
           document.title = `samsa_turno_${app.date.replace(/-/g, '')}_${app.time.replace(':', '')}`;
@@ -290,18 +262,15 @@ const MyTurns = () => {
           setTimeout(() => setPrintAppointmentData(null), 500);
       }, 100);
   };
-
   const filteredAppointments = appointments.filter(app => {
     if (filter === "upcoming") return ['pending', 'waiting', 'attending'].includes(app.status);
     if (filter === "history") return ['finished', 'cancelled'].includes(app.status);
     return true;
   });
-
   return (
     <div className="font-sans text-slate-800 bg-gray-50 min-h-screen print:bg-white">
       <div className="print:hidden">
         <Navbar />
-      
       <ReviewModal 
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
@@ -310,7 +279,6 @@ const MyTurns = () => {
         initialRating={selectedTurnForReview?.review?.rating || 0}
         initialComment={selectedTurnForReview?.review?.comment || ""}
       />
-
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -334,7 +302,6 @@ const MyTurns = () => {
           </div>
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid gap-6">
             {filteredAppointments.map((app) => {
@@ -347,17 +314,14 @@ const MyTurns = () => {
                 };
                 const currentStatus = statusStyles[app.status] || statusStyles.pending;
                 const StatusIcon = currentStatus.icon;
-
                 return (
                     <div key={app.id} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all ${app.status === 'attending' ? 'ring-2 ring-indigo-400' : ''}`}>
                         <div className="p-6 flex flex-col md:flex-row justify-between gap-6">
-                            
                             <div className="flex gap-5">
                                 <div className={`flex flex-col items-center justify-center rounded-xl w-16 h-16 border flex-shrink-0 ${app.status === 'finished' || app.status === 'cancelled' ? 'bg-gray-50 border-gray-200 text-gray-400' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
                                     <span className="text-xs font-bold uppercase">{new Date(app.date).toLocaleString('es-ES', { month: 'short' })}</span>
                                     <span className="text-2xl font-extrabold">{new Date(app.date).getDate() + 1}</span>
                                 </div>
-                                
                                 <div>
                                     <h3 className="text-lg font-bold text-gray-900">{app.specialty}</h3>
                                     <p className="text-blue-600 font-medium text-sm flex items-center gap-1 mt-1">
@@ -372,7 +336,6 @@ const MyTurns = () => {
                                     </div>
                                 </div>
                             </div>
-
                             <div className="flex flex-col items-start md:items-end justify-between gap-2 min-w-[160px]">
                                 <div className="flex items-center gap-2">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${currentStatus.color}`}>
@@ -384,17 +347,14 @@ const MyTurns = () => {
                                         </button>
                                     )}
                                 </div>
-
                                 <div className="mt-2">
                                     {app.status === 'pending' && (
                                         <button onClick={() => handleCancelTurnClick(app.id)} className="text-red-500 hover:text-red-700 text-sm font-medium hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
                                             Cancelar Turno
                                         </button>
                                     )}
-                                    
                                     {app.status === 'waiting' && <span className="text-orange-600 text-xs font-bold animate-pulse">¡Estás próximo a pasar!</span>}
                                     {app.status === 'attending' && <span className="text-indigo-600 text-xs font-bold">Siendo atendido...</span>}
-
                                     {app.status === 'finished' && (
                                         !app.review ? (
                                             <button onClick={() => openReview(app)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition shadow-sm">
@@ -417,7 +377,6 @@ const MyTurns = () => {
                                 </div>
                             </div>
                         </div>
-                        
                         <div className={`h-1.5 w-full ${
                             app.status === 'pending' ? 'bg-blue-400' : 
                             app.status === 'waiting' ? 'bg-orange-400' :
@@ -429,8 +388,6 @@ const MyTurns = () => {
             })}
         </div>
       </div>
-
-      {/* Modal de Confirmación de Cancelación (ROJO) */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -438,7 +395,6 @@ const MyTurns = () => {
             <button onClick={() => setShowCancelModal(false)} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
               <X className="w-6 h-6" />
             </button>
-
             <div className="text-center">
               <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                  <AlertCircle className="w-10 h-10 text-red-600" />
@@ -447,7 +403,6 @@ const MyTurns = () => {
               <p className="text-gray-600 mb-8 leading-relaxed">
                 ¿Estás seguro de que deseas cancelar este turno? Esta acción no se puede deshacer y perderás tu lugar.
               </p>
-
               <div className="flex flex-col gap-3">
                  <button onClick={confirmCancelTurn} className="w-full py-3.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/20 transition-all transform active:scale-95">
                     Sí, cancelar turno
@@ -460,8 +415,6 @@ const MyTurns = () => {
           </div>
         </div>
       )}
-
-      {/* Cartelito de Éxito al Cancelar (Modal Centrado) */}
       {showCancelSuccessToast && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-2xl shadow-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in duration-300 flex items-center gap-4 max-w-sm w-full">
@@ -479,16 +432,11 @@ const MyTurns = () => {
           </div>
         </div>
       )}
-
       </div>
-
-      {/* Renderizado Oculto del Comprobante (Para Imprimir/PDF) */}
       {printAppointmentData && (
           <PrintReceipt appointmentData={printAppointmentData} />
       )}
-
     </div>
   );
 };
-
 export default MyTurns;

@@ -4,16 +4,11 @@ import {
   MessageCircle, ArrowRight, Search, FileText 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// IMPORTACIÓN CORRECTA DE TU NAVBAR EXISTENTE
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-
-// --- UTILIDAD: FadeIn (Entradas suaves estilo GSAP) ---
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
-
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -23,15 +18,12 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
         }
       });
     }, { threshold: 0.1 });
-
     const { current } = domRef;
     if (current) observer.observe(current);
-
     return () => {
       if (current) observer.unobserve(current);
     };
   }, []);
-
   return (
     <div
       ref={domRef}
@@ -44,14 +36,11 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
     </div>
   );
 };
-
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState(null);
-
   const toggleQuestion = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
-
   const faqs = [
     {
       id: "01",
@@ -94,26 +83,19 @@ const FAQ = () => {
       answer: "Dependiendo del tipo de servicio, el sistema puede permitir múltiples turnos, pero en general se limita a uno por persona para evitar sobrecargas y asegurar disponibilidad para todos."
     }
   ];
-
   return (
     <div className="font-sans text-slate-800 bg-white min-h-screen selection:bg-blue-100 selection:text-blue-900 flex flex-col">
-      
       <Navbar />
-
-      {/* HEADER HERO */}
       <div className="relative pt-32 pb-16 lg:pt-40 lg:pb-24 overflow-hidden">
-         {/* Fondo decorativo sutil */}
          <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50/50 rounded-full blur-3xl opacity-60 translate-x-1/2 -translate-y-1/2"></div>
          </div>
-
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
           <FadeIn>
             <div className="inline-flex items-center justify-center p-3 mb-8 bg-blue-50 rounded-2xl text-blue-600">
                 <HelpCircle className="w-8 h-8" />
             </div>
           </FadeIn>
-          
           <FadeIn delay={100}>
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-6">
               Preguntas <br className="hidden md:block" />
@@ -122,7 +104,6 @@ const FAQ = () => {
               </span>
             </h1>
           </FadeIn>
-          
           <FadeIn delay={200}>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light leading-relaxed">
               Resolvemos tus dudas sobre el funcionamiento de SAMSA para que tu experiencia sea simple y transparente.
@@ -130,8 +111,6 @@ const FAQ = () => {
           </FadeIn>
         </div>
       </div>
-
-      {/* FAQ LIST */}
       <div className="max-w-3xl mx-auto px-6 lg:px-8 pb-24 flex-grow">
         <div className="space-y-4">
           {faqs.map((item, index) => (
@@ -159,7 +138,6 @@ const FAQ = () => {
                         <ChevronDown className="w-5 h-5" />
                     </div>
                 </button>
-                
                 <div 
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${
                         activeIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
@@ -173,8 +151,6 @@ const FAQ = () => {
             </FadeIn>
           ))}
         </div>
-
-        {/* Contacto Extra */}
         <FadeIn delay={400}>
             <div className="mt-16 text-center bg-gradient-to-br from-gray-50 to-white rounded-3xl p-10 border border-gray-100 shadow-lg shadow-gray-200/50">
                 <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-6">
@@ -197,11 +173,8 @@ const FAQ = () => {
             </div>
         </FadeIn>
       </div>
-
-      {/* FOOTER */}
       <Footer theme="light" />
     </div>
   );
 };
-
 export default FAQ;

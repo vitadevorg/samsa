@@ -71,7 +71,7 @@
   @page {
     margin: 0;
   }
-  #root {
+  body.hide-root-for-print #root {
     display: none !important;
   }
 }

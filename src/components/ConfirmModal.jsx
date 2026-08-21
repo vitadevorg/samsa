@@ -1,9 +1,7 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
-
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-100 animate-slideUp">
@@ -30,5 +28,4 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
     </div>
   );
 };
-
 export default ConfirmModal;

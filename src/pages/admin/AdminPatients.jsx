@@ -1,33 +1,26 @@
 import React, { useState } from 'react';
-// Corrección de importaciones
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { Users, Trash2, ShieldAlert } from 'lucide-react';
-
 const AdminPatients = () => {
   const [patients, setPatients] = useState([
     { id: 1, name: "Lucas Gabriel Lazarte", dni: "45.275.212", email: "lglucas@gmail.com" },
     { id: 2, name: "Juan Pérez", dni: "30.123.456", email: "juan@test.com" },
   ]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
   const openDeleteModal = (id) => {
       setSelectedId(id);
       setIsModalOpen(true);
   };
-
   const confirmDelete = () => {
       setPatients(patients.filter(p => p.id !== selectedId));
       setIsModalOpen(false);
       setSelectedId(null);
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
       <ConfirmModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -35,14 +28,12 @@ const AdminPatients = () => {
         title="Eliminar Paciente"
         message="¿Está completamente seguro? Eliminar un paciente borrará también su historial de turnos y estudios asociados."
       />
-
       <div className="max-w-6xl mx-auto px-4 py-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
             <div className="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-200"><Users className="text-white w-6 h-6"/></div>
             Base de Pacientes
         </h1>
         <p className="text-gray-500 mb-8 ml-14">Visualización y control de usuarios registrados.</p>
-
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex items-start gap-4 shadow-sm">
             <ShieldAlert className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -52,7 +43,6 @@ const AdminPatients = () => {
                 </p>
             </div>
         </div>
-
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
@@ -94,5 +84,4 @@ const AdminPatients = () => {
     </div>
   );
 };
-
 export default AdminPatients;   

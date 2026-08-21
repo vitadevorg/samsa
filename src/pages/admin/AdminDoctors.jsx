@@ -1,35 +1,28 @@
 import React, { useState } from 'react';
-// IMPORT CORREGIDO: Sube 2 niveles para llegar a components
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { Trash2, Edit2, UserPlus, Stethoscope, Save, X } from 'lucide-react';
-
 const AdminDoctors = () => {
   const [doctors, setDoctors] = useState([
     { id: 1, name: "Francisco Matar", specialty: "Clínica Médica", email: "fran@samsa.com" },
     { id: 2, name: "Agustina Vega", specialty: "Nutrición", email: "agus@samsa.com" },
   ]);
-
   const initialFormState = { name: '', specialty: '', email: '', password: '' };
   const [form, setForm] = useState(initialFormState);
-  
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
   const openDeleteModal = (id) => {
       setDeleteId(id);
       setIsModalOpen(true);
   };
-
   const confirmDelete = () => {
       setDoctors(doctors.filter(d => d.id !== deleteId));
       if (deleteId === editId) cancelEdit();
       setIsModalOpen(false);
       setDeleteId(null);
   };
-
   const handleEdit = (doc) => {
       setIsEditing(true);
       setEditId(doc.id);
@@ -41,16 +34,13 @@ const AdminDoctors = () => {
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
   const cancelEdit = () => {
       setIsEditing(false);
       setEditId(null);
       setForm(initialFormState);
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     if (isEditing) {
         setDoctors(prev => prev.map(doc => 
             doc.id === editId 
@@ -63,11 +53,9 @@ const AdminDoctors = () => {
         setForm(initialFormState);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
       <ConfirmModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -75,7 +63,6 @@ const AdminDoctors = () => {
         title="Eliminar Profesional"
         message="¿Confirma que desea eliminar a este médico del sistema? Se perderá su historial de acceso."
       />
-
       <div className="max-w-6xl mx-auto px-4 py-10">
         <div className="flex justify-between items-end mb-6">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -83,7 +70,6 @@ const AdminDoctors = () => {
             Gestión de Médicos
             </h1>
         </div>
-
         <div className={`bg-white p-8 rounded-2xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
           <div className="flex justify-between items-center mb-6">
               <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
@@ -95,7 +81,6 @@ const AdminDoctors = () => {
                   </button>
               )}
           </div>
-          
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
             <div className="lg:col-span-1">
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Nombre Completo</label>
@@ -127,7 +112,6 @@ const AdminDoctors = () => {
             </div>
           </form>
         </div>
-
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50 border-b border-gray-100">
@@ -180,5 +164,4 @@ const AdminDoctors = () => {
     </div>
   );
 };
-
 export default AdminDoctors;

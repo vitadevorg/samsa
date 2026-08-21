@@ -9,13 +9,11 @@ import {
   Search, Phone, ChevronLeft, ChevronRight, List, ShieldCheck, Activity, Hash, CreditCard, Mail, FileText, LayoutGrid
 } from 'lucide-react';
 
-// --- DATOS ESTÁTICOS ---
 const INSURANCES = [
   "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
   "Galeno", "PAMI", "IOS", "OSECAC"
 ];
 
-// --- HELPER: Generar fechas simuladas ---
 const getToday = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -26,7 +24,6 @@ const getFutureDate = (days) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-// --- CUSTOM CALENDAR OVERLAY COMPONENT ---
 const CustomCalendar = ({ selectedDate, onSelect, onClose, inline = false, appointments = null, selectedDoctor = null }) => {
     const initialDate = selectedDate ? new Date(selectedDate + 'T12:00:00Z') : new Date();
     const [viewDate, setViewDate] = useState(initialDate);
@@ -38,7 +35,7 @@ const CustomCalendar = ({ selectedDate, onSelect, onClose, inline = false, appoi
     const firstDayIndex = new Date(year, month, 1).getDay();
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    
+
     const renderDays = () => {
         let days = [];
         for (let i = 0; i < firstDayIndex; i++) {
@@ -49,13 +46,13 @@ const CustomCalendar = ({ selectedDate, onSelect, onClose, inline = false, appoi
             const isSelected = dateStr === selectedDate;
             const isToday = dateStr === getToday();
             const dayOfWeek = new Date(year, month, i).getDay();
-            
+
             const docAppointmentsCount = appointments && selectedDoctor ? (appointments[selectedDoctor] || []).filter(app => app.date === dateStr && app.status !== 'cancelled').length : 0;
             const hasAppointments = docAppointmentsCount > 0;
             const isFullyBooked = docAppointmentsCount >= 12;
 
-            const isDisabled = dayOfWeek === 0 || isFullyBooked || i === 15; // Domingo o el día 15 deshabilitado como demo, o si está lleno
-            
+            const isDisabled = dayOfWeek === 0 || isFullyBooked || i === 15; 
+
             days.push(
                 <button 
                     key={i} 
@@ -94,7 +91,7 @@ const CustomCalendar = ({ selectedDate, onSelect, onClose, inline = false, appoi
                 </div>
                 <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} className="p-1 hover:bg-slate-100 rounded-lg text-slate-500"><ChevronRight className="w-5 h-5"/></button>
             </div>
-            
+
             {showYearSelector ? (
                 <div className="h-48 overflow-y-auto custom-scrollbar grid grid-cols-3 gap-2 p-1">
                     {Array.from({length: 100}, (_, i) => new Date().getFullYear() - 80 + i).map(y => (
@@ -135,7 +132,6 @@ const formatDateToLocale = (dateStr) => {
     return date.toLocaleDateString('es-AR', options).replace(',', '');
 };
 
-// Generar últimos 3 días y próximos 7 días para el carrusel
 const generateDateArray = () => {
     const dates = [];
     for (let i = -2; i <= 7; i++) {
@@ -146,7 +142,6 @@ const generateDateArray = () => {
 
 const DATES_CAROUSEL = generateDateArray();
 
-// --- MOCK DATA: Doctores asignados ---
 const assignedDoctors = [
   { id: 'd1', name: 'Dr. Jesús Zelarayan', specialty: 'Cardiología', location: 'Sede Centro - Consultorio 4' },
   { id: 'd2', name: 'Dra. Sofía López', specialty: 'Pediatría', location: 'Sede Norte - Consultorio 12' },
@@ -154,7 +149,6 @@ const assignedDoctors = [
   { id: 'd4', name: 'Dra. Ana Torres', specialty: 'Dermatología', location: 'Sede Sur - Consultorio 2' },
 ];
 
-// --- MOCK DATA: Base de pacientes registrados ---
 const REGISTERED_PATIENTS = {
     '45275212': { patient: 'Lucas Gabriel Lazarte', phone: '3863409588', email: 'lucas@gmail.com', obraSocial: 'OSDE', dob: '1995-04-12' },
     '32111222': { patient: 'Luis Coronel', phone: '3814445555', email: 'luis.coronel@hotmail.com', obraSocial: 'Prensa', dob: '1988-08-20' },
@@ -162,7 +156,6 @@ const REGISTERED_PATIENTS = {
     '38634095': { patient: 'Juan Pérez', phone: '3815551234', email: 'jperez@gmail.com', obraSocial: 'Subsidio de Salud', dob: '2000-01-01' },
 };
 
-// --- MOCK DATA: Turnos ---
 const initialAppointments = {
   'd1': [
     { id: 1, date: getToday(), time: '09:00', patient: 'Lucas Gabriel Lazarte', status: 'attending', type: 'Presencial', phone: '3863409588' },
@@ -179,21 +172,20 @@ const initialAppointments = {
 };
 
 const isLate = (timeStr) => {
-    // Simple mock logic for "late"
+
     const [h, m] = timeStr.split(':');
     const now = new Date();
     const appt = new Date();
     appt.setHours(parseInt(h), parseInt(m), 0);
-    return now.getTime() > (appt.getTime() + 15 * 60000); // 15 mins late
+    return now.getTime() > (appt.getTime() + 15 * 60000); 
 };
 
 const SecretaryDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Protección de ruta por rol
   useEffect(() => {
-      // Si no hay usuario logueado o el rol no es 'secretary', lo mandamos al inicio
+
       if (!user || user.role !== 'secretary') {
           navigate('/');
       }
@@ -203,34 +195,28 @@ const SecretaryDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [appointments, setAppointments] = useState(initialAppointments);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('single'); // 'single' o 'columns'
-  
-  // Lista de Suspenso (Bolsa de Suspenso)
+  const [viewMode, setViewMode] = useState('single'); 
+
   const [suspendedPatients, setSuspendedPatients] = useState([]);
   const [suspendToDelete, setSuspendToDelete] = useState(null);
 
-  // Modales
   const [showNewTurnModal, setShowNewTurnModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationMsg, setNotificationMsg] = useState('');
   const [showChatModal, setShowChatModal] = useState(false);
   const [showSuspendModal, setShowSuspendModal] = useState(false);
-  
-  // Custom Calendar state
+
   const [showMainCalendar, setShowMainCalendar] = useState(false);
   const [showModalCalendar, setShowModalCalendar] = useState(false);
   const [showNewTurnDateCalendar, setShowNewTurnDateCalendar] = useState(false);
   const [showDoctorMenu, setShowDoctorMenu] = useState(false);
 
-  // Modal actions (Confirmar Llegada / Cancelación directa)
   const [confirmAction, setConfirmAction] = useState({ show: false, action: '', id: null });
-  
-  // Súper Modal Reprogramación
+
   const [rescheduleData, setRescheduleData] = useState({ show: false, id: null, hasDate: 'yes', reason: '', notify: true, deriveTo: '', customDate: '', customTime: '' });
   const [isSelectingCustomTime, setIsSelectingCustomTime] = useState(false);
   const [tempSelectedDate, setTempSelectedDate] = useState('');
 
-  // Formulario Nuevo Turno
   const [newTurnData, setNewTurnData] = useState({ patient: '', dni: '', cuit: '', dob: '', obraSocial: '', email: '', phone: '', date: '', time: '', type: 'Presencial', motivoConsulta: '', isReschedule: false });
   const [showDobCalendar, setShowDobCalendar] = useState(false);
 
@@ -274,8 +260,7 @@ const SecretaryDashboard = () => {
   };
 
   const currentDoctor = assignedDoctors.find(d => d.id === selectedDoctor);
-  
-  // Filtrar por doctor, fecha y buscador
+
   const currentAppointments = (appointments[selectedDoctor] || [])
       .filter(app => app.date === selectedDate)
       .filter(app => app.patient.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -291,12 +276,12 @@ const SecretaryDashboard = () => {
       status: 'pending',
       type: newTurnData.type
     };
-    
+
     setAppointments(prev => ({
       ...prev,
       [selectedDoctor]: [...prev[selectedDoctor], newTurn].sort((a, b) => a.time.localeCompare(b.time))
     }));
-    
+
     setShowNewTurnModal(false);
     setNewTurnData({ patient: '', dni: '', cuit: '', dob: '', obraSocial: '', email: '', phone: '', time: '', type: 'Presencial' });
   };
@@ -317,8 +302,7 @@ const SecretaryDashboard = () => {
             ...prev,
             [selectedDoctor]: prev[selectedDoctor].filter(app => app.id !== confirmAction.id)
         }));
-        
-        // Lógica de bolsa de suspenso
+
         if (confirmAction.sendToSuspend) {
             const patientToSuspend = currentAppointments.find(a => a.id === confirmAction.id);
             if (patientToSuspend) {
@@ -326,7 +310,6 @@ const SecretaryDashboard = () => {
             }
         }
 
-        // Alerta proactiva si hay pacientes en espera
         if (suspendedPatients.length > 0) {
             setNotificationMsg(`Horario liberado. Hay ${suspendedPatients.length + (confirmAction.sendToSuspend ? 1 : 0)} pacientes en lista de espera. ¿Desea asignar este turno ahora?`);
             setShowNotificationModal(true);
@@ -346,7 +329,7 @@ const SecretaryDashboard = () => {
   const executeReschedule = (e) => {
     e.preventDefault();
     const { id, hasDate, notify } = rescheduleData;
-    
+
     if (hasDate === 'no') {
       const appToSuspend = appointments[selectedDoctor].find(a => a.id === id);
       if (appToSuspend) {
@@ -374,7 +357,7 @@ const SecretaryDashboard = () => {
        setNotificationMsg(`Turno reprogramado para el ${formatDateToLocale(rescheduleData.customDate)} a las ${rescheduleData.customTime}hs.`);
        setShowNotificationModal(true);
     }
-    
+
     setRescheduleData({ ...rescheduleData, show: false });
   };
 
@@ -394,7 +377,6 @@ const SecretaryDashboard = () => {
     }
   };
 
-  // Si no pasó el check de seguridad, no renderizamos nada (evita un parpadeo de la UI)
   if (!user || user.role !== 'secretary') {
       return null;
   }
@@ -404,15 +386,14 @@ const SecretaryDashboard = () => {
       <Navbar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
-        
-        {/* Cabecera Operativa (Estilo Premium Safe) */}
+
         <div className="relative rounded-3xl bg-slate-900 p-8 text-white shadow-xl mb-8 border border-slate-800">
             <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
                 <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
                     <Calendar className="w-64 h-64 text-slate-100" />
                 </div>
             </div>
-            
+
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="w-full md:w-1/2">
                     <div className="flex items-center gap-3 text-slate-300 mb-2">
@@ -481,7 +462,6 @@ const SecretaryDashboard = () => {
             </div>
         </div>
 
-        {/* Carrusel Horizontal de Fechas */}
         <div className="mb-8 flex items-center gap-2">
             <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center shrink-0 relative">
                 <button 
@@ -499,7 +479,7 @@ const SecretaryDashboard = () => {
                     />
                 )}
             </div>
-            
+
             <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-2 overflow-x-auto custom-scrollbar flex-grow">
                 {DATES_CAROUSEL.map(date => {
                 const isSelected = date === selectedDate;
@@ -518,10 +498,9 @@ const SecretaryDashboard = () => {
             </div>
         </div>
 
-        {/* Panel Principal */}
         {viewMode === 'single' ? (
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-12">
-            {/* Header de la Agenda */}
+
             <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-6 flex flex-col lg:flex-row justify-between items-center gap-4">
                 <div className="text-white flex items-center gap-4 w-full lg:w-auto">
                     <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm shrink-0">
@@ -537,7 +516,7 @@ const SecretaryDashboard = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-                    {/* Buscador en tiempo real */}
+
                     <div className="relative flex-grow sm:w-64">
                         <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
@@ -548,7 +527,7 @@ const SecretaryDashboard = () => {
                             className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-slate-700 text-white rounded-xl focus:ring-2 focus:ring-pink-500/50 outline-none text-sm placeholder-slate-400"
                         />
                     </div>
-                    
+
                     <button 
                         onClick={() => setShowSuspendModal(true)}
                         className="flex items-center justify-center gap-2 bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold hover:bg-slate-600 transition-colors text-sm"
@@ -565,7 +544,6 @@ const SecretaryDashboard = () => {
                 </div>
             </div>
 
-            {/* Lista de Turnos */}
             <div className="p-0 sm:p-6 overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
@@ -635,13 +613,13 @@ const SecretaryDashboard = () => {
             </div>
         </div>
         ) : (
-        /* Vista Multiprofesional en Columnas */
+
         <div className="flex overflow-x-auto custom-scrollbar pb-6 gap-6 items-start snap-x mb-12">
             {assignedDoctors.map(doctor => {
                 const docAppointments = (appointments[doctor.id] || [])
                     .filter(app => app.date === selectedDate)
                     .filter(app => app.patient.toLowerCase().includes(searchTerm.toLowerCase()));
-                
+
                 return (
                     <div key={doctor.id} className="min-w-[320px] max-w-[350px] bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden snap-start flex-1 shrink-0 flex flex-col h-[600px]">
                         <div className="bg-slate-900 p-5 text-white flex items-start gap-4">
@@ -696,7 +674,6 @@ const SecretaryDashboard = () => {
       </main>
       <Footer />
 
-      {/* --- MODAL: NUEVO TURNO MANUAL (MEJORADO) --- */}
       {showNewTurnModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl my-8 ring-1 ring-white/10 overflow-hidden">
@@ -713,8 +690,7 @@ const SecretaryDashboard = () => {
                     }} className="text-white/50 hover:text-white transition-colors bg-slate-800 p-2 rounded-full hover:bg-slate-700"><XCircle className="w-6 h-6"/></button>
                 </div>
                 <form onSubmit={handleCreateTurn} className="p-8 space-y-8">
-                    
-                    {/* SECCIÓN 1: DATOS PERSONALES */}
+
                     <div>
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <User className="w-4 h-4" /> Datos del Paciente
@@ -727,7 +703,7 @@ const SecretaryDashboard = () => {
                                     <input type="text" required value={newTurnData.patient} onChange={e => setNewTurnData({...newTurnData, patient: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Ej. Juan Pérez" />
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 mb-1.5">DNI *</label>
                                 <div className="relative">
@@ -735,7 +711,7 @@ const SecretaryDashboard = () => {
                                     <input type="text" required value={newTurnData.dni} onChange={handleDniChange} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Nro de Documento" />
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 mb-1.5">Fecha de Nacimiento *</label>
                                 <div className="relative">
@@ -764,7 +740,7 @@ const SecretaryDashboard = () => {
                                     <input type="tel" required value={newTurnData.phone} onChange={e => setNewTurnData({...newTurnData, phone: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Ej. 381 444 5555" />
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 mb-1.5">Email (Opcional)</label>
                                 <div className="relative">
@@ -777,7 +753,6 @@ const SecretaryDashboard = () => {
 
                     <div className="w-full h-px bg-slate-100"></div>
 
-                    {/* SECCIÓN 2: FACTURACIÓN & OBRA SOCIAL */}
                     <div>
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <CreditCard className="w-4 h-4" /> Cobertura y Facturación
@@ -807,7 +782,6 @@ const SecretaryDashboard = () => {
 
                     <div className="w-full h-px bg-slate-100"></div>
 
-                    {/* SECCIÓN 3: DATOS DEL TURNO */}
                     <div>
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <Clock className="w-4 h-4" /> Asignación
@@ -847,7 +821,7 @@ const SecretaryDashboard = () => {
                                     <ChevronDown className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                 </div>
                             </div>
-                            
+
                             <div className="col-span-1 md:col-span-2 mt-2">
                                 <label className="block text-xs font-bold text-slate-500 mb-3">Horarios Disponibles *</label>
                                 {newTurnData.date ? (
@@ -873,7 +847,7 @@ const SecretaryDashboard = () => {
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className="col-span-1 md:col-span-2 mt-2">
                                 <label className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Consulta</label>
                                 <div className="relative">
@@ -891,7 +865,7 @@ const SecretaryDashboard = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <button type="submit" disabled={!newTurnData.time || !newTurnData.date} className={`w-full flex items-center justify-center gap-2 font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl mt-4 ${(!newTurnData.time || !newTurnData.date) ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-0.5'}`}>
                         <Check className="w-5 h-5" /> Registrar Turno {newTurnData.date && `(${formatDateToLocale(newTurnData.date)})`}
                     </button>
@@ -900,7 +874,6 @@ const SecretaryDashboard = () => {
         </div>
       )}
 
-      {/* --- MODAL: CONFIRMACIÓN SIMPLE (Llegó / Cancelar) --- */}
       {confirmAction.show && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
             <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-100">
@@ -930,7 +903,7 @@ const SecretaryDashboard = () => {
                                 <option value="Error administrativo">Error administrativo</option>
                             </select>
                         </div>
-                        
+
                         <label className="flex items-start gap-3 p-3 bg-blue-50/50 border border-blue-100 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors">
                             <div className="pt-0.5">
                                 <input 
@@ -962,7 +935,6 @@ const SecretaryDashboard = () => {
         </div>
       )}
 
-      {/* --- SÚPER MODAL: REPROGRAMACIÓN --- */}
       {rescheduleData.show && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fadeIn overflow-y-auto">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl my-8 ring-1 ring-white/10 overflow-hidden flex flex-col">
@@ -970,7 +942,7 @@ const SecretaryDashboard = () => {
                     <h2 className="text-xl font-black flex items-center gap-3"><div className="bg-slate-800 p-2 rounded-lg"><Calendar className="w-5 h-5 text-blue-400"/></div> Reprogramación de Turno</h2>
                     <button type="button" onClick={() => setRescheduleData({ ...rescheduleData, show: false })} className="text-white/50 hover:text-white transition-colors bg-slate-800 p-2 rounded-full hover:bg-slate-700"><XCircle className="w-6 h-6"/></button>
                 </div>
-                
+
                 {isSelectingCustomTime ? (
                     <div className="p-8 space-y-6 flex-1 overflow-y-auto bg-slate-50">
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -982,7 +954,7 @@ const SecretaryDashboard = () => {
                                 <CustomCalendar inline={true} selectedDate={tempSelectedDate} onSelect={(d) => setTempSelectedDate(d)} onClose={() => {}} />
                             </div>
                         </div>
-                        
+
                         {tempSelectedDate && (
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 animate-fadeIn">
                                 <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2">
@@ -1022,7 +994,7 @@ const SecretaryDashboard = () => {
                     </div>
                 ) : (
                 <form onSubmit={executeReschedule} className="p-8 space-y-8 flex-1 overflow-y-auto">
-                    {/* Auditoría */}
+
                     <div>
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <Activity className="w-4 h-4" /> Auditoría
@@ -1044,7 +1016,6 @@ const SecretaryDashboard = () => {
 
                     <div className="w-full h-px bg-slate-100"></div>
 
-                    {/* Pregunta Clave */}
                     <div>
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <Clock className="w-4 h-4" /> Nueva Disponibilidad
@@ -1062,7 +1033,6 @@ const SecretaryDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Dependiendo de la respuesta */}
                     {rescheduleData.hasDate === 'yes' && (
                         <div className="space-y-4 animate-fadeIn">
                             <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Búsqueda Inteligente (Próximos libres)</p>
@@ -1109,7 +1079,6 @@ const SecretaryDashboard = () => {
           </div>
       )}
 
-      {/* --- MODAL: BOLSA DE SUSPENSO --- */}
       {showSuspendModal && (
           <div className="fixed inset-0 z-50 flex items-stretch justify-end bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
               <div className="bg-white shadow-2xl w-full max-w-md h-full flex flex-col overflow-hidden animate-slideLeft">
@@ -1126,7 +1095,7 @@ const SecretaryDashboard = () => {
                       </div>
                       <button onClick={() => setShowSuspendModal(false)} className="relative z-10 text-white/50 hover:text-white bg-white/5 p-2 rounded-full transition-colors hover:bg-white/10 border border-white/5"><X className="w-5 h-5"/></button>
                   </div>
-                  
+
                   <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-4">
                       {suspendedPatients.length === 0 ? (
                           <div className="text-center py-10 opacity-50">
@@ -1150,7 +1119,7 @@ const SecretaryDashboard = () => {
                                           <Clock className="w-3 h-3" /> Hace 0 días
                                       </span>
                                   </div>
-                                  
+
                                   <div className="flex gap-3 relative">
                                       <button 
                                           onClick={() => setSuspendToDelete(idx)} 
@@ -1180,7 +1149,6 @@ const SecretaryDashboard = () => {
           </div>
       )}
 
-      {/* --- MODAL: CONFIRMACIÓN ELIMINAR DE BOLSA --- */}
       {suspendToDelete !== null && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
             <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-100 animate-scaleIn">
@@ -1215,7 +1183,6 @@ const SecretaryDashboard = () => {
         </div>
       )}
 
-      {/* --- MODAL: NOTIFICACIÓN DE SISTEMA --- */}
       {showNotificationModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
             <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center">
@@ -1229,7 +1196,6 @@ const SecretaryDashboard = () => {
         </div>
       )}
 
-      {/* --- MODAL: CHAT PROFESIONAL --- */}
       {showChatModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col h-[500px]">
@@ -1264,7 +1230,6 @@ const SecretaryDashboard = () => {
         </div>
       )}
 
-      {/* --- MODAL: PERFIL DEL PACIENTE --- */}
       {selectedPatientProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 animate-fadeIn">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden ring-1 ring-white/10 flex flex-col max-h-[90vh]">
@@ -1316,7 +1281,7 @@ const SecretaryDashboard = () => {
                             )}
                         </div>
                     </div>
-                    
+
                     {(selectedPatientProfile.obraSocial || selectedPatientProfile.cuit) && (
                     <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Cobertura y Facturación</h3>

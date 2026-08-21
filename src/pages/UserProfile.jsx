@@ -3,18 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Mail, Key, CreditCard, FileText, 
   Camera, Trash2, Save, X, AlertTriangle, Shield, 
-  Stethoscope, HeartPulse, Calendar, LogOut, CheckCircle, Phone
+  Stethoscope, HeartPulse, Calendar, LogOut, CheckCircle, Phone, Bell
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-
-// --- DATOS ESTÁTICOS ---
 const INSURANCES = [
   "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
   "Galeno", "PAMI", "IOS", "OSECAC"
 ];
-
-// Componente InputField extraído
 const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => (
   <div className="space-y-1">
     <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
@@ -35,13 +31,12 @@ const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, d
     />
   </div>
 );
-
 const UserProfile = () => {
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingNotifications, setIsEditingNotifications] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -50,7 +45,6 @@ const UserProfile = () => {
   const [showRelievedToast, setShowRelievedToast] = useState(false);
   const [showGoodbyeToast, setShowGoodbyeToast] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-
   const [formData, setFormData] = useState({
     name: user?.name || '',
     lastname: user?.lastname || '', 
@@ -60,14 +54,15 @@ const UserProfile = () => {
     phone: user?.phone || '',
     dni: user?.dni || '',
     cuil: user?.cuil || '',
-    insurance: user?.insurance || 'Ninguna', // Campo Obra Social
+    insurance: user?.insurance || 'Ninguna',
+    notifyEmail: true,
+    notifySms: false,
+    notifyWhatsapp: false,
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
-
   const [previewImg, setPreviewImg] = useState(user?.img || null);
-
   const roleTheme = {
     admin: { color: 'slate', icon: Shield, label: 'Administrador' },
     doctor: { color: 'indigo', icon: Stethoscope, label: 'Profesional de Salud' },
@@ -75,12 +70,21 @@ const UserProfile = () => {
   };
   const currentTheme = roleTheme[user?.role] || roleTheme.patient;
   const ThemeIcon = currentTheme.icon;
-
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
-
+  const handleNotificationChange = (e) => {
+    const { name, checked } = e.target;
+    if (!checked) {
+      const others = ['notifyEmail', 'notifySms', 'notifyWhatsapp'].filter(k => k !== name);
+      const isAnyOtherChecked = others.some(k => formData[k]);
+      if (!isAnyOtherChecked) {
+        return;
+      }
+    }
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -92,16 +96,13 @@ const UserProfile = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
-
   const handleDeleteImage = () => {
     setPreviewImg(null);
     updateUser({ img: null });
   };
-
   const handleSaveProfile = (e) => {
     if (e) e.preventDefault();
     updateUser({
@@ -120,7 +121,6 @@ const UserProfile = () => {
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
   };
-
   const handleSavePassword = (e) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
@@ -134,7 +134,6 @@ const UserProfile = () => {
     setPasswordError('');
     setShowPasswordModal(true);
   };
-
   const confirmPasswordChange = () => {
     console.log("Cambiando contraseña...");
     setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -143,13 +142,11 @@ const UserProfile = () => {
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
   };
-
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setShowRelievedToast(true);
     setTimeout(() => setShowRelievedToast(false), 4000);
   };
-
   const handleDeleteAccount = () => {
     setShowDeleteModal(false);
     setShowGoodbyeToast(true);
@@ -159,26 +156,20 @@ const UserProfile = () => {
       navigate('/');
     }, 4000);
   };
-
   const handleLogout = () => {
       logout();
       navigate('/');
   };
-
   if (!user) return <div className="p-10 text-center">Cargando perfil...</div>;
-
   return (
     <div className="min-h-screen bg-gray-50/50">
       <Navbar />
-      
       <main className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        
         <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r from-${currentTheme.color}-600 to-${currentTheme.color}-800 p-8 text-white shadow-lg mb-8`}>
           <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/3 -translate-y-1/3">
             <ThemeIcon className="w-64 h-64" />
           </div>
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
-            
             <div className="relative group">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/30 shadow-xl overflow-hidden bg-white flex items-center justify-center relative z-20">
                 {previewImg ? (
@@ -187,7 +178,6 @@ const UserProfile = () => {
                   <User className={`w-20 h-20 text-${currentTheme.color}-300`} />
                 )}
               </div>
-              
               <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-30">
                 <button onClick={triggerFileInput} className="p-2 bg-white rounded-full text-gray-700 hover:text-blue-600 hover:scale-110 transition" title="Subir foto">
                   <Camera className="w-5 h-5" />
@@ -200,7 +190,6 @@ const UserProfile = () => {
                 <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
               </div>
             </div>
-
             <div className="text-center md:text-left flex-1">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                 <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider bg-${currentTheme.color}-200/20 rounded-full flex items-center gap-1`}>
@@ -215,9 +204,7 @@ const UserProfile = () => {
             </div>
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           <div className="lg:col-span-2 space-y-8">
             <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 relative overflow-hidden">
               <div className="flex justify-between items-center mb-6">
@@ -242,7 +229,6 @@ const UserProfile = () => {
                   </div>
                 )}
               </div>
-
               <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField 
                   label="Nombre(s)" 
@@ -322,8 +308,6 @@ const UserProfile = () => {
                   disabled={!isEditing} 
                   themeColor={currentTheme.color}
                 />
-
-                {/* Selector de Obra Social */}
                 <div className="space-y-1 col-span-1 md:col-span-2">
                     <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
                       <HeartPulse className={`w-4 h-4 text-${currentTheme.color}-500`} /> Obra Social
@@ -344,22 +328,88 @@ const UserProfile = () => {
                       ))}
                     </select>
                 </div>
-
               </form>
-              
               {isEditing && (
                  <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-400 animate-pulse"></div>
               )}
             </section>
+            <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 relative overflow-hidden">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <Bell className={`w-5 h-5 text-${currentTheme.color}-600`}/> Recordatorios y Notificaciones
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">Seleccioná los medios por los cuales te gustaría recibir alertas de tus turnos y estudios.</p>
+                </div>
+                {!isEditingNotifications ? (
+                  <button onClick={() => setIsEditingNotifications(true)} className={`flex items-center gap-2 px-5 py-2.5 bg-${currentTheme.color}-50 text-${currentTheme.color}-700 rounded-xl hover:bg-${currentTheme.color}-100 font-semibold transition-colors shrink-0`}>
+                    Editar Datos
+                  </button>
+                ) : (
+                  <div className="flex gap-2 shrink-0">
+                    <button onClick={() => setIsEditingNotifications(false)} className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-semibold transition-colors">
+                      <X className="w-4 h-4"/> Cancelar
+                    </button>
+                    <button type="button" onClick={() => { setShowSaveModal(true); setIsEditingNotifications(false); }} className={`flex items-center gap-2 px-5 py-2.5 bg-${currentTheme.color}-600 text-white rounded-xl hover:bg-${currentTheme.color}-700 font-bold transition-colors shadow-md hover:shadow-lg`}>
+                      <Save className="w-4 h-4"/> Guardar
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-4">
+                <label className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isEditingNotifications ? 'cursor-pointer' : 'opacity-80'} ${formData.notifyEmail ? (isEditingNotifications ? `bg-${currentTheme.color}-50 border-${currentTheme.color}-200` : 'bg-gray-50 border-gray-200') : 'bg-gray-50 border-gray-200'}`}>
+                  <input
+                    type="checkbox"
+                    name="notifyEmail"
+                    checked={formData.notifyEmail}
+                    onChange={handleNotificationChange}
+                    disabled={!isEditingNotifications}
+                    className={`w-5 h-5 text-${currentTheme.color}-600 rounded focus:ring-${currentTheme.color}-500 ${!isEditingNotifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  />
+                  <div className={!isEditingNotifications ? 'opacity-70' : ''}>
+                    <p className="font-bold text-gray-800">Correo Electrónico</p>
+                    <p className="text-sm text-gray-500">Recibirás confirmaciones y recordatorios por email.</p>
+                  </div>
+                </label>
+                <label className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isEditingNotifications ? 'cursor-pointer' : 'opacity-80'} ${formData.notifySms ? (isEditingNotifications ? `bg-${currentTheme.color}-50 border-${currentTheme.color}-200` : 'bg-gray-50 border-gray-200') : 'bg-gray-50 border-gray-200'}`}>
+                  <input
+                    type="checkbox"
+                    name="notifySms"
+                    checked={formData.notifySms}
+                    onChange={handleNotificationChange}
+                    disabled={!isEditingNotifications}
+                    className={`w-5 h-5 text-${currentTheme.color}-600 rounded focus:ring-${currentTheme.color}-500 ${!isEditingNotifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  />
+                  <div className={!isEditingNotifications ? 'opacity-70' : ''}>
+                    <p className="font-bold text-gray-800">SMS</p>
+                    <p className="text-sm text-gray-500">Recibirás mensajes de texto en tu celular.</p>
+                  </div>
+                </label>
+                <label className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isEditingNotifications ? 'cursor-pointer' : 'opacity-80'} ${formData.notifyWhatsapp ? (isEditingNotifications ? `bg-${currentTheme.color}-50 border-${currentTheme.color}-200` : 'bg-gray-50 border-gray-200') : 'bg-gray-50 border-gray-200'}`}>
+                  <input
+                    type="checkbox"
+                    name="notifyWhatsapp"
+                    checked={formData.notifyWhatsapp}
+                    onChange={handleNotificationChange}
+                    disabled={!isEditingNotifications}
+                    className={`w-5 h-5 text-${currentTheme.color}-600 rounded focus:ring-${currentTheme.color}-500 ${!isEditingNotifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  />
+                  <div className={!isEditingNotifications ? 'opacity-70' : ''}>
+                    <p className="font-bold text-gray-800">WhatsApp</p>
+                    <p className="text-sm text-gray-500">Recibirás notificaciones directas por WhatsApp.</p>
+                  </div>
+                </label>
+              </div>
+              {isEditingNotifications && (
+                 <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-400 animate-pulse"></div>
+              )}
+            </section>
           </div>
-
           <div className="space-y-8">
-            
             <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
                <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                  <Key className={`w-5 h-5 text-${currentTheme.color}-600`}/> Seguridad
                </h2>
-               
                {!isChangingPassword ? (
                   <div className="text-center py-4">
                      <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -417,7 +467,6 @@ const UserProfile = () => {
                   </form>
                )}
             </section>
-
             <section className="bg-red-50 rounded-3xl shadow-sm border border-red-100 p-6 md:p-8">
               <h2 className="text-lg font-bold text-red-700 mb-2 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5"/> Zona de Peligro
@@ -429,18 +478,15 @@ const UserProfile = () => {
                 <Trash2 className="w-4 h-4"/> Eliminar Cuenta
               </button>
             </section>
-
             <button 
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:text-blue-600 transition-all shadow-sm"
             >
                 <LogOut className="w-4 h-4"/> Cerrar Sesión
             </button>
-
           </div>
         </div>
       </main>
-
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -448,7 +494,6 @@ const UserProfile = () => {
             <button onClick={() => setShowDeleteModal(false)} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
               <X className="w-6 h-6" />
             </button>
-
             <div className="text-center">
               <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                  <span className="text-5xl" role="img" aria-label="sad face">😢</span>
@@ -457,7 +502,6 @@ const UserProfile = () => {
               <p className="text-gray-600 mb-8 leading-relaxed">
                 Lamentamos mucho que quieras irte de S.A.M.S.A. Si eliminas tu cuenta, <strong className="text-red-600">perderás acceso a todo de forma permanente.</strong>
               </p>
-
               <div className="flex flex-col gap-3">
                  <button onClick={handleDeleteAccount} className="w-full py-3.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/20 transition-all transform active:scale-95">
                     Sí, eliminar mi cuenta permanentemente
@@ -470,8 +514,6 @@ const UserProfile = () => {
           </div>
         </div>
       )}
-
-      {/* Modal de Confirmación de Guardado */}
       {showSaveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -479,7 +521,6 @@ const UserProfile = () => {
             <button onClick={() => setShowSaveModal(false)} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
               <X className="w-6 h-6" />
             </button>
-
             <div className="text-center">
               <div className={`w-20 h-20 bg-${currentTheme.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
                  <Save className={`w-10 h-10 text-${currentTheme.color}-600`} />
@@ -488,7 +529,6 @@ const UserProfile = () => {
               <p className="text-gray-600 mb-8 leading-relaxed">
                 ¿Estás seguro de que deseas actualizar tu información personal?
               </p>
-
               <div className="flex flex-col gap-3">
                  <button onClick={handleSaveProfile} className={`w-full py-3.5 bg-${currentTheme.color}-600 text-white font-bold rounded-xl hover:bg-${currentTheme.color}-700 shadow-lg shadow-${currentTheme.color}-600/20 transition-all transform active:scale-95`}>
                     Sí, guardar cambios
@@ -501,8 +541,6 @@ const UserProfile = () => {
           </div>
         </div>
       )}
-
-      {/* Modal de Confirmación de Contraseña */}
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -510,7 +548,6 @@ const UserProfile = () => {
             <button onClick={() => setShowPasswordModal(false)} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
               <X className="w-6 h-6" />
             </button>
-
             <div className="text-center">
               <div className={`w-20 h-20 bg-${currentTheme.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
                  <Key className={`w-10 h-10 text-${currentTheme.color}-600`} />
@@ -519,7 +556,6 @@ const UserProfile = () => {
               <p className="text-gray-600 mb-8 leading-relaxed">
                 ¿Estás seguro de que deseas actualizar tu contraseña de seguridad?
               </p>
-
               <div className="flex flex-col gap-3">
                  <button onClick={confirmPasswordChange} className={`w-full py-3.5 bg-${currentTheme.color}-600 text-white font-bold rounded-xl hover:bg-${currentTheme.color}-700 shadow-lg shadow-${currentTheme.color}-600/20 transition-all transform active:scale-95`}>
                     Sí, cambiar contraseña
@@ -532,8 +568,6 @@ const UserProfile = () => {
           </div>
         </div>
       )}
-
-      {/* Cartelito de Éxito (Modal Centrado) */}
       {showSuccessToast && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-2xl shadow-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in duration-300 flex items-center gap-4 max-w-sm w-full">
@@ -551,8 +585,6 @@ const UserProfile = () => {
           </div>
         </div>
       )}
-
-      {/* Cartelito Aliviado (Modal Grande) */}
       {showRelievedToast && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -560,7 +592,6 @@ const UserProfile = () => {
             <button onClick={() => setShowRelievedToast(false)} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
               <X className="w-6 h-6" />
             </button>
-
             <div className="text-center">
               <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                  <span className="text-5xl" role="img" aria-label="relieved face">😮‍💨</span>
@@ -576,13 +607,10 @@ const UserProfile = () => {
           </div>
         </div>
       )}
-
-      {/* Cartelito Despedida (Modal Grande) */}
       {showGoodbyeToast && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all">
           <div className="bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in fade-in zoom-in duration-300">
             <div className="absolute top-0 left-0 w-full h-2 bg-slate-600"></div>
-
             <div className="text-center">
               <div className="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700">
                  <span className="text-5xl" role="img" aria-label="sad face">🥺</span>
@@ -601,5 +629,4 @@ const UserProfile = () => {
     </div>
   );
 };
-
 export default UserProfile;

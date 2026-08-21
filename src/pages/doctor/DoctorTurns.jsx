@@ -6,24 +6,19 @@ import {
   AlertCircle, Upload, X, Paperclip, Stethoscope,
   Megaphone, ClipboardList, Save
 } from 'lucide-react';
-
-// --- HELPER: Generar fechas simuladas ---
 const getToday = () => new Date().toISOString().split('T')[0];
 const getFutureDate = (days) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
     return date.toISOString().split('T')[0];
 };
-
-// --- MOCK DATA: Turnos Generales (Hoy + Futuros) ---
 const initialAppointments = [
-  // HOY
   { 
     id: 1, 
     date: getToday(),
     time: '09:00', 
     patient: 'Lucas Gabriel Lazarte', 
-    status: 'attending', // En consultorio
+    status: 'attending', 
     img: '/img/patients/masc4.jpg',
     age: 24,
     historyId: 'HC-45275'
@@ -33,7 +28,7 @@ const initialAppointments = [
     date: getToday(),
     time: '09:30', 
     patient: 'Luis Coronel', 
-    status: 'waiting', // En sala de espera
+    status: 'waiting', 
     img: '/img/patients/masc1.jpg',
     age: 32,
     historyId: 'HC-98212'
@@ -43,16 +38,14 @@ const initialAppointments = [
     date: getToday(),
     time: '08:30', 
     patient: 'Ramiro Vides', 
-    status: 'finished', // Ya se fue
+    status: 'finished', 
     img: '/img/patients/masc2.avif',
     age: 45,
     historyId: 'HC-33421'
   },
-  
-  // ESTE MES (Futuros)
   { 
     id: 3, 
-    date: getFutureDate(5), // Dentro de 5 días
+    date: getFutureDate(5), 
     time: '10:00', 
     patient: 'Carlos Rodriguez', 
     status: 'pending',
@@ -70,11 +63,9 @@ const initialAppointments = [
     age: 29,
     historyId: 'HC-99887'
   },
-
-  // PRÓXIMO MES
   {
     id: 5, 
-    date: getFutureDate(35), // Próximo mes
+    date: getFutureDate(35), 
     time: '11:00', 
     patient: 'Pedro Sanchez', 
     status: 'pending',
@@ -83,8 +74,6 @@ const initialAppointments = [
     historyId: 'HC-55112'
   }
 ];
-
-// --- ESTILOS E INYECCIÓN DE ANIMACIONES ---
 const styles = `
   @keyframes gradient-xy {
     0% { background-position: 0% 50%; }
@@ -96,20 +85,14 @@ const styles = `
     animation: gradient-xy 15s ease infinite;
   }
 `;
-
-// --- COMPONENTE MODAL (Mismo de antes, sin cambios funcionales) ---
 const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
   const [files, setFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
-  
-  // Estados para confirmación
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
   if (!isOpen || !appointment) return null;
-
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files).map(file => ({
@@ -121,7 +104,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
       setFiles(prev => [...prev, ...newFiles]);
     }
   };
-
   const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => setIsDragging(false);
@@ -134,12 +116,10 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
         setFiles(prev => [...prev, ...newFiles]);
     }
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setShowConfirm(true);
   };
-
   const confirmSave = () => {
     setShowConfirm(false);
     setShowSuccess(true);
@@ -149,20 +129,14 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
         setShowSuccess(false);
     }, 1500);
   };
-
   const cancelConfirm = () => {
     setShowConfirm(false);
   };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] ring-1 ring-white/10">
-        
-        {/* Header Elegante */}
         <div className="bg-gradient-to-r from-blue-900 to-indigo-800 p-8 flex justify-between items-start shrink-0 relative overflow-hidden">
-          {/* Deco */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-          
           <div className="text-white relative z-10">
             <h2 className="text-2xl font-black flex items-center gap-3 tracking-tight">
               <ClipboardList className="w-7 h-7 text-blue-300"/> Cierre de Consulta
@@ -176,8 +150,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
             <X className="w-6 h-6" />
           </button>
         </div>
-
-        {/* Pantallas de Confirmación */}
         {showSuccess ? (
             <div className="p-16 flex flex-col items-center justify-center text-center animate-fadeIn bg-slate-50 flex-1">
                 <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6">
@@ -193,7 +165,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                 </div>
                 <h3 className="text-3xl font-black text-slate-800 mb-2">¿Estás seguro?</h3>
                 <p className="text-slate-500 text-lg max-w-md mx-auto mb-8">Estás por cerrar esta consulta médica. Una vez guardada, no podrás borrarla, solo asentar nuevas evoluciones.</p>
-                
                 <div className="flex gap-4">
                     <button onClick={cancelConfirm} className="px-8 py-3 rounded-xl text-slate-600 font-bold bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
                         Volver a Editar
@@ -205,10 +176,8 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
             </div>
         ) : (
             <>
-                {/* Body del Formulario */}
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                 <form id="report-form" onSubmit={handleSubmit} className="space-y-8">
-                    
                     <div className="space-y-3">
                     <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-600"/> Diagnóstico / Evolución
@@ -221,7 +190,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                         onChange={e => setDiagnosis(e.target.value)} 
                     />
                     </div>
-
                     <div className="space-y-3">
                     <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <Paperclip className="w-5 h-5 text-blue-600"/> Archivos Adjuntos
@@ -243,7 +211,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                             <p className="text-xs text-slate-400 mt-2 font-medium">Soporta PDF, JPG, PNG (Max 10MB)</p>
                         </label>
                     </div>
-                    
                     {files.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                             {files.map((f, i) => (
@@ -265,7 +232,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                         </div>
                     )}
                     </div>
-
                     <div className="space-y-3">
                     <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-amber-500"/> Receta / Indicaciones
@@ -279,8 +245,6 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                     </div>
                 </form>
                 </div>
-
-                {/* Footer del Modal */}
                 <div className="bg-white p-6 border-t border-slate-100 flex justify-end gap-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] relative z-20">
                 <button onClick={onClose} className="px-6 py-3 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">
                     Cancelar
@@ -295,62 +259,43 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
     </div>
   );
 };
-
 export default function DoctorTurns() {
   const [appointments, setAppointments] = useState(initialAppointments);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // --- MANEJO DE ESTADOS ---
   const handleCallPatient = (id) => {
       setAppointments(prev => prev.map(app => app.id === id ? { ...app, status: 'attending' } : app));
   };
-
   const handleOpenReport = (appointment) => {
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
   };
-
   const handleFinishAppointment = (id, data) => {
     setAppointments(prev => prev.map(app => app.id === id ? { ...app, status: 'finished' } : app));
     setIsModalOpen(false);
     setSelectedAppointment(null);
   };
-
-  // --- AGRUPACIÓN DE TURNOS POR FECHA ---
   const today = getToday();
   const groupedAppointments = {
       today: appointments.filter(a => a.date === today),
       upcoming: appointments.filter(a => a.date > today).sort((a, b) => new Date(a.date) - new Date(b.date))
   };
-
-  // Función para formatear fecha amigable
   const formatDate = (dateString) => {
       const date = new Date(dateString);
       const todayDate = new Date();
-      // Ajuste zona horaria simple para visualización
       date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-      
       if (dateString === today) return 'Hoy';
-      
       return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', weekday: 'long' });
   };
-
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       <Navbar />
       <MedicalReportModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} appointment={selectedAppointment} onSave={handleFinishAppointment} />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
         <style>{styles}</style>
-
-        {/* HERO SECTION / DASHBOARD */}
         <div className="relative rounded-3xl overflow-hidden mb-12 bg-blue-900 animate-gradient shadow-2xl">
-            {/* Background Decorations */}
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-cyan-500/20 blur-3xl pointer-events-none"></div>
-            
             <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div className="text-white">
                     <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3">
@@ -360,8 +305,6 @@ export default function DoctorTurns() {
                         Acá tenés un resumen rápido de tu agenda médica de hoy.
                     </p>
                 </div>
-
-                {/* Bento Metrics */}
                 <div className="flex gap-4 self-start md:self-auto">
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 text-center flex flex-col items-center justify-center min-w-[110px] hover:-translate-y-1 hover:shadow-lg hover:bg-white/20 transition-all duration-300 cursor-default">
                         <div className="bg-white/20 p-2 rounded-xl mb-3">
@@ -372,7 +315,6 @@ export default function DoctorTurns() {
                         </span>
                         <span className="text-xs font-bold text-blue-200 uppercase tracking-widest">En Espera</span>
                     </div>
-
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 text-center flex flex-col items-center justify-center min-w-[110px] hover:-translate-y-1 hover:shadow-lg hover:bg-white/20 transition-all duration-300 cursor-default">
                         <div className="bg-white/20 p-2 rounded-xl mb-3">
                             <CheckCircle className="w-6 h-6 text-green-300" />
@@ -382,7 +324,6 @@ export default function DoctorTurns() {
                         </span>
                         <span className="text-xs font-bold text-blue-200 uppercase tracking-widest">Atendidos</span>
                     </div>
-
                     <div className="hidden md:flex bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 text-center flex-col items-center justify-center min-w-[110px] hover:-translate-y-1 hover:shadow-lg hover:bg-white/20 transition-all duration-300 cursor-default">
                         <div className="bg-white/20 p-2 rounded-xl mb-3">
                             <Stethoscope className="w-6 h-6 text-blue-200" />
@@ -395,8 +336,6 @@ export default function DoctorTurns() {
                 </div>
             </div>
         </div>
-
-        {/* --- SECCIÓN: TURNOS DE HOY --- */}
         {groupedAppointments.today.length > 0 && (
             <div className="mb-12 animate-fadeIn">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
@@ -415,8 +354,6 @@ export default function DoctorTurns() {
                 </div>
             </div>
         )}
-
-        {/* --- SECCIÓN: PRÓXIMOS TURNOS (Este mes y Siguiente) --- */}
         {groupedAppointments.upcoming.length > 0 && (
             <div className="animate-fadeIn mt-12">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
@@ -442,10 +379,7 @@ export default function DoctorTurns() {
     </div>
   );
 }
-
-// --- SUB-COMPONENTE TARJETA DE TURNO (Para limpiar el código principal) ---
 const AppointmentCard = ({ app, onCall, onFinish, isFuture, dateLabel }) => {
-    // Configuración visual según estado
     const statusConfig = {
         pending: { label: 'Pendiente', color: 'bg-gray-100 text-gray-600 border-gray-200', icon: Clock },
         waiting: { label: 'En Espera', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: AlertCircle, rowClass: 'border-l-4 border-l-orange-400 ring-1 ring-orange-100' },
@@ -453,21 +387,15 @@ const AppointmentCard = ({ app, onCall, onFinish, isFuture, dateLabel }) => {
         finished: { label: 'Finalizado', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle, rowClass: 'opacity-60 bg-gray-50' },
         cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-700 border-red-200', icon: XCircle, rowClass: 'opacity-50 grayscale' },
     };
-
     const config = statusConfig[app.status] || statusConfig.pending;
     const StatusIcon = config.icon;
-
     return (
         <div className={`bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 duration-300 border border-gray-100 overflow-hidden transition-all flex flex-col md:flex-row ${config.rowClass || ''}`}>
-            
-            {/* Fecha/Hora */}
             <div className={`p-6 flex flex-col items-center justify-center md:w-36 shrink-0 border-b md:border-b-0 md:border-r border-gray-100 ${app.status === 'attending' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-500'}`}>
                 {isFuture && <span className="text-xs font-bold uppercase mb-1 text-center leading-tight">{dateLabel}</span>}
                 <span className="text-2xl font-bold">{app.time}</span>
                 {!isFuture && <span className="text-xs font-bold uppercase tracking-wider">hs</span>}
             </div>
-
-            {/* Info Paciente */}
             <div className="p-6 flex-1 flex flex-col justify-center">
                     <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
@@ -487,22 +415,17 @@ const AppointmentCard = ({ app, onCall, onFinish, isFuture, dateLabel }) => {
                     </span>
                     </div>
             </div>
-
-            {/* Botones de Acción */}
             <div className="p-4 md:p-6 flex items-center justify-end md:w-48 gap-2 border-t md:border-t-0 md:border-l border-gray-100 bg-gray-50/30">
                 {!isFuture && app.status === 'waiting' && (
                     <button onClick={() => onCall(app.id)} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition shadow-md animate-pulse">
                         <Megaphone className="w-4 h-4" /> Llamar
                     </button>
                 )}
-
                 {!isFuture && app.status === 'attending' && (
                     <button onClick={() => onFinish(app)} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition shadow-md">
                         <FileText className="w-4 h-4" /> Finalizar
                     </button>
                 )}
-
-                {/* Estados sin acción inmediata */}
                 {(isFuture || app.status === 'pending') && <span className="text-xs text-gray-400 font-medium text-center w-full">Programado</span>}
                 {app.status === 'finished' && <span className="text-xs text-green-600 font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Completado</span>}
             </div>

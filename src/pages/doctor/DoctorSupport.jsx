@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { LifeBuoy, Send, MessageSquare, PhoneCall, Mail, AlertTriangle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { LifeBuoy, Send, MessageSquare, PhoneCall, Mail, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Printer } from 'lucide-react';
 
 const faqs = [
   {
@@ -24,26 +24,29 @@ const faqs = [
 
 const DoctorSupport = () => {
   const [openFaq, setOpenFaq] = useState(null);
-  const [ticketStatus, setTicketStatus] = useState('idle'); // idle, sending, success
+  const [ticketStatus, setTicketStatus] = useState('idle'); 
+  const [ticketId, setTicketId] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setTicketStatus('sending');
+    const newId = Math.floor(Math.random() * 9000) + 1000;
     setTimeout(() => {
+      setTicketId(newId);
       setTicketStatus('success');
-      setTimeout(() => setTicketStatus('idle'), 5000);
     }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans relative">
+      <div className="print:hidden flex flex-col min-h-screen">
       <Navbar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
-        {/* Encabezado */}
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-            
+
             <div className="relative z-10 w-full text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-3 text-blue-600 mb-3">
                     <div className="bg-blue-100 p-2 rounded-xl">
@@ -59,10 +62,9 @@ const DoctorSupport = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          
-          {/* LADO IZQUIERDO: Formulario */}
+
           <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm h-fit relative overflow-hidden">
-            {/* Acento decorativo */}
+
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
 
             <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3 relative z-10 tracking-tight">
@@ -73,15 +75,26 @@ const DoctorSupport = () => {
               <div className="bg-green-50/50 border border-green-100 rounded-2xl p-10 text-center animate-fadeIn relative z-10">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-5" />
                 <h3 className="text-2xl font-black text-slate-800 mb-2">¡Ticket enviado!</h3>
-                <p className="text-slate-500 font-medium">
-                  Hemos recibido tu consulta. Nos pondremos en contacto a la brevedad. Tu número de ticket es <strong className="text-slate-800 bg-white px-2 py-1 rounded-md border border-slate-200">#TK-{Math.floor(Math.random() * 9000) + 1000}</strong>.
+                <p className="text-slate-500 font-medium mb-6">
+                  Hemos recibido tu consulta. Nos pondremos en contacto a la brevedad. Tu número de ticket es <strong className="text-slate-800 bg-white px-2 py-1 rounded-md border border-slate-200">#TK-{ticketId}</strong>.
                 </p>
-                <button 
-                  onClick={() => setTicketStatus('idle')}
-                  className="mt-8 px-6 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors shadow-lg shadow-slate-200"
-                >
-                  Enviar otro ticket
-                </button>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={() => window.print()}
+                    className="w-full px-6 py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2"
+                  >
+                    <Printer className="w-5 h-5" /> Descargar / Imprimir Comprobante
+                  </button>
+                  <button 
+                    onClick={() => {
+                        setTicketStatus('idle');
+                        setTicketId(null);
+                    }}
+                    className="w-full px-6 py-4 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors shadow-lg shadow-slate-200"
+                  >
+                    Enviar otro ticket
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
@@ -89,7 +102,7 @@ const DoctorSupport = () => {
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Asunto</label>
                   <input type="text" required placeholder="Ej: Error al guardar historia clínica" className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm" />
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Categoría</label>
@@ -130,10 +143,8 @@ const DoctorSupport = () => {
             )}
           </div>
 
-          {/* LADO DERECHO: FAQs y Contacto */}
           <div className="space-y-6">
-            
-            {/* Canales Directos */}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-7 text-white shadow-lg relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-500/10 transition-colors"></div>
@@ -154,7 +165,6 @@ const DoctorSupport = () => {
               </div>
             </div>
 
-            {/* FAQs */}
             <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm relative overflow-hidden">
               <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3 tracking-tight">
                 <AlertTriangle className="w-6 h-6 text-amber-500" /> Dudas Frecuentes
@@ -188,6 +198,37 @@ const DoctorSupport = () => {
       </main>
 
       <Footer />
+      </div>
+
+      {ticketStatus === 'success' && ticketId && (
+        <div className="hidden print:flex flex-col p-12 font-serif text-slate-900 bg-white w-full absolute top-0 left-0 right-0 z-[99999] min-h-[100vh]">
+            <div className="flex justify-between items-end mb-8 border-b-2 border-slate-900 pb-6">
+                <div>
+                    <h1 className="text-4xl tracking-[0.3em] font-medium text-slate-900">SAMSA</h1>
+                    <p className="text-xs text-slate-500 tracking-[0.2em] uppercase mt-1">Soporte Técnico IT</p>
+                </div>
+                <div className="text-right">
+                    <p className="font-bold text-slate-700">Comprobante de Ticket</p>
+                    <p className="text-sm">N° TK-{ticketId}</p>
+                </div>
+            </div>
+
+            <div className="my-10 space-y-6 flex-grow">
+                <p className="text-xl font-bold">Hemos recibido tu solicitud de soporte.</p>
+                <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 inline-block">
+                    <p className="text-sm text-slate-500 uppercase tracking-widest font-bold mb-1">Número de Seguimiento</p>
+                    <p className="text-4xl font-mono font-black text-slate-800">#TK-{ticketId}</p>
+                </div>
+                <p className="text-lg">Nuestro equipo de Mesa de Ayuda se pondrá en contacto a la brevedad para brindarte una solución.</p>
+                <p className="text-sm text-slate-500 mt-10">Fecha de emisión: {new Date().toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+
+            <div className="mt-auto border-t pt-6 flex justify-between items-center text-xs text-slate-500">
+                <p>Documento generado automáticamente por SAMSA Core.</p>
+                <p>Uso interno exclusivamente.</p>
+            </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -5,18 +5,12 @@ import {
   ChevronUp, ShieldCheck, Calendar, User, Wallet, X, Check,
   ArrowRight, Sun 
 } from 'lucide-react';
-
-// Nota: Si este archivo (Professionals.jsx) está dentro de una subcarpeta (ej: pages/doctor/),
-// deberás ajustar la ruta a '../../components/ui/Navbar'
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { doctorsData } from '../data/doctors';
-
-// --- UTILIDAD: FadeIn (Para animaciones suaves de entrada) ---
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
-
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -26,15 +20,12 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
         }
       });
     }, { threshold: 0.1 });
-
     const { current } = domRef;
     if (current) observer.observe(current);
-
     return () => {
       if (current) observer.unobserve(current);
     };
   }, []);
-
   return (
     <div
       ref={domRef}
@@ -47,8 +38,6 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
     </div>
   );
 };
-
-// --- DATOS CONSTANTES ---
 const SPECIALTIES = [
   "Todas", "Cardiología", "Clínica Médica", "Dermatología", "Diagnóstico", 
   "Endocrinología", "Fonoaudiología", "Ginecología", "Hemoterapia", 
@@ -56,27 +45,17 @@ const SPECIALTIES = [
   "Nutrición", "Odontología", "Oftalmología", "Pediatría", 
   "Psicología", "Psiquiatría", "Radiología", "Traumatología", "Urología"
 ];
-
 const INSURANCES = [
   "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
   "Galeno", "PAMI", "IOS", "OSECAC"
 ];
-
 const DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
-// --- MOCK DATA DE DOCTORES ---
-// Datos movidos a src/data/doctors.js
-
-// --- COMPONENTE CARD INDIVIDUAL ---
 const DoctorCard = ({ doctor }) => {
     const hoursString = doctor.hours.map(h => `${h.start}-${h.end}`).join(" / ");
     const isPublic = doctor.attentionType === 'Pública';
-
     return (
         <div className="bg-white rounded-[1.5rem] border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 group flex flex-col h-full relative overflow-hidden">
-            {/* Decoración Hover Lateral */}
             <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top"></div>
-
             <div className="flex gap-5 items-start mb-4">
                 <div className="relative shrink-0">
                     <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm bg-gray-50">
@@ -95,7 +74,6 @@ const DoctorCard = ({ doctor }) => {
                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" /> {doctor.rating}
                     </div>
                 </div>
-                
                 <div className="flex-1 min-w-0 pt-1">
                     <div className="flex justify-between items-start">
                         <h3 className="font-bold text-lg text-gray-900 truncate pr-2">{doctor.name}</h3>
@@ -109,7 +87,6 @@ const DoctorCard = ({ doctor }) => {
                     </p>
                 </div>
             </div>
-
             <div className="space-y-3 mt-2 mb-6">
                 <div className="flex items-start gap-3 text-sm text-gray-600">
                     <Calendar className="w-4 h-4 text-blue-500 mt-0.5 shrink-0"/> 
@@ -126,7 +103,6 @@ const DoctorCard = ({ doctor }) => {
                     </span>
                 </div>
             </div>
-
             <div className="mt-auto">
                 <Link to={`/professionals/${doctor.id}`} className="block">
                     <button className="w-full py-3 bg-gray-50 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg text-sm">
@@ -137,8 +113,6 @@ const DoctorCard = ({ doctor }) => {
         </div>
     );
 };
-
-// --- PÁGINA PRINCIPAL: PROFESSIONALS ---
 const Professionals = () => {
   const location = useLocation();
   const [search, setSearch] = useState('');
@@ -148,8 +122,6 @@ const Professionals = () => {
   const [timeOfDay, setTimeOfDay] = useState('');
   const [attentionType, setAttentionType] = useState('all');
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
-
-  // Inicializar filtro desde URL si existe (ej: viene desde "Turnos")
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const specialtyParam = params.get('specialty');
@@ -163,28 +135,20 @@ const Professionals = () => {
         }
     }
   }, [location]);
-
-  // Lógica de filtrado
   const filteredDoctors = useMemo(() => {
       return doctorsData.filter(doc => {
           const matchesSearch = doc.name.toLowerCase().includes(search.toLowerCase()) || 
                                 doc.specialty.toLowerCase().includes(search.toLowerCase());
-          
           const matchesSpecialty = selectedSpecialty === 'Todas' || doc.specialty === selectedSpecialty;
-
           const matchesInsurance = !selectedInsurance || 
                                    (doc.attentionType === 'Particular' && doc.insurance.includes(selectedInsurance));
-
           const matchesType = attentionType === 'all' || doc.attentionType === attentionType;
-
           const matchesDays = selectedDays.length === 0 || 
                               selectedDays.some(day => doc.days.includes(day));
-
           let matchesTime = true;
           if (timeOfDay) {
               const hasMorning = doc.hours.some(h => parseInt(h.start) < 13);
               const hasAfternoon = doc.hours.some(h => parseInt(h.start) >= 12);
-              
               if (timeOfDay === 'both') {
                   matchesTime = hasMorning && hasAfternoon;
               } else if (timeOfDay === 'morning') {
@@ -193,20 +157,15 @@ const Professionals = () => {
                   matchesTime = hasAfternoon;
               }
           }
-
           return matchesSearch && matchesSpecialty && matchesInsurance && matchesType && matchesDays && matchesTime;
       });
   }, [search, selectedSpecialty, selectedInsurance, attentionType, selectedDays, timeOfDay]);
-
-  // Handlers
   const toggleDay = (day) => {
       setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]);
   };
-
   const toggleTime = (time) => {
       setTimeOfDay(prev => prev === time ? '' : time);
   };
-
   const clearFilters = () => {
       setSearch('');
       setSelectedSpecialty('Todas');
@@ -215,14 +174,9 @@ const Professionals = () => {
       setTimeOfDay('');
       setAttentionType('all');
   };
-
   return (
     <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900">
-      
-      {/* NAVBAR REAL */}
       <Navbar />
-
-      {/* SEARCH HEADER */}
       <div className="relative z-40 bg-white shadow-sm border-b border-gray-200 transition-all duration-300">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <FadeIn className="flex gap-3">
@@ -245,21 +199,15 @@ const Professionals = () => {
               </FadeIn>
           </div>
       </div>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-            
-            {/* --- SIDEBAR FILTERS --- */}
             <aside className={`lg:w-72 shrink-0 space-y-8 bg-white lg:bg-transparent p-6 lg:p-0 rounded-3xl lg:rounded-none shadow-xl lg:shadow-none border border-gray-100 lg:border-none transition-all duration-300 ${showFiltersMobile ? 'block fixed inset-4 z-50 overflow-y-auto lg:static' : 'hidden lg:block'}`}>
-                
-                {/* Mobile Close */}
                 <div className="lg:hidden flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">Filtros</h2>
                     <button onClick={() => setShowFiltersMobile(false)} className="p-2 bg-gray-100 rounded-full">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
                 <FadeIn delay={100}>
                     <div className="space-y-1">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -277,7 +225,6 @@ const Professionals = () => {
                         </div>
                     </div>
                 </FadeIn>
-
                 <FadeIn delay={150}>
                     <div className="space-y-1">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
@@ -304,7 +251,6 @@ const Professionals = () => {
                         </div>
                     </div>
                 </FadeIn>
-
                 <FadeIn delay={200} className={attentionType === 'Pública' ? 'opacity-40 pointer-events-none grayscale' : ''}>
                     <div className="space-y-1">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
@@ -323,7 +269,6 @@ const Professionals = () => {
                         </div>
                     </div>
                 </FadeIn>
-
                 <FadeIn delay={250}>
                     <div className="space-y-1">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
@@ -374,15 +319,12 @@ const Professionals = () => {
                         </div>
                     </div>
                 </FadeIn>
-                
                 <FadeIn delay={300}>
                     <button onClick={clearFilters} className="w-full py-3 text-sm text-gray-500 hover:text-red-500 font-bold border border-transparent hover:bg-red-50 hover:border-red-100 rounded-xl transition-all flex items-center justify-center gap-2">
                         <X className="w-4 h-4" /> Limpiar Filtros
                     </button>
                 </FadeIn>
             </aside>
-
-            {/* --- RESULTADOS --- */}
             <div className="flex-1 min-w-0">
                 <FadeIn>
                     <div className="mb-6 flex justify-between items-end">
@@ -395,7 +337,6 @@ const Professionals = () => {
                         </span>
                     </div>
                 </FadeIn>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredDoctors.length > 0 ? (
                         filteredDoctors.map((doc, index) => (
@@ -421,14 +362,10 @@ const Professionals = () => {
                     )}
                 </div>
             </div>
-
         </div>
       </main>
-      
-      {/* FOOTER */}
       <Footer />
     </div>
   );
 };
-
 export default Professionals;

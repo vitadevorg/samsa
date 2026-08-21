@@ -12,7 +12,7 @@ const ChevronRight = ({className}) => (
 const Footer = ({ theme = 'dark' }) => {
   const { user } = useAuth();
   const isLight = theme === 'light';
-  
+
   const isAdmin = user?.role === 'admin';
   const isDoctor = user?.role === 'doctor';
 
@@ -26,7 +26,7 @@ const Footer = ({ theme = 'dark' }) => {
   return (
     <footer className={`${bgClass} ${isLight ? 'text-gray-800' : 'text-white'} py-16`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
-          
+
           <div className="space-y-4">
               <div className="flex items-center gap-2">
                   <div className="bg-blue-600 p-2 rounded-lg">
@@ -88,7 +88,7 @@ const Footer = ({ theme = 'dark' }) => {
           <div>
               <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>Síguenos</h4>
               <div className="flex space-x-4">
-                 {/* Iconos sociales simulados con divs para mantener estilo minimalista */}
+
                  {['fb', 'tw', 'ig'].map((social, i) => (
                      <div key={i} className={`w-10 h-10 ${iconBgClass} rounded-xl flex items-center justify-center hover:bg-blue-600 hover:-translate-y-1 transition-all cursor-pointer shadow-lg border ${isLight ? 'border-blue-50' : 'border-slate-800'}`}>
                          <div className={`w-4 h-4 ${isLight ? 'bg-blue-300' : 'bg-slate-400'} rounded-sm`}></div>
@@ -97,7 +97,7 @@ const Footer = ({ theme = 'dark' }) => {
               </div>
           </div>
       </div>
-      
+
       <div className={`max-w-7xl mx-auto px-4 mt-16 pt-8 border-t ${borderBottomClass} text-center ${textMutedClass} text-xs`}>
           &copy; {new Date().getFullYear()} S.A.M.S.A. Todos los derechos reservados. Desarrollado con pasión por la salud.
       </div>

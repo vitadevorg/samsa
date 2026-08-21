@@ -9,25 +9,18 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { doctorsData } from '../data/doctors';
-
-// --- DATOS ESTÁTICOS ---
 const SPECIALTIES = [
   "Cardiología", "Clínica Médica", "Pediatría", "Nutrición", 
   "Neurología", "Dermatología", "Traumatología", "Ginecología", 
   "Oftalmología", "Psiquiatría"
 ];
-
 const INSURANCES = [
   "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
   "Galeno", "PAMI", "IOS", "OSECAC"
 ];
-
 const DAYS_OF_WEEK = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-// --- COMPONENTE MODAL DE ÉXITO ---
 const SuccessModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-sm w-full mx-4 animate-slideUp transform transition-all">
@@ -48,11 +41,8 @@ const SuccessModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
-// --- COMPONENTE MODAL DE CONFIRMACIÓN ---
 const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-sm w-full mx-4 animate-slideUp transform transition-all">
@@ -81,12 +71,9 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
     </div>
   );
 };
-
-// --- COMPONENTE AUXILIAR: RESEÑA INDIVIDUAL ---
 const ReviewCard = ({ review }) => {
     const [expanded, setExpanded] = useState(false);
     const isLong = review.text.length > 120;
-
     return (
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
             <div className="flex justify-between items-start mb-3">
@@ -105,7 +92,6 @@ const ReviewCard = ({ review }) => {
                     </div>
                 </div>
             </div>
-
             <div>
                 <p className={`text-gray-600 text-sm leading-relaxed ${!expanded && isLong ? 'line-clamp-2' : ''}`}>
                     {review.text}
@@ -122,17 +108,12 @@ const ReviewCard = ({ review }) => {
         </div>
     );
 };
-
 const DoctorProfile = () => {
   const { id } = useParams();
   const { user, updateUser } = useAuth();
   const location = useLocation();
-
   const isSelfView = location.pathname === '/doctor/profile';
-
-  // --- ESTADO INICIAL ---
   const publicDoctor = doctorsData.find(d => d.id === id) || doctorsData[0];
-
   const initialData = isSelfView ? {
       name: user?.name || "Dr. Jesús Zelarayan",
       specialty: user?.specialty || "Cardiología",
@@ -151,14 +132,10 @@ const DoctorProfile = () => {
         { id: 3, user: "Luis Coronel", date: "2025-11-01", text: "Me salvó la vida, literalmente. Eternamente agradecida por su diagnóstico rápido.", stars: 5 }
       ]
   } : publicDoctor;
-
   const [profileData, setProfileData] = useState(initialData);
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-  // --- LÓGICA DE EDICIÓN ---
-
   const toggleDay = (day) => {
       setProfileData(prev => {
           const newDays = prev.days.includes(day) 
@@ -167,7 +144,6 @@ const DoctorProfile = () => {
           return { ...prev, days: DAYS_OF_WEEK.filter(d => newDays.includes(d)) };
       });
   };
-
   const addTimeRange = () => {
       setProfileData(prev => ({ ...prev, hours: [...prev.hours, {start: "", end: ""}] }));
   };
@@ -179,7 +155,6 @@ const DoctorProfile = () => {
       newHours[index][field] = value;
       setProfileData({ ...profileData, hours: newHours });
   };
-
   const toggleInsurance = (ins) => {
       setProfileData(prev => {
           let newInsurance;
@@ -196,41 +171,30 @@ const DoctorProfile = () => {
           return { ...prev, insurance: newInsurance };
       });
   };
-
   const handleSaveClick = () => {
       setShowConfirmModal(true);
   };
-
   const handleConfirmSave = () => {
       setShowConfirmModal(false);
       if (isSelfView) updateUser(profileData);
       setIsEditing(false);
       setShowSuccessModal(true);
   };
-
-  // --- HELPERS VISTA PREVIA ---
   const formatHours = (hours) => {
       if (!hours || hours.length === 0) return "Sin horarios";
       return hours.map(h => `${h.start} - ${h.end}`).join(" / ");
   };
-  
   const formatDays = (days) => Array.isArray(days) ? days.join(", ") : days;
-
   const sortedReviews = [...profileData.reviews].sort((a, b) => new Date(b.date) - new Date(a.date));
-
   const renderStars = (rating) => [...Array(5)].map((_, i) => (
       <Star key={i} className={`w-5 h-5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
   ));
-
   return (
     <div className="font-sans text-slate-800 bg-gray-50 min-h-screen">
       <Navbar />
-      
       <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
       <ConfirmModal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} onConfirm={handleConfirmSave} />
-
       <div className="max-w-5xl mx-auto px-4 py-12">
-        
         {isSelfView && (
             <div className="bg-indigo-600 text-white p-4 rounded-xl shadow-lg mb-8 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -250,7 +214,6 @@ const DoctorProfile = () => {
                 )}
             </div>
         )}
-
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 mb-12">
             <div className="h-32 bg-gradient-to-r from-blue-100 to-indigo-50"></div>
             <div className="px-8 pb-8 relative">
@@ -259,7 +222,6 @@ const DoctorProfile = () => {
                         <img src={profileData.img} alt={profileData.name} className="w-32 h-32 object-cover rounded-xl" />
                     </div>
                 </div>
-
                 <div className="text-center border-b border-gray-100 pb-8">
                     <h1 className="text-3xl font-bold text-gray-900">{profileData.name}</h1>
                     <p className="text-blue-600 font-medium text-lg uppercase tracking-wide mt-1">{profileData.specialty}</p>
@@ -269,7 +231,6 @@ const DoctorProfile = () => {
                         <span className="text-gray-400 text-sm">({profileData.reviewsCount} reseñas)</span>
                     </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-gray-700">
@@ -313,14 +274,11 @@ const DoctorProfile = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Botón Agendar Turno (CORREGIDO) */}
                 {!isSelfView && (
                   <div className="mt-4 bg-indigo-50 rounded-xl p-6 text-center">
                     <p className="text-indigo-900 font-medium mb-4">
                       Solo falta que elijas el horario, ¡Y listo!
                     </p>
-                    {/* Aquí estaba el problema: debe usar el ID dinámico */}
                     <Link to={`/book-appointment/${id}`}>
                       <button
                         className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg"
@@ -330,7 +288,6 @@ const DoctorProfile = () => {
                     </Link>
                   </div>
                 )}
-
                  <div className="mt-8 pt-8 border-t border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                         <Award className="w-5 h-5 text-blue-600"/> {isSelfView ? "Acerca de mí" : `Acerca de ${profileData.name.split(' ')[1]}`}
@@ -339,7 +296,6 @@ const DoctorProfile = () => {
                 </div>
             </div>
         </div>
-
         {isSelfView && (
             <div className={`bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-500 mb-12 ${isEditing ? 'opacity-100 translate-y-0' : 'opacity-50 grayscale pointer-events-none'}`}>
                 <div className="bg-slate-800 p-6 border-b border-slate-700 flex justify-between items-center">
@@ -355,7 +311,6 @@ const DoctorProfile = () => {
                         </div>
                     )}
                 </div>
-
                 <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div className="space-y-8">
                         <div className="space-y-4">
@@ -386,7 +341,6 @@ const DoctorProfile = () => {
                              />
                         </div>
                     </div>
-
                     <div className="space-y-8">
                         <div className="space-y-2">
                             <label className="block text-sm font-bold text-gray-700 uppercase">Tipo de Atención</label>
@@ -466,7 +420,6 @@ const DoctorProfile = () => {
                 </div>
             </div>
         )}
-
         <div className="mt-12 mb-20">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -486,12 +439,9 @@ const DoctorProfile = () => {
                 )}
             </div>
         </div>
-
       </div>
-      {/* FOOTER */}
       <Footer />
     </div>
   );
 };
-
 export default DoctorProfile;

@@ -2,29 +2,25 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   HeartPulse, LogOut, ChevronDown, Menu, X,
-  Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield
+  Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const handleLogout = () => {
     logout();
     navigate('/');
   };
-
   const getLinkClass = (path) => {
     const isActive = location.pathname === path;
     return isActive 
       ? "text-blue-700 font-bold flex items-center gap-1 bg-blue-50/80 px-4 py-2 rounded-xl transition-colors" 
       : "text-slate-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:bg-slate-50 px-4 py-2 rounded-xl transition-all";
   };
-
   const getFirstName = (fullName) => {
     if (!fullName) return '';
     const parts = fullName.split(' ');
@@ -33,20 +29,15 @@ const Navbar = () => {
     }
     return parts[0];
   };
-
   const displayName = getFirstName(user?.name);
   const userInitial = displayName ? displayName.charAt(0) : '';
-
   const isAdmin = user?.role === 'admin';
   const isDoctor = user?.role === 'doctor';
   const isSecretary = user?.role === 'secretary';
-
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
-          
-          {/* 1. LOGO */}
           <div className="flex items-center">
             <Link to={isAdmin ? "/admin/doctors" : isDoctor ? "/doctor/turns" : isSecretary ? "/secretary/dashboard" : "/"} className="flex items-center gap-2 group">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-2.5 rounded-xl group-hover:shadow-md group-hover:shadow-blue-500/20 transition-all duration-300 border border-blue-100">
@@ -55,11 +46,8 @@ const Navbar = () => {
               <span className="text-2xl font-black text-slate-800 tracking-tight group-hover:text-blue-700 transition-colors">S.A.M.S.A</span>
             </Link>
           </div>
-
-          {/* 2. MENÚ CENTRAL */}
           <div className="hidden md:flex space-x-8 items-center">
             {isAdmin ? (
-              /* --- VISTA ADMINISTRADOR --- */
               <>
                 <Link to="/admin/offices" className={getLinkClass('/admin/offices')}>
                   <Building className="w-4 h-4"/> Consultorios
@@ -78,7 +66,6 @@ const Navbar = () => {
                 </Link>
               </>
             ) : isDoctor ? (
-              /* --- VISTA MÉDICO --- */
               <>
                 <Link to="/doctor/turns" className={getLinkClass('/doctor/turns')}>
                   Turnos Asignados
@@ -88,7 +75,6 @@ const Navbar = () => {
                 </Link>
               </>
             ) : isSecretary ? (
-              /* --- VISTA SECRETARIA --- */
               <>
                 <Link to="/secretary/dashboard" className={getLinkClass('/secretary/dashboard')}>
                   Agenda Diaria
@@ -98,16 +84,14 @@ const Navbar = () => {
                 </Link>
               </>
             ) : (
-              /* --- VISTA PÚBLICA / PACIENTE --- */
               <>
-                <Link to="/about" className={getLinkClass('/about')}>Acerca de Nosotros</Link>
                 <Link to="/turns" className={getLinkClass('/turns')}>Turnos</Link>
                 <Link to="/professionals" className={getLinkClass('/professionals')}>Profesionales</Link>
+                <Link to="/news" className={getLinkClass('/news')}>Foro</Link>
                 <Link to="/faq" className={getLinkClass('/faq')}>Preguntas Frecuentes</Link>
+                <Link to="/about" className={getLinkClass('/about')}>Acerca de Nosotros</Link>
               </>
             )}
-
-            {/* 3. PERFIL / LOGIN */}
             {user ? (
               <div className="relative ml-4">
                 <button 
@@ -129,18 +113,13 @@ const Navbar = () => {
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
-
-                {/* Dropdown Menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 z-50">
                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
                       <p className="text-xs font-bold text-gray-400 uppercase">Cuenta</p>
                       <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
                     </div>
-
-                    {/* OPCIONES DINÁMICAS */}
                     {isAdmin ? (
-                       /* VISTA ADMIN */
                        <>
                          <Link to="/admin/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                            <Shield className="w-4 h-4" /> Mi Perfil
@@ -150,21 +129,18 @@ const Navbar = () => {
                          </div>
                        </>
                     ) : isDoctor ? (
-                      /* VISTA MÉDICO */
                       <>
                         <Link to="/doctor/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                           <User className="w-4 h-4" /> Perfil Profesional
                         </Link>
                       </>
                     ) : isSecretary ? (
-                      /* VISTA SECRETARIA */
                       <>
                          <div className="px-4 py-2 text-xs text-center text-pink-600 italic bg-pink-50 mx-2 rounded mt-1 font-bold">
                             Modo Operativo
                          </div>
                       </>
                     ) : (
-                      /* VISTA PACIENTE */
                       <>
                         <Link to="/user-profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                           <User className="w-4 h-4" /> Mi Perfil
@@ -175,9 +151,11 @@ const Navbar = () => {
                         <Link to="/studies" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                           <FileText className="w-4 h-4" /> Mis Estudios
                         </Link>
+                        <Link to="/my-reviews" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                          <Star className="w-4 h-4" /> Mis Reseñas
+                        </Link>
                       </>
                     )}
-
                     <div className="border-t border-gray-100 my-1 mt-2"></div>
                     <button onClick={handleLogout} className="flex items-center gap-2 w-full text-left px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition">
                       <LogOut className="w-4 h-4" /> Cerrar Sesión
@@ -196,8 +174,6 @@ const Navbar = () => {
               </Link>
             )}
           </div>
-          
-          {/* MENÚ MÓVIL */}
           <div className="md:hidden flex items-center">
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-blue-600 p-2">
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -205,8 +181,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-
-      {/* CONTENIDO MENÚ MÓVIL */}
       {isOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
           {isAdmin ? (
@@ -231,13 +205,13 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Acerca de Nosotros</Link>
               <Link to="/turns" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos</Link>
               <Link to="/professionals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Profesionales</Link>
+              <Link to="/news" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
               <Link to="/faq" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Preguntas Frecuentes</Link>
+              <Link to="/about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Acerca de Nosotros</Link>
             </>
           )}
-          
           <div className="border-t border-gray-100 mt-4 pt-4">
              {user ? (
                 <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 font-bold">Cerrar Sesión</button>
@@ -250,5 +224,4 @@ const Navbar = () => {
     </nav>
   );
 };
-
 export default Navbar;

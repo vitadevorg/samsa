@@ -5,7 +5,6 @@ import {
   Users, Search, Plus, Calendar, Phone, Mail, FileText, CheckCircle, AlertCircle, Edit, Save, X
 } from 'lucide-react';
 
-// --- MOCK DATA: Base de Pacientes ---
 const initialPatients = [
   { 
     id: 1, 
@@ -45,7 +44,6 @@ const initialPatients = [
   },
 ];
 
-// --- COMPONENTE MODAL: NUEVO PACIENTE (PREMIUM CON CONFIRMACIÓN) ---
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const [newPatient, setNewPatient] = useState({ name: '', dni: '', email: '', phone: '' });
     const [showConfirm, setShowConfirm] = useState(false);
@@ -80,7 +78,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
                     </div>
                     <h2 className="text-xl font-black text-white tracking-tight relative z-10">Registrar Paciente</h2>
                 </div>
-                
+
                 {showSuccess ? (
                     <div className="p-12 flex flex-col items-center justify-center text-center animate-fadeIn bg-slate-50">
                         <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6">
@@ -96,7 +94,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
                         </div>
                         <h3 className="text-2xl font-black text-slate-800 mb-2">¿Estás seguro?</h3>
                         <p className="text-slate-500 text-sm mb-8">Vas a registrar un nuevo paciente en la base de datos operativa.</p>
-                        
+
                         <div className="flex gap-3 w-full">
                             <button type="button" onClick={cancelConfirm} className="flex-1 py-3 rounded-xl text-slate-600 font-bold bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
                                 Volver
@@ -137,11 +135,9 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     );
 };
 
-// --- COMPONENTE MODAL: EDITAR PACIENTE ---
 const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
     const [editData, setEditData] = useState(patient || { email: '', phone: '' });
 
-    // Actualizar estado si cambia el paciente seleccionado
     React.useEffect(() => {
         if (patient) setEditData(patient);
     }, [patient]);
@@ -160,7 +156,7 @@ const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
                     <h2 className="text-xl font-black tracking-tight flex items-center gap-2"><Edit className="w-6 h-6 text-pink-400"/> Editar Contacto</h2>
                     <button onClick={onClose} className="text-white/70 hover:text-white transition-colors"><X className="w-6 h-6"/></button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-8 space-y-5 bg-slate-50/50">
                     <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3 text-blue-800 text-sm font-medium mb-4">
                         <AlertCircle className="w-5 h-5 shrink-0 text-blue-500" />
@@ -171,7 +167,7 @@ const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Nombre Completo</label>
                         <input disabled value={editData.name} className="w-full p-4 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 outline-none cursor-not-allowed" />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
@@ -193,13 +189,11 @@ const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
     );
 };
 
-// --- PÁGINA PRINCIPAL ---
 export default function SecretaryPatients() {
   const [patients, setPatients] = useState(initialPatients);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
-  
-  // Estados Modales
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -208,7 +202,6 @@ export default function SecretaryPatients() {
       p.dni.includes(searchTerm)
   );
 
-  // Handlers
   const handleAddPatient = (newPatient) => {
       setPatients(prev => [newPatient, ...prev]);
       setIsAddModalOpen(false);
@@ -227,8 +220,7 @@ export default function SecretaryPatients() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       <Navbar />
-      
-      {/* Modales */}
+
       <AddPatientModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -243,7 +235,7 @@ export default function SecretaryPatients() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
+
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-pink-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
             <div className="relative z-10 w-full md:w-auto text-center md:text-left">
@@ -279,7 +271,7 @@ export default function SecretaryPatients() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredPatients.map((patient) => (
                 <div key={patient.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden">
-                    {/* Acento decorativo */}
+
                     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-50 to-rose-50 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform"></div>
 
                     <div className="flex items-start gap-5 relative z-10">
@@ -295,7 +287,7 @@ export default function SecretaryPatients() {
                                     <p className="text-sm text-slate-400 font-mono font-medium mt-0.5 tracking-wide">DNI: {patient.dni}</p>
                                 </div>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-y-3 gap-x-4 mt-4 text-sm font-medium">
                                 <div className="flex items-center gap-2 truncate text-slate-600" title="Teléfono">
                                     <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
@@ -336,7 +328,7 @@ export default function SecretaryPatients() {
                 </div>
             ))}
         </div>
-        
+
         {filteredPatients.length === 0 && (
             <div className="text-center py-20">
                 <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">

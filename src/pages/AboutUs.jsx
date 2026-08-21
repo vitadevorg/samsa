@@ -3,25 +3,19 @@ import { Clock, Users, Activity, Phone, Calendar, ArrowRight, CheckCircle } from
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-
-// --- UTILIDAD 1: Componente para animar entrada (Simula GSAP ScrollTrigger) ---
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
-
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => setIsVisible(entry.isIntersecting));
-    }, { threshold: 0.1 }); // Se activa al ver el 10% del elemento
-
+    }, { threshold: 0.1 }); 
     const { current } = domRef;
     if (current) observer.observe(current);
-
     return () => {
       if (current) observer.unobserve(current);
     };
   }, []);
-
   return (
     <div
       ref={domRef}
@@ -29,68 +23,49 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
       className={`transition-all duration-1000 ease-out transform ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-12' // Efecto de subir
+          : 'opacity-0 translate-y-12' 
       } ${className}`}
     >
       {children}
     </div>
   );
 };
-
-// --- UTILIDAD 2: Componente para contar números (Simula CountUp) ---
 const Counter = ({ end, duration = 2000, suffix = "" }) => {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
-
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) setIsVisible(true);
     });
     if (domRef.current) observer.observe(domRef.current);
   }, []);
-
   useEffect(() => {
     if (!isVisible) return;
-    
     let startTime;
     let animationFrame;
-
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const progress = timestamp - startTime;
       const percentage = Math.min(progress / duration, 1);
-      
-      // Easing function (easeOutExpo)
       const ease = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
-      
       setCount(Math.floor(ease * end));
-
       if (progress < duration) {
         animationFrame = requestAnimationFrame(animate);
       }
     };
-
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
   }, [isVisible, end, duration]);
-
   return <span ref={domRef}>{count}{suffix}</span>;
 };
-
-// --- COMPONENTE PRINCIPAL ---
 const AboutUs = () => {
   return (
     <div className="font-sans text-slate-800 bg-white selection:bg-blue-100 selection:text-blue-900">
-      
       <Navbar />
-
-      {/* HERO SECTION */}
       <div className="relative pt-24 pb-16 lg:pt-32 lg:pb-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
-            {/* Texto Hero */}
             <div className="z-10 order-2 lg:order-1">
               <FadeIn delay={0}>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-6">
@@ -98,7 +73,6 @@ const AboutUs = () => {
                   <span className="text-blue-700 font-medium text-xs tracking-wide uppercase">Innovación en Salud</span>
                 </div>
               </FadeIn>
-              
               <FadeIn delay={100}>
                 <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-gray-900 leading-[1.1] mb-6">
                   Su salud es nuestra <br />
@@ -107,14 +81,12 @@ const AboutUs = () => {
                   </span>
                 </h1>
               </FadeIn>
-              
               <FadeIn delay={200}>
                 <p className="text-xl text-gray-500 leading-relaxed max-w-lg mb-8 font-light">
                   Transformamos el acceso a la salud eliminando filas, no calidad. 
                   Un sistema diseñado para la era moderna.
                 </p>
               </FadeIn>
-
               <FadeIn delay={300}>
                 <div className="flex flex-wrap gap-4">
                   <button className="px-8 py-4 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 duration-300 shadow-lg shadow-gray-900/20">
@@ -126,13 +98,10 @@ const AboutUs = () => {
                 </div>
               </FadeIn>
             </div>
-
-            {/* Imagen Hero */}
             <div className="relative order-1 lg:order-2 lg:h-[600px] flex items-center justify-center">
               <FadeIn delay={400} className="w-full h-full">
                 <div className="relative w-full h-full rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10 group">
                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/10 to-transparent z-10 mix-blend-multiply transition-opacity group-hover:opacity-75"></div>
-                   {/* Recuerda poner la imagen en public/img/ */}
                    <img 
                     src="/img/matarSoto.png" 
                     alt="Doctor Matar y Soto" 
@@ -148,8 +117,6 @@ const AboutUs = () => {
           </div>
         </div>
       </div>
-
-      {/* STATS SECTION */}
       <section className="bg-gray-50 border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
@@ -173,8 +140,6 @@ const AboutUs = () => {
           </div>
         </div>
       </section>
-
-      {/* FEATURES */}
       <section className="py-24 lg:py-32 bg-white relative">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="max-w-2xl mb-20">
@@ -185,7 +150,6 @@ const AboutUs = () => {
                 </p>
             </FadeIn>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Clock, title: "Gestión Ágil", desc: "Turnos en tiempo real, sin burocracia innecesaria." },
@@ -208,13 +172,9 @@ const AboutUs = () => {
           </div>
         </div>
       </section>
-
-      {/* HOW IT WORKS */}
       <section className="py-24 bg-blue-50/30 relative overflow-hidden">
-        {/* Background decorations */}
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse" style={{ animationDelay: '2s' }}></div>
-
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
              <FadeIn>
@@ -227,11 +187,8 @@ const AboutUs = () => {
                 <p className="text-slate-500 text-lg max-w-2xl mx-auto">Tres simples pasos que te conectan directamente con la solución que necesitas, sin demoras ni burocracia.</p>
              </FadeIn>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-             {/* Línea conectora visible solo en desktop */}
              <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-blue-100 via-blue-300 to-blue-100 z-0"></div>
-
              {[
                { num: "1", title: "Solicitud", text: "Seleccioná la especialidad y el horario desde tu dispositivo." },
                { num: "2", title: "Confirmación", text: "Recibí tu ticket digital instantáneo con los detalles." },
@@ -250,10 +207,8 @@ const AboutUs = () => {
           </div>
         </div>
       </section>
-      {/* FOOTER */}
       <Footer theme="light" />
     </div>
   );
 };
-
 export default AboutUs;

@@ -3,7 +3,6 @@ import { ShieldCheck, Calendar, Activity, Users, ArrowRight, Star, MapPin, Check
 import { Link } from 'react-router-dom';
 import ProfessionalApplicationModal from './ProfessionalApplicationModal';
 
-// --- HOOK DE REVELADO AL SCROLL ---
 const useScrollReveal = (threshold = 0.1) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
@@ -52,8 +51,6 @@ const AnimatedStepsFlow = () => {
         const currentRef = domRef.current;
         if (!currentRef) return;
 
-        // Utilizamos un observer con un margen superior e inferior muy estricto
-        // para asegurar que solo dispare cuando esté en el medio de la pantalla.
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
@@ -63,8 +60,7 @@ const AnimatedStepsFlow = () => {
             },
             { threshold: 0.5 }
         );
-        
-        // Pequeño delay inicial para evitar disparos en falso durante el render inicial
+
         const timeout = setTimeout(() => {
             observer.observe(currentRef);
         }, 800);
@@ -77,7 +73,7 @@ const AnimatedStepsFlow = () => {
 
     return (
         <div ref={domRef} className="grid grid-cols-1 md:grid-cols-4 gap-8 relative mt-16 min-h-[200px]">
-            {/* Línea conectora de pasos y Progreso (solo desktop) */}
+
             <div className="hidden md:block absolute top-6 left-[12%] right-[12%] h-1 bg-slate-800 -z-10 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500 rounded-full" style={{ 
                     width: '100%', 
@@ -86,7 +82,7 @@ const AnimatedStepsFlow = () => {
                     transform: isVisible ? 'none' : 'scaleX(0)'
                 }}></div>
             </div>
-            
+
             {[
                 { step: "01", title: "Enviá tu Solicitud", desc: "Completá tus datos y nuestro equipo evaluará tu perfil." },
                 { step: "02", title: "Definí Horarios", desc: "Indicá tu disponibilidad y modalidad de atención." },
@@ -95,7 +91,7 @@ const AnimatedStepsFlow = () => {
             ].map((item, idx) => (
                 <div key={idx} className="text-center relative opacity-0" style={{ animation: isVisible ? `fade-in-up-delay 0.6s forwards ${200 + (idx * 1200)}ms` : 'none' }}>
                     <div className="relative w-12 h-12 rounded-full border-2 bg-slate-900 mx-auto mb-6 flex items-center justify-center overflow-hidden" style={{ animation: isVisible ? `step-border 0.6s forwards ${400 + (idx * 1200)}ms` : 'none', borderColor: '#334155' }}>
-                        {/* Efecto de líquido llenándose */}
+
                         <div className="absolute bottom-0 left-0 w-full bg-blue-500 h-0" style={{ animation: isVisible ? `fill-up 0.8s ease-out forwards ${400 + (idx * 1200)}ms` : 'none' }}></div>
                         <span className="relative z-10 font-black text-slate-500" style={{ animation: isVisible ? `step-text 0.4s forwards ${800 + (idx * 1200)}ms` : 'none' }}>{item.step}</span>
                     </div>
@@ -150,15 +146,15 @@ const AnimatedNumber = ({ end, duration = 1500, isVisible, suffix = "" }) => {
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            // easeOutCubic
+
             const easeProgress = 1 - Math.pow(1 - progress, 3);
             setCount(Math.floor(easeProgress * end));
-            
+
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             }
         };
-        
+
         window.requestAnimationFrame(step);
     }, [end, duration, isVisible]);
 
@@ -170,17 +166,16 @@ const ProfessionalB2BSection = () => {
 
     return (
         <section className="relative bg-slate-950 overflow-hidden pt-24 pb-32 font-sans border-t border-slate-900">
-            {/* BACKGROUND DECORATIONS */}
+
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[120px]"></div>
                 <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-900/20 rounded-full blur-[150px]"></div>
-                {/* Grid pattern sutil */}
+
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                
-                {/* 1. HERO B2B */}
+
                 <div className="text-center max-w-3xl mx-auto mb-20">
                     <Reveal>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-blue-400 text-xs font-bold tracking-widest uppercase mb-6 shadow-xl">
@@ -197,14 +192,12 @@ const ProfessionalB2BSection = () => {
                     </Reveal>
                 </div>
 
-                {/* 2. MOCKUP & PROPOSICIÓN DE VALOR */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-28">
-                    
-                    {/* Visual Mockup (Show, Don't Tell) */}
+
                     <Reveal delay={300} className="relative">
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-purple-600/20 rounded-[2.5rem] blur-2xl transform -rotate-3 scale-105"></div>
                         <div className="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 p-8 rounded-[2rem] shadow-2xl hover:-translate-y-2 transition-transform duration-500">
-                            
+
                             <div className="flex justify-between items-start mb-8">
                                 <div className="flex gap-5">
                                     <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-700/50 shadow-inner">
@@ -240,8 +233,7 @@ const ProfessionalB2BSection = () => {
                                 Reservar Turno <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>
-                        
-                        {/* Widget: Nuevo Turno */}
+
                         <div className="absolute -bottom-6 -right-6 bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
                             <div className="flex items-center gap-3">
                                 <div className="bg-green-500/20 p-2 rounded-full">
@@ -254,7 +246,6 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        {/* Widget: Ahorro de tiempo */}
                         <div className="absolute -top-10 -left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
                             <div className="flex items-center gap-4">
                                 <div className="relative w-12 h-12">
@@ -271,7 +262,6 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        {/* Widget: Crecimiento */}
                         <div className="absolute top-1/2 -right-12 transform -translate-y-1/2 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10 hidden sm:block" style={{ animationDuration: '8s', animationDelay: '2s' }}>
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
@@ -287,7 +277,6 @@ const ProfessionalB2BSection = () => {
                         </div>
                     </Reveal>
 
-                    {/* Tarjetas de Propuesta de Valor */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
                             { icon: <Users />, title: "Mayor Visibilidad", desc: "Tu perfil disponible para miles de pacientes buscando tu especialidad." },
@@ -308,7 +297,6 @@ const ProfessionalB2BSection = () => {
                     </div>
                 </div>
 
-                {/* 3. MÉTRICAS CONCEPTUALES */}
                 <Reveal delay={200}>
                     <div className="flex flex-wrap justify-center gap-8 md:gap-16 border-y border-slate-800 py-10 mb-28 bg-slate-900/30">
                         <div className="text-center">
@@ -326,14 +314,13 @@ const ProfessionalB2BSection = () => {
                     </div>
                 </Reveal>
 
-                {/* 4. ONBOARDING (CÓMO FUNCIONA) */}
                 <div className="mb-28">
                     <Reveal>
                         <h3 className="text-2xl md:text-3xl font-black text-white text-center mb-16">Unirte es muy sencillo</h3>
                     </Reveal>
-                    
+
                     <AnimatedStepsFlow />
-                    
+
                     <style>{`
                         @keyframes fill-up {
                             0% { height: 0%; }
@@ -352,7 +339,6 @@ const ProfessionalB2BSection = () => {
                     `}</style>
                 </div>
 
-                {/* NUEVA SECCIÓN: ECOSISTEMA DETALLADO APILADO */}
                 <div className="mb-28 mt-20">
                     <Reveal>
                         <div className="text-center mb-20">
@@ -362,8 +348,7 @@ const ProfessionalB2BSection = () => {
                     </Reveal>
 
                     <div className="space-y-24">
-                        
-                        {/* 1. Especialistas */}
+
                         <div className="flex flex-col md:flex-row items-center gap-12">
                             <Reveal className="w-full md:w-1/2">
                                 <div className="bg-blue-500/20 text-blue-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
@@ -395,7 +380,6 @@ const ProfessionalB2BSection = () => {
                             </Reveal>
                         </div>
 
-                        {/* 2. Pacientes */}
                         <div className="flex flex-col md:flex-row-reverse items-center gap-12">
                             <Reveal className="w-full md:w-1/2">
                                 <div className="bg-emerald-500/20 text-emerald-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
@@ -428,7 +412,6 @@ const ProfessionalB2BSection = () => {
                             </Reveal>
                         </div>
 
-                        {/* 3. Secretarias */}
                         <div className="flex flex-col md:flex-row items-center gap-12">
                             <Reveal className="w-full md:w-1/2">
                                 <div className="bg-amber-500/20 text-amber-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
@@ -443,7 +426,7 @@ const ProfessionalB2BSection = () => {
                                 <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
                                     <h5 className="text-white font-bold mb-8 text-center">Origen de los turnos</h5>
-                                    
+
                                     <AnimatedChartTrigger threshold={0.5}>
                                         {(isVisible) => (
                                             <div className="flex items-end justify-center gap-16 h-32 border-b border-slate-700 pb-2 px-8">
@@ -464,7 +447,6 @@ const ProfessionalB2BSection = () => {
                             </Reveal>
                         </div>
 
-                        {/* 4. Directores Médicos */}
                         <div className="flex flex-col md:flex-row-reverse items-center gap-12">
                             <Reveal className="w-full md:w-1/2">
                                 <div className="bg-purple-500/20 text-purple-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
@@ -482,18 +464,16 @@ const ProfessionalB2BSection = () => {
                                         <h5 className="text-white font-bold">Ocupación de Consultorios</h5>
                                         <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-lg border border-purple-500/30">ÓPTIMA: 92%</span>
                                     </div>
-                                    
-                                    {/* Heatmap Simulado */}
+
                                     <div className="grid grid-cols-5 gap-2">
                                         <div className="col-span-5 flex justify-between text-xs text-slate-500 font-bold mb-1 px-1"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span></div>
-                                        {/* Fila Mañana */}
+
                                         <div className="aspect-square bg-purple-500/90 rounded-md"></div>
                                         <div className="aspect-square bg-purple-500/70 rounded-md"></div>
                                         <div className="aspect-square bg-purple-500 rounded-md"></div>
                                         <div className="aspect-square bg-purple-500/80 rounded-md"></div>
                                         <div className="aspect-square bg-purple-500/90 rounded-md"></div>
-                                        
-                                        {/* Fila Tarde */}
+
                                         <div className="aspect-square bg-purple-500 rounded-md shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
                                         <div className="aspect-square bg-purple-500/80 rounded-md"></div>
                                         <div className="aspect-square bg-slate-800 rounded-md relative flex items-center justify-center"><span className="text-[10px] text-slate-500">Mantenimiento</span></div>
@@ -507,11 +487,10 @@ const ProfessionalB2BSection = () => {
                     </div>
                 </div>
 
-                {/* 5. CTA DE CIERRE */}
                 <Reveal delay={300}>
                     <div className="bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-8 md:p-16 text-center relative overflow-hidden shadow-2xl">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-                        
+
                         <h3 className="text-3xl md:text-4xl font-black text-white mb-4 relative z-10">
                             Tu consultorio, tus reglas.<br />
                             <span className="text-blue-400">Nosotros ponemos la tecnología.</span>
@@ -519,7 +498,7 @@ const ProfessionalB2BSection = () => {
                         <p className="text-slate-400 text-lg mb-10 max-w-2xl mx-auto relative z-10">
                             Sumate a SAMSA y llevá tu práctica profesional a una nueva forma de gestionar pacientes, sin fricciones.
                         </p>
-                        
+
                         <button onClick={() => setShowApplicationModal(true)} className="px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-xl font-black text-lg transition-all shadow-lg hover:shadow-white/20 hover:-translate-y-1 group flex items-center gap-2 mx-auto relative z-10">
                             Enviar Solicitud de Adhesión <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
