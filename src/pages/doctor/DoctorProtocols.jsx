@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { BookOpen, ShieldAlert, FileText, Download, Search, AlertCircle, X, Printer, HeartPulse } from 'lucide-react';

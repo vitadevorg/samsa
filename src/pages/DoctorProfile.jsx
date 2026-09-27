@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { 
   MapPin, Clock, Star, ShieldCheck, Award, User, MessageSquare, 
