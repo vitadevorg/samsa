@@ -153,7 +153,9 @@ const UserProfile = () => {
   const handleDeleteAccount = () => {
     setShowDeleteModal(false);
     setShowGoodbyeToast(true);
-    schedule(() => {
+    // setTimeout directo a propósito (no `schedule`): el cierre de sesión tiene que ocurrir
+    // aunque el usuario salga de la página durante el mensaje de despedida.
+    setTimeout(() => {
       logout();
       navigate('/');
     }, 4000);
