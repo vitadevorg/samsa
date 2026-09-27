@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { 
   Calendar, Clock, User, CheckCircle, XCircle, X,
   AlertCircle, ChevronDown, MessageSquare, Plus, Check, MapPin, Send,
@@ -181,15 +179,6 @@ const isLate = (timeStr) => {
 };
 
 const SecretaryDashboard = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-
-      if (!user || user.role !== 'secretary') {
-          navigate('/');
-      }
-  }, [user, navigate]);
 
   const [selectedDoctor, setSelectedDoctor] = useState(assignedDoctors[0].id);
   const [selectedDate, setSelectedDate] = useState(getToday());
@@ -268,8 +257,8 @@ const SecretaryDashboard = () => {
   const handleCreateTurn = (e) => {
     e.preventDefault();
     const newTurn = {
-      id: Date.now(),
-      date: selectedDate,
+      id: crypto.randomUUID(),
+      date: newTurnData.date,
       time: newTurnData.time,
       patient: newTurnData.patient,
       phone: newTurnData.phone,
@@ -279,7 +268,7 @@ const SecretaryDashboard = () => {
 
     setAppointments(prev => ({
       ...prev,
-      [selectedDoctor]: [...prev[selectedDoctor], newTurn].sort((a, b) => a.time.localeCompare(b.time))
+      [selectedDoctor]: [...(prev[selectedDoctor] || []), newTurn].sort((a, b) => a.time.localeCompare(b.time))
     }));
 
     setShowNewTurnModal(false);
@@ -376,10 +365,6 @@ const SecretaryDashboard = () => {
       default: return <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Pendiente</span>;
     }
   };
-
-  if (!user || user.role !== 'secretary') {
-      return null;
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
