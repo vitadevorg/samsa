@@ -1,113 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, User, CreditCard, Mail, FileText, ArrowLeft, Check, ChevronLeft, ChevronRight, AlertTriangle, Edit2, X, CheckCircle, Briefcase, HeartPulse, Calendar, ShieldCheck, MapPin, Printer, Building2, Smartphone } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/useAuth'; 
 import { doctorsData } from '../data/doctors';
-import html2pdf from 'html2pdf.js';
 import PrintReceipt from '../components/PrintReceipt';
 import { generateTransactionId } from '../utils/ids';
+import {
+    startOfDay, startOfMonth, addMonths, getWorkingDayIndexes,
+    buildCalendarMonth, buildTimeSlots, getSlotAvailability,
+} from '../utils/schedule';
+const buildInitialForm = (user) => ({
+    name: user ? `${user.name || ''} ${user.lastname || ''}`.trim() : '',
+    dni: user?.dni || '',
+    dob: user?.dob || '',
+    email: user?.email || '',
+    insurance: user ? 'particular' : '',
+});
 const BookAppointment = () => {
     const { id } = useParams();
     const { user } = useAuth(); 
-    const navigate = useNavigate();
     const doctor = doctorsData.find(d => d.id === id);
     const doctorName = doctor ? doctor.name : "Profesional Médico";
-    const dayMap = { "Dom": 0, "Lun": 1, "Mar": 2, "Mié": 3, "Jue": 4, "Vie": 5, "Sáb": 6 };
-    const availableDays = doctor ? doctor.days.map(d => dayMap[d]) : [1, 2, 3, 4, 5];
     const [step, setStep] = useState(1);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTime, setSelectedTime] = useState(null);
     const [isAnimatingSuccess, setIsAnimatingSuccess] = useState(false);
     const [isPrinting, setIsPrinting] = useState(false); 
     const [transactionId] = useState(generateTransactionId);
-    const today = new Date();
-    const [currentDisplayDate, setCurrentDisplayDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1)); 
-    const [calendarDays, setCalendarDays] = useState([]);
-    const [dailyTimeSlots, setDailyTimeSlots] = useState([]);
-    const [formData, setFormData] = useState({
-      name: '', 
-      dni: '', 
-      dob: '', 
-      insurance: '', 
-      email: ''
-    });
-    useEffect(() => {
-        if (user) {
-            setFormData({
-                name: `${user.name || ''} ${user.lastname || ''}`.trim(),
-                dni: user.dni || '',
-                dob: user.dob || '', 
-                email: user.email || '',
-                insurance: 'particular' 
-            });
-        }
-    }, [user]);
-    useEffect(() => {
-      const year = currentDisplayDate.getFullYear();
-      const month = currentDisplayDate.getMonth();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const firstDayIndex = new Date(year, month, 1).getDay(); 
-      const daysArray = [];
-      for (let i = 0; i < firstDayIndex; i++) daysArray.push({ type: 'empty', key: `empty-${i}` });
-      for (let d = 1; d <= daysInMonth; d++) {
-        const date = new Date(year, month, d);
-        const dayOfWeek = date.getDay();
-        const checkDate = new Date(year, month, d);
-        const todayClean = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const isPast = checkDate < todayClean;
-        const worksThisDay = availableDays.includes(dayOfWeek);
-        const isFull = worksThisDay && !isPast && (d * (dayOfWeek+1) % 7 === 0); 
-        let status = 'available';
-        if (isPast || !worksThisDay) status = 'closed';
-        else if (isFull) status = 'full';
-        daysArray.push({ type: 'day', key: `day-${d}`, day: d, date: date, status: status, gridStart: dayOfWeek === 0 ? 1 : dayOfWeek + 1 });
-      }
-      setCalendarDays(daysArray);
-    }, [currentDisplayDate]);
-    const canGoPrev = () => currentDisplayDate > new Date(today.getFullYear(), today.getMonth(), 1);
-    const canGoNext = () => {
-      const maxDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-      return currentDisplayDate < maxDate;
-    };
+    const [today] = useState(startOfDay);
+    const [currentDisplayDate, setCurrentDisplayDate] = useState(() => startOfMonth(today));
+    const [formData, setFormData] = useState(() => buildInitialForm(user));
+    const calendarDays = useMemo(
+        () => buildCalendarMonth(currentDisplayDate, getWorkingDayIndexes(doctor?.days), today),
+        [currentDisplayDate, doctor, today]
+    );
+    const dailyTimeSlots = useMemo(
+        () => (selectedDate ? getSlotAvailability(doctor?.id, selectedDate.date, buildTimeSlots(doctor?.hours)) : []),
+        [selectedDate, doctor]
+    );
+    const canGoPrev = () => currentDisplayDate > startOfMonth(today);
+    const canGoNext = () => currentDisplayDate < addMonths(today, 1);
     const changeMonth = (offset) => {
-      const newDate = new Date(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() + offset, 1);
-      setCurrentDisplayDate(newDate);
+      setCurrentDisplayDate(addMonths(currentDisplayDate, offset));
       setSelectedDate(null); setSelectedTime(null);
     };
-    useEffect(() => {
-      if (selectedDate) {
-          setSelectedTime(null);
-          let baseSlots = [];
-          if (doctor) {
-              doctor.hours.forEach(interval => {
-                  let [startH, startM] = interval.start.split(':').map(Number);
-                  let [endH, endM] = interval.end.split(':').map(Number);
-                  let curH = startH;
-                  let curM = startM;
-                  while (curH < endH || (curH === endH && curM < endM)) {
-                      baseSlots.push(`${curH.toString().padStart(2, '0')}:${curM.toString().padStart(2, '0')}`);
-                      curM += 30;
-                      if (curM >= 60) {
-                          curM = 0;
-                          curH += 1;
-                      }
-                  }
-              });
-          } else {
-              baseSlots = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "16:00", "16:30", "17:00"];
-          }
-          const simulatedSlots = baseSlots.map(time => {
-              const rand = Math.random();
-              let status = 'available';
-              if (rand > 0.7) status = 'busy';
-              return { time, status };
-          });
-          setDailyTimeSlots(simulatedSlots);
-      }
-    }, [selectedDate]);
-    const handleDateClick = (dayObj) => { if (dayObj.status === 'available') setSelectedDate(dayObj); };
+    const handleDateClick = (dayObj) => {
+        if (dayObj.status !== 'available') return;
+        setSelectedDate(dayObj);
+        setSelectedTime(null);
+    };
     const handleInputChange = (e) => { setFormData(prev => ({ ...prev, [e.target.name]: e.target.value })); };
     const handleDniChange = (e) => { if (/^\d*$/.test(e.target.value)) setFormData(prev => ({ ...prev, dni: e.target.value })); };
     const handleNextStep = () => {
