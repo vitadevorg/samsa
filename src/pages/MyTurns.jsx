@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, User, XCircle, CheckCircle, AlertCircle, Search, Star, MessageSquare, Send, X, Heart, Activity, Stethoscope, Timer, Download, HeartPulse } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -6,19 +6,12 @@ import { useAuth } from '../context/useAuth';
 import PrintReceipt from '../components/PrintReceipt';
 import { generateTransactionId } from '../utils/ids';
 import { useTimeouts } from '../hooks/useTimeouts';
-const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0, initialComment = "" }) => {
+// Se monta solo mientras está abierto, así el estado arranca siempre desde los valores iniciales.
+const ReviewModal = ({ onClose, onSubmit, doctorName, initialRating = 0, initialComment = "" }) => {
     const [rating, setRating] = useState(initialRating);
     const [hover, setHover] = useState(0);
     const [comment, setComment] = useState(initialComment);
     const [viewState, setViewState] = useState("form");
-    useEffect(() => {
-        if (isOpen) {
-            setRating(initialRating);
-            setComment(initialComment);
-            setViewState("form");
-        }
-    }, [isOpen, initialRating, initialComment]);
-    if (!isOpen) return null;
     const handleSubmit = () => {
         if (rating === 0) {
             alert("Por favor, seleccioná una calificación de estrellas.");
@@ -216,14 +209,15 @@ const MyTurns = () => {
     <div className="font-sans text-slate-800 bg-gray-50 min-h-screen print:bg-white">
       <div className="print:hidden">
         <Navbar />
-      <ReviewModal 
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        onSubmit={handleSubmitReview}
-        doctorName={selectedTurnForReview?.doctor}
-        initialRating={selectedTurnForReview?.review?.rating || 0}
-        initialComment={selectedTurnForReview?.review?.comment || ""}
-      />
+      {isReviewModalOpen && (
+        <ReviewModal 
+          onClose={() => setIsReviewModalOpen(false)}
+          onSubmit={handleSubmitReview}
+          doctorName={selectedTurnForReview?.doctor}
+          initialRating={selectedTurnForReview?.review?.rating || 0}
+          initialComment={selectedTurnForReview?.review?.comment || ""}
+        />
+      )}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

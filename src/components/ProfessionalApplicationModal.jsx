@@ -5,35 +5,29 @@ import { SPECIALTIES } from '../constants/catalog';
 import { generateTransactionId } from '../utils/ids';
 import { useTimeouts } from '../hooks/useTimeouts';
 
-const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
+const EMPTY_APPLICATION = {
+    firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
+    specialty: '', licenseNumber: '', professionalType: 'particular',
+    cv: null, profilePic: null
+};
+
+// Se monta solo mientras está abierto, así cada apertura arranca con el formulario vacío.
+const ProfessionalApplicationModal = ({ onClose }) => {
     const { schedule } = useTimeouts();
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [receiptNumber, setReceiptNumber] = useState('');
-    const [formData, setFormData] = useState({
-        firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
-        specialty: '', licenseNumber: '', professionalType: 'particular',
-        cv: null, profilePic: null
-    });
+    const [formData, setFormData] = useState(EMPTY_APPLICATION);
 
+    // Bloquea el scroll de fondo mientras el modal está montado y lo restaura al cerrarse.
     useEffect(() => {
-        if (isOpen) {
-            setStep(1);
-            setIsSubmitting(false);
-            setIsSuccess(false);
-            setProgress(0);
-            setFormData({
-                firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
-                specialty: '', licenseNumber: '', professionalType: 'particular',
-                cv: null, profilePic: null
-            });
-            document.body.style.overflow = 'hidden';
-        } else {
+        document.body.style.overflow = 'hidden';
+        return () => {
             document.body.style.overflow = 'unset';
-        }
-    }, [isOpen]);
+        };
+    }, []);
 
     useEffect(() => {
         if (isSuccess) {
@@ -46,7 +40,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
         };
     }, [isSuccess]);
 
-    if (!isOpen) return null;
 
     const handleNext = () => {
         setStep(prev => {

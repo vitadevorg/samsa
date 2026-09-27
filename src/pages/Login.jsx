@@ -117,18 +117,16 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: false, password: false });
   const [errorMsg, setErrorMsg] = useState('');
+  // Estado del envío: 'idle' | 'processing' | 'success' | 'error'.
   const [loginState, setLoginState] = useState('idle'); 
   const [activeField, setActiveField] = useState(null);
-  useEffect(() => {
-      if (['processing', 'success', 'error'].includes(loginState)) return;
-      if (showPassword || activeField === 'password') {
-          setLoginState('peeking');
-      } else if (activeField === 'email') {
-          setLoginState('inspecting');
-      } else {
-          setLoginState('idle');
-      }
-  }, [showPassword, activeField, loginState]);
+  // La pose del avatar se deriva: el envío tiene prioridad; si no, depende del campo con foco.
+  const getAvatarState = () => {
+      if (loginState !== 'idle') return loginState;
+      if (showPassword || activeField === 'password') return 'peeking';
+      if (activeField === 'email') return 'inspecting';
+      return 'idle';
+  };
   const handleEmailChange = (e) => {
       setEmail(e.target.value);
       if (errors.email) setErrors(prev => ({ ...prev, email: false }));
@@ -193,7 +191,7 @@ const Login = () => {
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 relative z-10">
           <div className="h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500"></div>
           <div className="p-8 pt-10">
-            <MedicalAvatar currentState={loginState} />
+            <MedicalAvatar currentState={getAvatarState()} />
             <div className="text-center mb-8 mt-4 relative z-30">
               <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Bienvenido</h2>
               <p className="text-slate-500 text-sm mt-2">Ingresá tus credenciales para acceder a S.A.M.S.A</p>

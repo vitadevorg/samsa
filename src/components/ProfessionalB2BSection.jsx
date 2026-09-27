@@ -54,10 +54,7 @@ const AnimatedNumber = ({ end, duration = 1500, isVisible, suffix = "" }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
-        if (!isVisible) {
-            setCount(0);
-            return;
-        }
+        if (!isVisible) return;
 
         let startTimestamp = null;
         let frameId;
@@ -77,7 +74,7 @@ const AnimatedNumber = ({ end, duration = 1500, isVisible, suffix = "" }) => {
         return () => window.cancelAnimationFrame(frameId);
     }, [end, duration, isVisible]);
 
-    return <span>{count}{suffix}</span>;
+    return <span>{isVisible ? count : 0}{suffix}</span>;
 };
 
 const ProfessionalB2BSection = () => {
@@ -426,7 +423,7 @@ const ProfessionalB2BSection = () => {
 
             </div>
 
-            <ProfessionalApplicationModal isOpen={showApplicationModal} onClose={() => setShowApplicationModal(false)} />
+            {showApplicationModal && <ProfessionalApplicationModal onClose={() => setShowApplicationModal(false)} />}
         </section>
     );
 };

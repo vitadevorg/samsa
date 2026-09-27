@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
   Search, Filter, MapPin, Clock, Star, ChevronDown, 
@@ -75,28 +75,25 @@ const DoctorCard = ({ doctor }) => {
         </div>
     );
 };
+// Filtros iniciales a partir de ?specialty= (links desde Home y Turnos): si coincide con
+// una especialidad conocida la selecciona; si no, la usa como texto de búsqueda.
+const getInitialFilters = (queryString) => {
+  const specialtyParam = new URLSearchParams(queryString).get('specialty');
+  if (!specialtyParam) return { specialty: 'Todas', search: '' };
+  const match = SPECIALTY_FILTERS.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
+  if (match) return { specialty: match, search: '' };
+  return { specialty: 'Todas', search: specialtyParam };
+};
 const Professionals = () => {
   const location = useLocation();
-  const [search, setSearch] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('Todas');
+  const [initialFilters] = useState(() => getInitialFilters(location.search));
+  const [search, setSearch] = useState(initialFilters.search);
+  const [selectedSpecialty, setSelectedSpecialty] = useState(initialFilters.specialty);
   const [selectedInsurance, setSelectedInsurance] = useState('');
   const [selectedDays, setSelectedDays] = useState([]);
   const [timeOfDay, setTimeOfDay] = useState('');
   const [attentionType, setAttentionType] = useState('all');
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const specialtyParam = params.get('specialty');
-    if (specialtyParam) {
-        const exists = SPECIALTY_FILTERS.some(s => s.toLowerCase() === specialtyParam.toLowerCase());
-        if (exists) {
-            const exactMatch = SPECIALTY_FILTERS.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
-            setSelectedSpecialty(exactMatch || 'Todas');
-        } else if (specialtyParam !== 'Todas') {
-             setSearch(specialtyParam);
-        }
-    }
-  }, [location]);
   const filteredDoctors = useMemo(() => {
       return doctorsData.filter(doc => {
           const matchesSearch = doc.name.toLowerCase().includes(search.toLowerCase()) || 
