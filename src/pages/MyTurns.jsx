@@ -12,9 +12,10 @@ const ReviewModal = ({ onClose, onSubmit, doctorName, initialRating = 0, initial
     const [hover, setHover] = useState(0);
     const [comment, setComment] = useState(initialComment);
     const [viewState, setViewState] = useState("form");
+    const [ratingError, setRatingError] = useState('');
     const handleSubmit = () => {
         if (rating === 0) {
-            alert("Por favor, seleccioná una calificación de estrellas.");
+            setRatingError("Por favor, seleccioná una calificación de estrellas.");
             return;
         }
         onSubmit(rating, comment);
@@ -34,13 +35,13 @@ const ReviewModal = ({ onClose, onSubmit, doctorName, initialRating = 0, initial
                 </div>
                 <div className="p-8">
                     <p className="text-gray-600 text-center mb-6 font-medium">¿Cómo calificarías tu experiencia?</p>
-                    <div className="flex justify-center gap-3 mb-8">
+                    <div className={`flex justify-center gap-3 ${ratingError ? 'mb-2' : 'mb-8'}`}>
                         {[1, 2, 3, 4, 5].map((star) => (
                             <button
                                 key={star}
                                 type="button"
                                 className="focus:outline-none transition-transform hover:scale-110 duration-200"
-                                onClick={() => setRating(star)}
+                                onClick={() => { setRating(star); setRatingError(''); }}
                                 onMouseEnter={() => setHover(star)}
                                 onMouseLeave={() => setHover(rating)}
                             >
@@ -48,6 +49,9 @@ const ReviewModal = ({ onClose, onSubmit, doctorName, initialRating = 0, initial
                             </button>
                         ))}
                     </div>
+                    {ratingError && (
+                        <p role="alert" className="text-red-500 text-sm font-semibold text-center mb-6">{ratingError}</p>
+                    )}
                     <div className="relative">
                         <textarea
                             className="w-full border border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none bg-gray-50 text-gray-700 text-sm transition-all"

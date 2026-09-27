@@ -31,6 +31,7 @@ const AdminProfile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -56,16 +57,15 @@ const AdminProfile = () => {
   const handleSavePassword = (e) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("Las nuevas contraseñas no coinciden.");
+      setPasswordError("Las nuevas contraseñas no coinciden.");
       return;
     }
-    console.log("Contraseña de admin actualizada...");
+    setPasswordError('');
     setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
     setIsChangingPassword(false);
     setShowSuccessModal(true);
   };
   const handleDeleteAccount = () => {
-    console.log("Cuenta de ADMIN eliminada:", user.uid); 
     logout();
     navigate('/');
   };
@@ -146,9 +146,12 @@ const AdminProfile = () => {
                         <div className="mt-2">
                             <InputField label="Confirmar Nueva" name="confirmPassword" type="password" icon={Key} value={formData.confirmPassword} onChange={handleInputChange} disabled={false} required />
                         </div>
+                        {passwordError && (
+                          <p role="alert" className="text-red-500 text-sm font-semibold mt-2">{passwordError}</p>
+                        )}
                      </div>
                      <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => setIsChangingPassword(false)} className="flex-1 py-2 text-gray-600 font-bold hover:bg-gray-200 rounded-lg text-sm">Cancelar</button>
+                        <button type="button" onClick={() => { setIsChangingPassword(false); setPasswordError(''); }} className="flex-1 py-2 text-gray-600 font-bold hover:bg-gray-200 rounded-lg text-sm">Cancelar</button>
                         <button type="submit" className="flex-1 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 text-sm shadow-md">Actualizar Clave</button>
                      </div>
                   </form>

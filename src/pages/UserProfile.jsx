@@ -134,7 +134,6 @@ const UserProfile = () => {
     setShowPasswordModal(true);
   };
   const confirmPasswordChange = () => {
-    console.log("Cambiando contraseña...");
     setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
     setIsChangingPassword(false);
     setShowPasswordModal(false);
@@ -150,7 +149,6 @@ const UserProfile = () => {
     setShowDeleteModal(false);
     setShowGoodbyeToast(true);
     schedule(() => {
-      console.log("Cuenta eliminada permanentemente:", user.id);
       logout();
       navigate('/');
     }, 4000);
