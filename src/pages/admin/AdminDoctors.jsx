@@ -1,65 +1,34 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useCrudList } from '../../hooks/useCrudList';
 import { Trash2, Edit2, UserPlus, Stethoscope, Save, X } from 'lucide-react';
 import { SPECIALTIES } from '../../constants/catalog';
+const INITIAL_DOCTORS = [
+  { id: 1, name: "Francisco Matar", specialty: "Clínica Médica", email: "fran@samsa.com" },
+  { id: 2, name: "Agustina Vega", specialty: "Nutrición", email: "agus@samsa.com" },
+];
+const EMPTY_FORM = { name: '', specialty: '', email: '', password: '' };
 const AdminDoctors = () => {
-  const [doctors, setDoctors] = useState([
-    { id: 1, name: "Francisco Matar", specialty: "Clínica Médica", email: "fran@samsa.com" },
-    { id: 2, name: "Agustina Vega", specialty: "Nutrición", email: "agus@samsa.com" },
-  ]);
-  const initialFormState = { name: '', specialty: '', email: '', password: '' };
-  const [form, setForm] = useState(initialFormState);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const openDeleteModal = (id) => {
-      setDeleteId(id);
-      setIsModalOpen(true);
-  };
-  const confirmDelete = () => {
-      setDoctors(doctors.filter(d => d.id !== deleteId));
-      if (deleteId === editId) cancelEdit();
-      setIsModalOpen(false);
-      setDeleteId(null);
-  };
-  const handleEdit = (doc) => {
-      setIsEditing(true);
-      setEditId(doc.id);
-      setForm({
-          name: doc.name,
-          specialty: doc.specialty,
-          email: doc.email,
-          password: '' 
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  const cancelEdit = () => {
-      setIsEditing(false);
-      setEditId(null);
-      setForm(initialFormState);
-  };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (isEditing) {
-        setDoctors(prev => prev.map(doc => 
-            doc.id === editId 
-            ? { ...doc, name: form.name, specialty: form.specialty, email: form.email } 
-            : doc
-        ));
-        cancelEdit();
-    } else {
-        setDoctors([...doctors, { ...form, id: Date.now() }]);
-        setForm(initialFormState);
-    }
-  };
+  const {
+    items: doctors, form, setForm, isEditing, editId,
+    startEdit: handleEdit, cancelEdit, submit: handleSubmit,
+    isDeleteOpen: isModalOpen, requestDelete: openDeleteModal, cancelDelete, confirmDelete,
+  } = useCrudList(INITIAL_DOCTORS, {
+    emptyForm: EMPTY_FORM,
+    // La contraseña solo viaja al alta/edición; nunca se guarda en el listado.
+    toItem: (form) => {
+      const doctor = { ...form };
+      delete doctor.password;
+      return doctor;
+    },
+  });
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <ConfirmModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
         title="Eliminar Profesional"
         message="¿Confirma que desea eliminar a este médico del sistema? Se perderá su historial de acceso."

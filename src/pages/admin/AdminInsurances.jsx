@@ -1,59 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useCrudList } from '../../hooks/useCrudList';
 import { Trash2, Edit2, Plus, Wallet, Save, X, ShieldCheck } from 'lucide-react';
+const INITIAL_INSURANCES = [
+  { id: 1, name: "OSDE", contact: "0800-555-6733" },
+  { id: 2, name: "Subsidio de Salud", contact: "0800-888-7827" },
+  { id: 3, name: "Prensa", contact: "0810-222-3344" },
+];
+const EMPTY_FORM = { name: '', contact: '' };
 const AdminInsurances = () => {
-  const [insurances, setInsurances] = useState([
-    { id: 1, name: "OSDE", contact: "0800-555-6733" },
-    { id: 2, name: "Subsidio de Salud", contact: "0800-888-7827" },
-    { id: 3, name: "Prensa", contact: "0810-222-3344" },
-  ]);
-  const initialFormState = { name: '', contact: '' };
-  const [form, setForm] = useState(initialFormState);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) return;
-    if (isEditing) {
-        setInsurances(prev => prev.map(item => 
-            item.id === editId ? { ...item, ...form } : item
-        ));
-        cancelEdit();
-    } else {
-        setInsurances([...insurances, { ...form, id: Date.now() }]);
-        setForm(initialFormState);
-    }
-  };
-  const handleEdit = (item) => {
-      setIsEditing(true);
-      setEditId(item.id);
-      setForm({ name: item.name, contact: item.contact });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  const cancelEdit = () => {
-      setIsEditing(false);
-      setEditId(null);
-      setForm(initialFormState);
-  };
-  const openDeleteModal = (id) => {
-      setDeleteId(id);
-      setIsModalOpen(true);
-  };
-  const confirmDelete = () => {
-      setInsurances(insurances.filter(i => i.id !== deleteId));
-      if (deleteId === editId) cancelEdit();
-      setIsModalOpen(false);
-      setDeleteId(null);
-  };
+  const {
+    items: insurances, form, setForm, isEditing, editId,
+    startEdit: handleEdit, cancelEdit, submit: handleSubmit,
+    isDeleteOpen: isModalOpen, requestDelete: openDeleteModal, cancelDelete, confirmDelete,
+  } = useCrudList(INITIAL_INSURANCES, {
+    emptyForm: EMPTY_FORM,
+    validate: (form) => Boolean(form.name.trim()),
+  });
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <ConfirmModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
         title="Eliminar Obra Social"
         message="¿Confirma que desea eliminar esta obra social? Los médicos y pacientes vinculados podrían perder esta referencia."

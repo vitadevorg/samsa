@@ -1,63 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useCrudList } from '../../hooks/useCrudList';
 import { Trash2, Tag, Plus, Edit2, Save, X } from 'lucide-react';
+const INITIAL_SPECIALTIES = [
+  { id: 1, name: "Cardiología", desc: "Corazón y sistema circulatorio" },
+  { id: 2, name: "Pediatría", desc: "Atención de niños y adolescentes" },
+  { id: 3, name: "Neurología", desc: "Sistema nervioso central" },
+];
+const EMPTY_FORM = { name: '', desc: '' };
 const AdminSpecialties = () => {
-  const [specialties, setSpecs] = useState([
-    { id: 1, name: "Cardiología", desc: "Corazón y sistema circulatorio" },
-    { id: 2, name: "Pediatría", desc: "Atención de niños y adolescentes" },
-    { id: 3, name: "Neurología", desc: "Sistema nervioso central" },
-  ]);
-  const initialFormState = { name: '', desc: '' };
-  const [form, setForm] = useState(initialFormState);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) return;
-    if (isEditing) {
-        setSpecs(prev => prev.map(item => 
-            item.id === editId ? { ...item, ...form } : item
-        ));
-        cancelEdit();
-    } else {
-        setSpecs([...specialties, { 
-            ...form, 
-            id: Date.now(), 
-            desc: form.desc || "Sin descripción" 
-        }]);
-        setForm(initialFormState);
-    }
-  };
-  const handleEdit = (item) => {
-      setIsEditing(true);
-      setEditId(item.id);
-      setForm({ name: item.name, desc: item.desc });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  const cancelEdit = () => {
-      setIsEditing(false);
-      setEditId(null);
-      setForm(initialFormState);
-  };
-  const openDeleteModal = (id) => {
-      setDeleteId(id);
-      setIsModalOpen(true);
-  }
-  const confirmDelete = () => {
-      if (deleteId === editId) cancelEdit();
-      setSpecs(prev => prev.filter(x => x.id !== deleteId));
-      setIsModalOpen(false);
-      setDeleteId(null);
-  }
+  const {
+    items: specialties, form, setForm, isEditing, editId,
+    startEdit: handleEdit, cancelEdit, submit: handleSubmit,
+    isDeleteOpen: isModalOpen, requestDelete: openDeleteModal, cancelDelete, confirmDelete,
+  } = useCrudList(INITIAL_SPECIALTIES, {
+    emptyForm: EMPTY_FORM,
+    validate: (form) => Boolean(form.name.trim()),
+    toItem: (form, { isNew }) => (isNew ? { ...form, desc: form.desc || 'Sin descripción' } : form),
+  });
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <ConfirmModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
         title="Eliminar Especialidad"
         message="¿Seguro que desea eliminar esta especialidad? Los médicos asociados deberán ser reasignados."
