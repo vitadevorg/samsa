@@ -1,3 +1,5 @@
+import { stableHash } from './ids';
+
 const DAY_INDEX = { Dom: 0, Lun: 1, Mar: 2, Mié: 3, Jue: 4, Vie: 5, Sáb: 6 };
 const DEFAULT_WORKING_DAYS = [1, 2, 3, 4, 5];
 const DEFAULT_SLOTS = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "16:00", "16:30", "17:00"];
@@ -15,16 +17,6 @@ export const addMonths = (date, offset) =>
 // Índices de día (0 = domingo) en los que atiende el profesional.
 export const getWorkingDayIndexes = (dayNames) =>
   dayNames ? dayNames.map((name) => DAY_INDEX[name]) : DEFAULT_WORKING_DAYS;
-
-// Hash simple y estable para simular ocupación sin Math.random():
-// el mismo profesional/día/horario siempre da el mismo resultado.
-const stableHash = (text) => {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    hash = (hash * 31 + text.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash);
-};
 
 /**
  * Celdas del calendario de un mes: huecos iniciales + un objeto por día

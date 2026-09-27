@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
 import { SPECIALTIES } from '../constants/catalog';
+import { generateTransactionId } from '../utils/ids';
 
 const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [receiptNumber, setReceiptNumber] = useState('');
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
         specialty: '', licenseNumber: '', professionalType: 'particular',
@@ -65,6 +67,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
     const handleSubmit = () => {
         setIsSubmitting(true);
         setProgress(100);
+        setReceiptNumber(generateTransactionId());
         setTimeout(() => {
             setIsSubmitting(false);
             setIsSuccess(true);
@@ -148,7 +151,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                             </div>
                             <div className="text-right font-sans">
                                 <p className="text-slate-400 uppercase text-xs font-bold tracking-wider mb-1">Comprobante Oficial N°</p>
-                                <p className="font-mono font-bold text-2xl text-slate-800">{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                                <p className="font-mono font-bold text-2xl text-slate-800">{receiptNumber}</p>
                                 <p className="text-sm text-slate-500 mt-1">{new Date().toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                             </div>
                         </div>

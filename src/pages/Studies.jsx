@@ -3,8 +3,12 @@ import { Link } from 'react-router-dom';
 import { FileText, Download, Eye, Calendar, Search, Activity, FileCheck, AlertCircle, HeartPulse, X, Printer } from 'lucide-react';
 import Navbar from '../components/Navbar'; 
 import { useAuth } from '../context/useAuth';
+import { stableCode, stableHash } from '../utils/ids';
+import { useTimeouts } from '../hooks/useTimeouts';
 const MedicalReport = ({ study, isPreview, user }) => {
-    const transactionId = Math.random().toString(36).substring(2, 12).toUpperCase();
+    // Mock: número de informe y matrícula derivados del estudio/profesional, estables entre vista previa e impresión.
+    const transactionId = stableCode(`informe-${study.id}`);
+    const doctorLicense = 1000 + (stableHash(study.doctorId ?? study.doctor) % 9000);
     return (
         <div className={`flex flex-col font-serif text-slate-900 bg-white mx-auto ${isPreview ? 'p-10 w-full max-w-4xl shadow-2xl min-h-[800px] my-10 relative z-10' : 'p-12 w-full max-w-none box-border absolute top-0 left-0 right-0 z-[99999] min-h-[100vh] hidden print:flex'}`} id={!isPreview ? 'print-area' : undefined}>
             <div className="flex justify-between items-end mb-8">
@@ -206,7 +210,7 @@ const MedicalReport = ({ study, isPreview, user }) => {
                         </div>
                         <p className="text-sm font-bold">{study.doctor}</p>
                         <p className="text-xs text-slate-500 uppercase">Médico Especialista</p>
-                        <p className="text-xs text-slate-500">M.P. {Math.floor(Math.random() * 9000) + 1000}</p>
+                        <p className="text-xs text-slate-500">M.P. {doctorLicense}</p>
                     </div>
                 </div>
             </div>
@@ -222,6 +226,7 @@ const MedicalReport = ({ study, isPreview, user }) => {
     );
 };
 const Studies = () => {
+  const { schedule } = useTimeouts();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [previewStudy, setPreviewStudy] = useState(null);
@@ -241,12 +246,12 @@ const Studies = () => {
   };
   const handlePrint = (study) => {
       setPrintStudy(study);
-      setTimeout(() => {
+      schedule(() => {
           const originalTitle = document.title;
           document.title = `samsa_estudio_${study.title.replace(/\s+/g, '_')}_${study.date}`;
           window.print();
           document.title = originalTitle;
-          setTimeout(() => setPrintStudy(null), 500);
+          schedule(() => setPrintStudy(null), 500);
       }, 100);
   };
   return (
