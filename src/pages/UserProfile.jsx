@@ -8,6 +8,7 @@ import {
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/useAuth';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
+import { useTimeouts } from '../hooks/useTimeouts';
 const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => (
   <div className="space-y-1">
     <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
@@ -29,6 +30,7 @@ const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, d
   </div>
 );
 const UserProfile = () => {
+  const { schedule } = useTimeouts();
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -116,7 +118,7 @@ const UserProfile = () => {
     setIsEditing(false);
     setShowSaveModal(false);
     setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
+    schedule(() => setShowSuccessToast(false), 3000);
   };
   const handleSavePassword = (e) => {
     e.preventDefault();
@@ -137,17 +139,17 @@ const UserProfile = () => {
     setIsChangingPassword(false);
     setShowPasswordModal(false);
     setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
+    schedule(() => setShowSuccessToast(false), 3000);
   };
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setShowRelievedToast(true);
-    setTimeout(() => setShowRelievedToast(false), 4000);
+    schedule(() => setShowRelievedToast(false), 4000);
   };
   const handleDeleteAccount = () => {
     setShowDeleteModal(false);
     setShowGoodbyeToast(true);
-    setTimeout(() => {
+    schedule(() => {
       console.log("Cuenta eliminada permanentemente:", user.id);
       logout();
       navigate('/');

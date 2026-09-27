@@ -7,6 +7,7 @@ import {
   Calendar, Phone, Mail, MapPin, Clock, File, Printer, HeartPulse,
   User, CheckCircle, AlertCircle, ClipboardList
 } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
 const initialPatients = [
   { 
     id: 1, 
@@ -202,6 +203,7 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
     );
 };
 const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
+  const { schedule } = useTimeouts();
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
   const [files, setFiles] = useState([]);
@@ -239,7 +241,7 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
   const confirmSave = () => {
     setShowConfirm(false);
     setShowSuccess(true);
-    setTimeout(() => {
+    schedule(() => {
         onSave(patient.id, { diagnosis, prescription, files, date: new Date().toISOString() });
         setDiagnosis(''); setPrescription(''); setFiles([]);
         setShowSuccess(false);
@@ -376,6 +378,7 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
   );
 };
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
+    const { schedule } = useTimeouts();
     const [newPatient, setNewPatient] = useState({ name: '', dni: '', email: '', phone: '' });
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -387,7 +390,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const confirmSave = () => {
         setShowConfirm(false);
         setShowSuccess(true);
-        setTimeout(() => {
+        schedule(() => {
             onAdd({ ...newPatient, id: Date.now(), age: 'N/A', historyId: `HC-${Math.floor(Math.random()*10000)}`, lastVisit: '-', img: 'https://i.pravatar.cc/150?u=new', history: [] });
             setNewPatient({ name: '', dni: '', email: '', phone: '' });
             setShowSuccess(false);

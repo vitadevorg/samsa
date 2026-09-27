@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Star, MessageSquare, Edit2, Trash2, Calendar, MapPin, Search, AlertCircle, X, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useTimeouts } from '../hooks/useTimeouts';
 
 const mockReviews = [
   {
@@ -34,6 +35,7 @@ const mockReviews = [
 ];
 
 const MyReviews = () => {
+  const { schedule } = useTimeouts();
   const [reviews, setReviews] = useState(mockReviews);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -71,7 +73,7 @@ const MyReviews = () => {
     setEditingReview(null);
     setConfirmingEdit(false);
     setShowSuccessModal(true);
-    setTimeout(() => {
+    schedule(() => {
       setShowSuccessModal(false);
     }, 2500);
   };

@@ -6,6 +6,7 @@ import {
   AlertCircle, Upload, X, Paperclip, Stethoscope,
   Megaphone, ClipboardList, Save
 } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
 const getToday = () => new Date().toISOString().split('T')[0];
 const getFutureDate = (days) => {
     const date = new Date();
@@ -86,6 +87,7 @@ const styles = `
   }
 `;
 const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
+  const { schedule } = useTimeouts();
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
   const [files, setFiles] = useState([]);
@@ -123,7 +125,7 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
   const confirmSave = () => {
     setShowConfirm(false);
     setShowSuccess(true);
-    setTimeout(() => {
+    schedule(() => {
         onSave(appointment.id, { diagnosis, prescription, files });
         setDiagnosis(''); setPrescription(''); setFiles([]);
         setShowSuccess(false);
@@ -270,7 +272,7 @@ export default function DoctorTurns() {
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
   };
-  const handleFinishAppointment = (id, data) => {
+  const handleFinishAppointment = (id) => {
     setAppointments(prev => prev.map(app => app.id === id ? { ...app, status: 'finished' } : app));
     setIsModalOpen(false);
     setSelectedAppointment(null);
@@ -282,7 +284,6 @@ export default function DoctorTurns() {
   };
   const formatDate = (dateString) => {
       const date = new Date(dateString);
-      const todayDate = new Date();
       date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
       if (dateString === today) return 'Hoy';
       return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', weekday: 'long' });

@@ -11,6 +11,7 @@ import {
     startOfDay, startOfMonth, addMonths, getWorkingDayIndexes,
     buildCalendarMonth, buildTimeSlots, getSlotAvailability,
 } from '../utils/schedule';
+import { useTimeouts } from '../hooks/useTimeouts';
 const buildInitialForm = (user) => ({
     name: user ? `${user.name || ''} ${user.lastname || ''}`.trim() : '',
     dni: user?.dni || '',
@@ -19,6 +20,7 @@ const buildInitialForm = (user) => ({
     insurance: user ? 'particular' : '',
 });
 const BookAppointment = () => {
+    const { schedule } = useTimeouts();
     const { id } = useParams();
     const { user } = useAuth(); 
     const doctor = doctorsData.find(d => d.id === id);
@@ -62,14 +64,14 @@ const BookAppointment = () => {
     };
     const handleConfirm = () => {
         setIsAnimatingSuccess(true); 
-        setTimeout(() => {
+        schedule(() => {
             setStep(4);
             setIsAnimatingSuccess(false); 
         }, 700); 
     };
     const handleDownloadReceipt = () => {
         setIsPrinting(true); 
-        setTimeout(() => {
+        schedule(() => {
             const originalTitle = document.title;
             const dateStr = new Date().toISOString().split('T')[0];
             const patientFileName = formData.name ? formData.name.replace(/\s+/g, '_').toLowerCase() : 'paciente';

@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/useAuth';
 import PrintReceipt from '../components/PrintReceipt';
 import { generateTransactionId } from '../utils/ids';
+import { useTimeouts } from '../hooks/useTimeouts';
 const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0, initialComment = "" }) => {
     const [rating, setRating] = useState(initialRating);
     const [hover, setHover] = useState(0);
@@ -92,6 +93,7 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, doctorName, initialRating = 0,
     );
 };
 const MyTurns = () => {
+  const { schedule } = useTimeouts();
   const { user } = useAuth();
   const [filter, setFilter] = useState("all"); 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -178,7 +180,7 @@ const MyTurns = () => {
           setShowCancelModal(false);
           setSelectedTurnForCancel(null);
           setShowCancelSuccessToast(true);
-          setTimeout(() => setShowCancelSuccessToast(false), 3000);
+          schedule(() => setShowCancelSuccessToast(false), 3000);
       }
   };
   const handlePrintReceipt = (app) => {
@@ -197,12 +199,12 @@ const MyTurns = () => {
           bookingDate: fakeBookingDate,
           transactionId: generateTransactionId()
       });
-      setTimeout(() => {
+      schedule(() => {
           const originalTitle = document.title;
           document.title = `samsa_turno_${app.date.replace(/-/g, '')}_${app.time.replace(':', '')}`;
           window.print();
           document.title = originalTitle;
-          setTimeout(() => setPrintAppointmentData(null), 500);
+          schedule(() => setPrintAppointmentData(null), 500);
       }, 100);
   };
   const filteredAppointments = appointments.filter(app => {

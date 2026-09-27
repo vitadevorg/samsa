@@ -3,8 +3,10 @@ import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
 import { SPECIALTIES } from '../constants/catalog';
 import { generateTransactionId } from '../utils/ids';
+import { useTimeouts } from '../hooks/useTimeouts';
 
 const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
+    const { schedule } = useTimeouts();
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,7 +70,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
         setIsSubmitting(true);
         setProgress(100);
         setReceiptNumber(generateTransactionId());
-        setTimeout(() => {
+        schedule(() => {
             setIsSubmitting(false);
             setIsSuccess(true);
         }, 1000);

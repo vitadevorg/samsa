@@ -4,6 +4,7 @@ import Footer from '../../components/Footer';
 import { 
   Users, Search, Plus, Calendar, Phone, Mail, FileText, CheckCircle, AlertCircle, Edit, Save, X
 } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
 
 const initialPatients = [
   { 
@@ -45,6 +46,7 @@ const initialPatients = [
 ];
 
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
+    const { schedule } = useTimeouts();
     const [newPatient, setNewPatient] = useState({ name: '', dni: '', email: '', phone: '' });
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -59,7 +61,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const confirmSave = () => {
         setShowConfirm(false);
         setShowSuccess(true);
-        setTimeout(() => {
+        schedule(() => {
             onAdd({ ...newPatient, id: Date.now(), age: 'N/A', historyId: `HC-${Math.floor(Math.random()*10000)}`, lastVisit: '-', img: 'https://i.pravatar.cc/150?u=new' });
             setNewPatient({ name: '', dni: '', email: '', phone: '' });
             setShowSuccess(false);

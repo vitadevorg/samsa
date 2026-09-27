@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { LifeBuoy, Send, MessageSquare, PhoneCall, Mail, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Printer } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
 
 const faqs = [
   {
@@ -23,6 +24,7 @@ const faqs = [
 ];
 
 const DoctorSupport = () => {
+  const { schedule } = useTimeouts();
   const [openFaq, setOpenFaq] = useState(null);
   const [ticketStatus, setTicketStatus] = useState('idle'); 
   const [ticketId, setTicketId] = useState(null);
@@ -31,7 +33,7 @@ const DoctorSupport = () => {
     e.preventDefault();
     setTicketStatus('sending');
     const newId = Math.floor(Math.random() * 9000) + 1000;
-    setTimeout(() => {
+    schedule(() => {
       setTicketId(newId);
       setTicketStatus('success');
     }, 1500);

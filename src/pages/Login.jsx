@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { login as authenticate, InvalidCredentialsError } from '../services/authService';
 import { getHomeForRole } from '../constants/roles';
+import { useTimeouts } from '../hooks/useTimeouts';
 import { Eye, EyeOff, Lock, Mail, Check, X, Activity, ChevronRight, ArrowLeft, AlertTriangle } from 'lucide-react';
 const customStyles = `
   @keyframes shake {
@@ -104,18 +105,12 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const timeoutsRef = useRef([]);
+  const { schedule } = useTimeouts();
+  // El login es asíncrono: evita actualizar estado si el usuario ya salió de la página.
   const isMountedRef = useRef(true);
   useEffect(() => {
       isMountedRef.current = true;
-      const timeouts = timeoutsRef.current;
-      return () => {
-          isMountedRef.current = false;
-          timeouts.forEach(clearTimeout);
-      };
-  }, []);
-  const schedule = useCallback((fn, ms) => {
-      timeoutsRef.current.push(setTimeout(fn, ms));
+      return () => { isMountedRef.current = false; };
   }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
