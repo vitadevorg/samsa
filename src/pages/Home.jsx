@@ -188,7 +188,7 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <Reveal key={index} delay={index * 100} className="h-full">
+              <Reveal key={service.title} delay={index * 100} className="h-full">
                   <Link to={`/professionals?specialty=${encodeURIComponent(service.title)}`} className="block group relative bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 h-full hover:-translate-y-2 overflow-hidden">
                     <div className={`absolute top-0 right-0 w-32 h-32 ${service.color} opacity-0 group-hover:opacity-5 rounded-bl-[100%] transition-all duration-500 translate-x-10 -translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0`}></div>
                     <div className={`inline-flex items-center justify-center p-4 ${service.color} rounded-2xl shadow-lg shadow-${service.color}/30 mb-6 group-hover:scale-110 transition-transform duration-300`}>

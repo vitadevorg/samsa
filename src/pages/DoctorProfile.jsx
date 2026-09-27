@@ -9,6 +9,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/useAuth';
 import { doctorsData } from '../data/doctors';
+import { createId } from '../utils/ids';
 import { SPECIALTIES, INSURANCE_OPTIONS, WEEK_DAYS } from '../constants/catalog';
 const SuccessModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -99,6 +100,11 @@ const ReviewCard = ({ review }) => {
         </div>
     );
 };
+// Cada franja horaria editable necesita un id estable para usarlo como key.
+const withRangeIds = (data) => ({
+  ...data,
+  hours: data.hours.map(range => ({ ...range, id: range.id ?? createId() })),
+});
 const DoctorProfile = () => {
   const { id } = useParams();
   const { user, updateUser } = useAuth();
@@ -108,7 +114,7 @@ const DoctorProfile = () => {
   const initialData = isSelfView ? {
       name: user?.name || "Dr. Jesús Zelarayan",
       specialty: user?.specialty || "Cardiología",
-      img: user?.img || "../../public/img/UTN-Jesus.jpg",
+      img: user?.img || "/img/UTN-Jesus.jpg",
       location: user?.location || "Planta Baja - Consultorio 4",
       attentionType: user?.attentionType || "Particular",
       insurance: user?.insurance || ["Prensa", "Subsidio"],
@@ -123,7 +129,7 @@ const DoctorProfile = () => {
         { id: 3, user: "Luis Coronel", date: "2025-11-01", text: "Me salvó la vida, literalmente. Eternamente agradecida por su diagnóstico rápido.", stars: 5 }
       ]
   } : publicDoctor;
-  const [profileData, setProfileData] = useState(initialData);
+  const [profileData, setProfileData] = useState(() => withRangeIds(initialData));
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -136,15 +142,17 @@ const DoctorProfile = () => {
       });
   };
   const addTimeRange = () => {
-      setProfileData(prev => ({ ...prev, hours: [...prev.hours, {start: "", end: ""}] }));
+      setProfileData(prev => ({ ...prev, hours: [...prev.hours, { id: createId(), start: "", end: "" }] }));
   };
-  const removeTimeRange = (index) => {
-      setProfileData(prev => ({ ...prev, hours: prev.hours.filter((_, i) => i !== index) }));
+  const removeTimeRange = (rangeId) => {
+      setProfileData(prev => ({ ...prev, hours: prev.hours.filter(range => range.id !== rangeId) }));
   };
-  const updateTimeRange = (index, field, value) => {
-      const newHours = [...profileData.hours];
-      newHours[index][field] = value;
-      setProfileData({ ...profileData, hours: newHours });
+  // Actualización inmutable: antes se mutaba el objeto, que es el mismo que guarda el contexto de sesión.
+  const updateTimeRange = (rangeId, field, value) => {
+      setProfileData(prev => ({
+          ...prev,
+          hours: prev.hours.map(range => range.id === rangeId ? { ...range, [field]: value } : range),
+      }));
   };
   const toggleInsurance = (ins) => {
       setProfileData(prev => {
@@ -395,13 +403,13 @@ const DoctorProfile = () => {
                                 <button onClick={addTimeRange} className="text-blue-600 text-xs font-bold hover:underline flex items-center"><Plus className="w-3 h-3"/> Agregar Turno</button>
                             </div>
                             <div className="space-y-2">
-                                {profileData.hours.map((range, idx) => (
-                                    <div key={idx} className="flex gap-2 items-center">
-                                        <input type="time" value={range.start} onChange={(e) => updateTimeRange(idx, 'start', e.target.value)} className="p-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-1 focus:ring-blue-500" />
+                                {profileData.hours.map((range) => (
+                                    <div key={range.id} className="flex gap-2 items-center">
+                                        <input type="time" value={range.start} onChange={(e) => updateTimeRange(range.id, 'start', e.target.value)} className="p-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-1 focus:ring-blue-500" />
                                         <span className="text-gray-400">-</span>
-                                        <input type="time" value={range.end} onChange={(e) => updateTimeRange(idx, 'end', e.target.value)} className="p-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-1 focus:ring-blue-500" />
+                                        <input type="time" value={range.end} onChange={(e) => updateTimeRange(range.id, 'end', e.target.value)} className="p-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-1 focus:ring-blue-500" />
                                         {profileData.hours.length > 1 && (
-                                            <button onClick={() => removeTimeRange(idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button>
+                                            <button onClick={() => removeTimeRange(range.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4"/></button>
                                         )}
                                     </div>
                                 ))}

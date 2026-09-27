@@ -97,7 +97,7 @@ const AboutUs = () => {
               { value: 50, suffix: "K+", label: "Pacientes" },
               { value: 300, suffix: "+", label: "Especialistas" }
             ].map((item, index) => (
-              <FadeIn key={index} delay={index * 100}>
+              <FadeIn key={item.label} delay={index * 100}>
                 <div className="text-center group cursor-default">
                   <div className="text-4xl lg:text-5xl font-bold text-gray-900 mb-2 font-mono tracking-tighter">
                     <Counter end={item.value} suffix={item.suffix} />
@@ -127,7 +127,7 @@ const AboutUs = () => {
               { icon: Activity, title: "Tecnología Smart", desc: "Historiales digitales y seguimiento preciso." },
               { icon: Users, title: "Trato Humano", desc: "Profesionales que valoran tu tiempo y bienestar." }
             ].map((feature, i) => (
-              <FadeIn key={i} delay={i * 150} className="h-full">
+              <FadeIn key={feature.title} delay={i * 150} className="h-full">
                 <div className="group h-full p-8 rounded-3xl bg-white border border-gray-100 hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 cursor-pointer flex flex-col">
                   <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-blue-600 transition-colors duration-500">
                     <feature.icon className="w-6 h-6 text-gray-900 group-hover:text-white transition-colors duration-500" />
@@ -165,7 +165,7 @@ const AboutUs = () => {
                { num: "2", title: "Confirmación", text: "Recibí tu ticket digital instantáneo con los detalles." },
                { num: "3", title: "Atención", text: "Llegá y accedé directamente al consultorio sin esperas." }
              ].map((step, i) => (
-               <FadeIn key={i} delay={i * 200} className="relative z-10">
+               <FadeIn key={step.num} delay={i * 200} className="relative z-10">
                    <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-8 border border-white shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-300 h-full text-center flex flex-col items-center group">
                       <div className="w-16 h-16 rounded-full bg-white border-4 border-blue-50 shadow-md flex items-center justify-center text-2xl font-black text-blue-600 mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:border-white group-hover:text-white transition-all duration-500">
                           {step.num}

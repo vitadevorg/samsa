@@ -89,8 +89,8 @@ const Footer = ({ theme = 'dark' }) => {
               <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>Síguenos</h4>
               <div className="flex space-x-4">
 
-                 {['fb', 'tw', 'ig'].map((social, i) => (
-                     <div key={i} className={`w-10 h-10 ${iconBgClass} rounded-xl flex items-center justify-center hover:bg-blue-600 hover:-translate-y-1 transition-all cursor-pointer shadow-lg border ${isLight ? 'border-blue-50' : 'border-slate-800'}`}>
+                 {['fb', 'tw', 'ig'].map((social) => (
+                     <div key={social} className={`w-10 h-10 ${iconBgClass} rounded-xl flex items-center justify-center hover:bg-blue-600 hover:-translate-y-1 transition-all cursor-pointer shadow-lg border ${isLight ? 'border-blue-50' : 'border-slate-800'}`}>
                          <div className={`w-4 h-4 ${isLight ? 'bg-blue-300' : 'bg-slate-400'} rounded-sm`}></div>
                      </div>
                  ))}

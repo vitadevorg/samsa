@@ -26,7 +26,7 @@ const AnimatedStepsFlow = () => {
                 { step: "03", title: "Recibí Pacientes", desc: "Aparecé en el mercado y recibí solicitudes de turnos." },
                 { step: "04", title: "Optimizá tu Día", desc: "Administrá tu agenda desde nuestra plataforma." }
             ].map((item, idx) => (
-                <div key={idx} className="text-center relative opacity-0" style={{ animation: isVisible ? `fade-in-up-delay 0.6s forwards ${200 + (idx * 1200)}ms` : 'none' }}>
+                <div key={item.step} className="text-center relative opacity-0" style={{ animation: isVisible ? `fade-in-up-delay 0.6s forwards ${200 + (idx * 1200)}ms` : 'none' }}>
                     <div className="relative w-12 h-12 rounded-full border-2 bg-slate-900 mx-auto mb-6 flex items-center justify-center overflow-hidden" style={{ animation: isVisible ? `step-border 0.6s forwards ${400 + (idx * 1200)}ms` : 'none', borderColor: '#334155' }}>
 
                         <div className="absolute bottom-0 left-0 w-full bg-blue-500 h-0" style={{ animation: isVisible ? `fill-up 0.8s ease-out forwards ${400 + (idx * 1200)}ms` : 'none' }}></div>
@@ -200,7 +200,7 @@ const ProfessionalB2BSection = () => {
                             { icon: <Smartphone />, title: "Gestión Integral", desc: "Historias clínicas, métricas y comunicaciones en un solo lugar." },
                             { icon: <CheckCircle />, title: "Menos Burocracia", desc: "Nosotros ordenamos la demanda, vos te enfocás en la salud." }
                         ].map((item, idx) => (
-                            <Reveal key={idx} delay={400 + (idx * 100)}>
+                            <Reveal key={item.title} delay={400 + (idx * 100)}>
                                 <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-2xl hover:bg-slate-800 transition-colors h-full">
                                     <div className="bg-blue-500/10 w-fit p-3 rounded-xl text-blue-400 mb-4 border border-blue-500/20">
                                         {item.icon}

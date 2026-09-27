@@ -85,7 +85,7 @@ const FAQ = () => {
       <div className="max-w-3xl mx-auto px-6 lg:px-8 pb-24 flex-grow">
         <div className="space-y-4">
           {faqs.map((item, index) => (
-            <FadeIn key={index} delay={Math.min(index * 50, 500)}>
+            <FadeIn key={item.question} delay={Math.min(index * 50, 500)}>
                 <div 
                     className={`group bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
                         activeIndex === index 

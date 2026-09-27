@@ -89,8 +89,8 @@ const MedicalReport = ({ study, isPreview, user }) => {
                                     { name: "Uremia", result: "0,25", unit: "g/l", ref: "Hasta 0,45", status: "normal" },
                                 ]
                             }
-                        ].map((section, idx) => (
-                            <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm break-inside-avoid">
+                        ].map((section) => (
+                            <div key={section.category} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm break-inside-avoid">
                                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-3">
                                     <h4 className="font-bold text-slate-700 tracking-widest text-sm uppercase">{section.category}</h4>
                                 </div>
@@ -160,8 +160,8 @@ const MedicalReport = ({ study, isPreview, user }) => {
                                     { name: "Eritrocitos", result: "0-1", unit: "x CPO", ref: "0 - 2 x CPO", status: "normal" },
                                 ]
                             }
-                        ].map((section, idx) => (
-                            <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm break-inside-avoid">
+                        ].map((section) => (
+                            <div key={section.category} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm break-inside-avoid">
                                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-3">
                                     <h4 className="font-bold text-slate-700 tracking-widest text-sm uppercase">{section.category}</h4>
                                 </div>

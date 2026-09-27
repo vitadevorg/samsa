@@ -129,7 +129,7 @@ const BookAppointment = () => {
                             </div>
                         </div>
                         <div className="grid grid-cols-7 gap-2 md:gap-4 place-items-center">
-                            {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map((d,i) => (<div key={i} className="h-10 w-10 flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{d}</div>))}
+                            {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map((d) => (<div key={d} className="h-10 w-10 flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{d}</div>))}
                             {calendarDays.map((slot) => {
                                 if (slot.type === 'empty') return <div key={slot.key} className="h-10 w-10"></div>;
                                 let btnClass = "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-200 ";
@@ -145,8 +145,8 @@ const BookAppointment = () => {
                             <div className="animate-fadeIn mt-10 pt-8 border-t border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600" /> Horarios para el {selectedDate.day}/{currentDisplayDate.getMonth()+1}</h3>
                                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                                    {dailyTimeSlots.map((slot, i) => (
-                                        <button key={i} disabled={slot.status !== 'available'} onClick={() => setSelectedTime(slot.time)} className={`py-2 px-2 rounded-lg text-sm font-medium border text-center transition-all ${selectedTime === slot.time ? "bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-100" : slot.status === 'busy' ? "bg-red-50 text-red-300 border-red-50 cursor-not-allowed line-through decoration-red-300 opacity-60" : "bg-white text-green-700 border-green-200 hover:bg-green-50 hover:border-green-400 cursor-pointer"}`}>{slot.time}</button>
+                                    {dailyTimeSlots.map((slot) => (
+                                        <button key={slot.time} disabled={slot.status !== 'available'} onClick={() => setSelectedTime(slot.time)} className={`py-2 px-2 rounded-lg text-sm font-medium border text-center transition-all ${selectedTime === slot.time ? "bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-100" : slot.status === 'busy' ? "bg-red-50 text-red-300 border-red-50 cursor-not-allowed line-through decoration-red-300 opacity-60" : "bg-white text-green-700 border-green-200 hover:bg-green-50 hover:border-green-400 cursor-pointer"}`}>{slot.time}</button>
                                     ))}
                                 </div>
                             </div>

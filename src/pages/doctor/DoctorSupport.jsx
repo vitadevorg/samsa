@@ -174,7 +174,7 @@ const DoctorSupport = () => {
 
               <div className="space-y-3">
                 {faqs.map((faq, index) => (
-                  <div key={index} className={`border ${openFaq === index ? 'border-blue-200 bg-blue-50/30' : 'border-slate-200'} rounded-2xl overflow-hidden transition-colors`}>
+                  <div key={faq.q} className={`border ${openFaq === index ? 'border-blue-200 bg-blue-50/30' : 'border-slate-200'} rounded-2xl overflow-hidden transition-colors`}>
                     <button 
                       onClick={() => setOpenFaq(openFaq === index ? null : index)}
                       className="w-full px-6 py-5 text-left font-bold text-slate-800 flex justify-between items-center hover:bg-slate-50 transition-colors"

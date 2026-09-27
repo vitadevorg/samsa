@@ -86,7 +86,7 @@ const Turns = () => {
         {filteredSpecialties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {filteredSpecialties.map((item, index) => (
-              <FadeIn key={index} delay={Math.min(index * 50, 600)} className="h-full">
+              <FadeIn key={item.title} delay={Math.min(index * 50, 600)} className="h-full">
                 <Link 
                   to={`/professionals?specialty=${encodeURIComponent(item.title)}`} 
                   className="group block h-full"

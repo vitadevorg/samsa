@@ -8,6 +8,7 @@ import {
   User, CheckCircle, AlertCircle, ClipboardList
 } from 'lucide-react';
 import { useTimeouts } from '../../hooks/useTimeouts';
+import { useFileAttachments } from '../../hooks/useFileAttachments';
 const initialPatients = [
   { 
     id: 1, 
@@ -96,8 +97,8 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                                             <div className="mt-4 pt-4 border-t border-slate-100/60">
                                                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Adjuntos</p>
                                                 <div className="flex gap-2 flex-wrap">
-                                                    {entry.files.map((f, i) => (
-                                                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer">
+                                                    {entry.files.map((f) => (
+                                                        <div key={f.name} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer">
                                                             <Paperclip className="w-3.5 h-3.5 text-blue-500"/> {f.name}
                                                         </div>
                                                     ))}
@@ -206,33 +207,17 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
   const { schedule } = useTimeouts();
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
-  const [files, setFiles] = useState([]);
+  const { files, addFiles, removeFile, clearFiles } = useFileAttachments();
   const [isDragging, setIsDragging] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   if (!isOpen || !patient) return null;
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).map(file => ({
-        file,
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-        type: file.type.split('/')[1]?.toUpperCase() || 'FILE'
-      }));
-      setFiles(prev => [...prev, ...newFiles]);
-    }
-  };
-  const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
+  const handleFileChange = (e) => addFiles(e.target.files);
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => setIsDragging(false);
   const handleDrop = (e) => {
     e.preventDefault(); setIsDragging(false);
-    if (e.dataTransfer.files?.length > 0) {
-        const newFiles = Array.from(e.dataTransfer.files).map(file => ({
-            file, name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB', type: file.type.split('/')[1]?.toUpperCase() || 'FILE'
-        }));
-        setFiles(prev => [...prev, ...newFiles]);
-    }
+    addFiles(e.dataTransfer.files);
   };
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -243,7 +228,7 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
     setShowSuccess(true);
     schedule(() => {
         onSave(patient.id, { diagnosis, prescription, files, date: new Date().toISOString() });
-        setDiagnosis(''); setPrescription(''); setFiles([]);
+        setDiagnosis(''); setPrescription(''); clearFiles();
         setShowSuccess(false);
     }, 1500);
   };
@@ -331,8 +316,8 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                     </div>
                     {files.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                            {files.map((f, i) => (
-                                <div key={i} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            {files.map((f) => (
+                                <div key={f.id} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex items-center gap-4 overflow-hidden">
                                         <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center shrink-0 text-blue-600 font-black text-xs border border-blue-100/50 shadow-inner">
                                             {f.type}
@@ -342,7 +327,7 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                                             <p className="text-xs text-slate-400 font-medium mt-0.5">{f.size}</p>
                                         </div>
                                     </div>
-                                    <button type="button" onClick={() => removeFile(i)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                                    <button type="button" onClick={() => removeFile(f.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-full transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
