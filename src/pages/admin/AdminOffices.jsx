@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useCrudList } from '../../hooks/useCrudList';
@@ -9,6 +9,7 @@ const INITIAL_OFFICES = [
 ];
 const EMPTY_FORM = { name: '', location: '' };
 const AdminOffices = () => {
+  const fieldId = useId();
   const {
     items: offices, form, setForm, isEditing, editId,
     startEdit: handleEdit, cancelEdit, submit: handleSubmit,
@@ -46,8 +47,8 @@ const AdminOffices = () => {
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
-                            <input 
+                            <label htmlFor={`${fieldId}-nombre`} className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
+                            <input id={`${fieldId}-nombre`} 
                                 required 
                                 placeholder="Ej: Consultorio 10" 
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" 
@@ -56,8 +57,8 @@ const AdminOffices = () => {
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Ubicación</label>
-                            <input 
+                            <label htmlFor={`${fieldId}-ubicacion`} className="text-xs font-bold text-gray-500 uppercase ml-1">Ubicación</label>
+                            <input id={`${fieldId}-ubicacion`} 
                                 required 
                                 placeholder="Ej: Piso 1, Ala Oeste" 
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" 

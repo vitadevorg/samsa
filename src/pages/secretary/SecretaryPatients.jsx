@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { 
@@ -46,6 +46,7 @@ const initialPatients = [
 ];
 
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
+    const fieldId = useId();
     const { schedule } = useTimeouts();
     const [newPatient, setNewPatient] = useState({ name: '', dni: '', email: '', phone: '' });
     const [showConfirm, setShowConfirm] = useState(false);
@@ -109,21 +110,21 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
                 ) : (
                     <form onSubmit={handleSubmit} className="p-8 space-y-5 bg-slate-50/50">
                         <div>
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre Completo</label>
-                            <input required placeholder="Ej: Juan Pérez" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
+                            <label htmlFor={`${fieldId}-nombre-completo`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre Completo</label>
+                            <input id={`${fieldId}-nombre-completo`} required placeholder="Ej: Juan Pérez" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
                         </div>
                         <div>
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Documento (DNI)</label>
-                            <input required placeholder="Ej: 30.123.456" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.dni} onChange={e => setNewPatient({...newPatient, dni: e.target.value})} />
+                            <label htmlFor={`${fieldId}-documento`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Documento (DNI)</label>
+                            <input id={`${fieldId}-documento`} required placeholder="Ej: 30.123.456" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.dni} onChange={e => setNewPatient({...newPatient, dni: e.target.value})} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
-                                <input type="email" placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
+                                <label htmlFor={`${fieldId}-email`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
+                                <input id={`${fieldId}-email`} type="email" placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
                             </div>
                             <div>
-                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
-                                <input placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
+                                <label htmlFor={`${fieldId}-telefono`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
+                                <input id={`${fieldId}-telefono`} placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
                             </div>
                         </div>
                         <div className="flex gap-3 pt-6 border-t border-slate-100">
@@ -138,6 +139,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
 };
 
 const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
+    const fieldId = useId();
     const [editData, setEditData] = useState(patient || { email: '', phone: '' });
 
     React.useEffect(() => {
@@ -166,18 +168,18 @@ const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
                     </div>
 
                     <div>
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Nombre Completo</label>
-                        <input disabled value={editData.name} className="w-full p-4 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 outline-none cursor-not-allowed" />
+                        <label htmlFor={`${fieldId}-nombre-completo`} className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Nombre Completo</label>
+                        <input id={`${fieldId}-nombre-completo`} disabled value={editData.name} className="w-full p-4 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 outline-none cursor-not-allowed" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
-                            <input type="email" required className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm font-bold text-slate-700" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} />
+                            <label htmlFor={`${fieldId}-email`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
+                            <input id={`${fieldId}-email`} type="email" required className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm font-bold text-slate-700" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} />
                         </div>
                         <div>
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
-                            <input required className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm font-bold text-slate-700" value={editData.phone} onChange={e => setEditData({...editData, phone: e.target.value})} />
+                            <label htmlFor={`${fieldId}-telefono`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
+                            <input id={`${fieldId}-telefono`} required className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm font-bold text-slate-700" value={editData.phone} onChange={e => setEditData({...editData, phone: e.target.value})} />
                         </div>
                     </div>
                     <div className="flex gap-3 pt-6 border-t border-slate-100">

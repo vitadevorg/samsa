@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { 
   MapPin, Clock, Star, ShieldCheck, Award, User, MessageSquare, 
@@ -106,6 +106,7 @@ const withRangeIds = (data) => ({
   hours: data.hours.map(range => ({ ...range, id: range.id ?? createId() })),
 });
 const DoctorProfile = () => {
+  const fieldId = useId();
   const { id } = useParams();
   const { user, updateUser } = useAuth();
   const location = useLocation();
@@ -313,8 +314,8 @@ const DoctorProfile = () => {
                 <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div className="space-y-8">
                         <div className="space-y-4">
-                            <label className="block text-sm font-bold text-gray-700 uppercase">Especialidad</label>
-                            <select 
+                            <label htmlFor={`${fieldId}-especialidad`} className="block text-sm font-bold text-gray-700 uppercase">Especialidad</label>
+                            <select id={`${fieldId}-especialidad`} 
                                 value={profileData.specialty}
                                 onChange={(e) => setProfileData({...profileData, specialty: e.target.value})}
                                 className="w-full p-3 border border-gray-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-blue-500 transition"
@@ -323,16 +324,16 @@ const DoctorProfile = () => {
                             </select>
                         </div>
                         <div className="space-y-4">
-                            <label className="block text-sm font-bold text-gray-700 uppercase">Ubicación</label>
-                            <input 
+                            <label htmlFor={`${fieldId}-ubicacion`} className="block text-sm font-bold text-gray-700 uppercase">Ubicación</label>
+                            <input id={`${fieldId}-ubicacion`} 
                                 value={profileData.location}
                                 onChange={(e) => setProfileData({...profileData, location: e.target.value})}
                                 className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                          <div className="space-y-4">
-                             <label className="block text-sm font-bold text-gray-700 uppercase">Biografía</label>
-                             <textarea 
+                             <label htmlFor={`${fieldId}-biografia`} className="block text-sm font-bold text-gray-700 uppercase">Biografía</label>
+                             <textarea id={`${fieldId}-biografia`} 
                                 value={profileData.bio}
                                 onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
                                 rows={4}
@@ -342,7 +343,7 @@ const DoctorProfile = () => {
                     </div>
                     <div className="space-y-8">
                         <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 uppercase">Tipo de Atención</label>
+                            <p className="block text-sm font-bold text-gray-700 uppercase">Tipo de Atención</p>
                             <div className="flex gap-2">
                                 {['Particular', 'Pública'].map((type) => (
                                     <button
@@ -361,7 +362,7 @@ const DoctorProfile = () => {
                         </div>
                         {profileData.attentionType === 'Particular' && (
                             <div className="space-y-2 animate-fadeIn">
-                                <label className="block text-sm font-bold text-gray-700 uppercase">Obras Sociales</label>
+                                <p className="block text-sm font-bold text-gray-700 uppercase">Obras Sociales</p>
                                 <div className="flex flex-wrap gap-2">
                                     {INSURANCE_OPTIONS.map(ins => (
                                         <button
@@ -380,7 +381,7 @@ const DoctorProfile = () => {
                             </div>
                         )}
                         <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 uppercase">Días de Atención</label>
+                            <p className="block text-sm font-bold text-gray-700 uppercase">Días de Atención</p>
                             <div className="flex justify-between gap-1">
                                 {WEEK_DAYS.map(day => (
                                     <button
@@ -399,7 +400,7 @@ const DoctorProfile = () => {
                         </div>
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <label className="block text-sm font-bold text-gray-700 uppercase">Rangos Horarios</label>
+                                <p className="block text-sm font-bold text-gray-700 uppercase">Rangos Horarios</p>
                                 <button onClick={addTimeRange} className="text-blue-600 text-xs font-bold hover:underline flex items-center"><Plus className="w-3 h-3"/> Agregar Turno</button>
                             </div>
                             <div className="space-y-2">

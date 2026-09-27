@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { login as authenticate, InvalidCredentialsError } from '../services/authService';
@@ -102,6 +102,7 @@ const MedicalAvatar = ({ currentState }) => {
   );
 };
 const Login = () => {
+  const fieldId = useId();
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -198,14 +199,14 @@ const Login = () => {
             </div>
             <form onSubmit={handleSubmit} className="space-y-6 relative z-30" noValidate>
               <div className="group">
-                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 transition-colors ${errors.email ? 'text-red-500' : 'text-slate-400'}`}>
+                <label htmlFor={`${fieldId}-correo-electronico`} className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 transition-colors ${errors.email ? 'text-red-500' : 'text-slate-400'}`}>
                     Correo Electrónico
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Mail className={`h-5 w-5 transition-colors ${errors.email ? 'text-red-400' : 'text-slate-400 group-focus-within:text-blue-500'}`} />
                   </div>
-                  <input
+                  <input id={`${fieldId}-correo-electronico`}
                     type="email"
                     className={`block w-full pl-11 pr-4 py-3.5 border rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none transition-all ${
                         errors.email 
@@ -221,14 +222,14 @@ const Login = () => {
                 </div>
               </div>
               <div className="group">
-                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 transition-colors ${errors.password ? 'text-red-500' : 'text-slate-400'}`}>
+                <label htmlFor={`${fieldId}-contrasena`} className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 transition-colors ${errors.password ? 'text-red-500' : 'text-slate-400'}`}>
                     Contraseña
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Lock className={`h-5 w-5 transition-colors ${errors.password ? 'text-red-400' : 'text-slate-400 group-focus-within:text-blue-500'}`} />
                   </div>
-                  <input
+                  <input id={`${fieldId}-contrasena`}
                     type={showPassword ? "text" : "password"}
                     className={`block w-full pl-11 pr-12 py-3.5 border rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none transition-all ${
                         errors.password 

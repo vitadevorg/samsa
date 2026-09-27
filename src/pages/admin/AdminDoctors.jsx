@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useCrudList } from '../../hooks/useCrudList';
@@ -10,6 +10,7 @@ const INITIAL_DOCTORS = [
 ];
 const EMPTY_FORM = { name: '', specialty: '', email: '', password: '' };
 const AdminDoctors = () => {
+  const fieldId = useId();
   const {
     items: doctors, form, setForm, isEditing, editId,
     startEdit: handleEdit, cancelEdit, submit: handleSubmit,
@@ -53,23 +54,23 @@ const AdminDoctors = () => {
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
             <div className="lg:col-span-1">
-                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Nombre Completo</label>
-                <input required placeholder="Ej: Dr. Juan Pérez" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} />
+                <label htmlFor={`${fieldId}-nombre-completo`} className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Nombre Completo</label>
+                <input id={`${fieldId}-nombre-completo`} required placeholder="Ej: Dr. Juan Pérez" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} />
             </div>
             <div className="lg:col-span-1">
-                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Especialidad</label>
-                <select required className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white appearance-none" value={form.specialty} onChange={e=>setForm({...form, specialty: e.target.value})}>
+                <label htmlFor={`${fieldId}-especialidad`} className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Especialidad</label>
+                <select id={`${fieldId}-especialidad`} required className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white appearance-none" value={form.specialty} onChange={e=>setForm({...form, specialty: e.target.value})}>
                     <option value="">Seleccionar...</option>
                     {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
             </div>
             <div className="lg:col-span-1">
-                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Usuario / Email</label>
-                <input required type="email" placeholder="medico@samsa.com" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} />
+                <label htmlFor={`${fieldId}-usuario-email`} className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Usuario / Email</label>
+                <input id={`${fieldId}-usuario-email`} required type="email" placeholder="medico@samsa.com" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" value={form.email} onChange={e=>setForm({...form, email: e.target.value})} />
             </div>
             <div className="lg:col-span-1">
-                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">{isEditing ? 'Nueva Contraseña (Opcional)' : 'Contraseña'}</label>
-                <input type="password" required={!isEditing} placeholder="******" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} />
+                <label htmlFor={`${fieldId}-campo`} className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">{isEditing ? 'Nueva Contraseña (Opcional)' : 'Contraseña'}</label>
+                <input id={`${fieldId}-campo`} type="password" required={!isEditing} placeholder="******" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" value={form.password} onChange={e=>setForm({...form, password: e.target.value})} />
             </div>
             <div className="lg:col-span-1">
                 <button type="submit" className={`w-full py-3 rounded-xl font-bold text-white transition shadow-md flex justify-center gap-2 items-center ${isEditing ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'}`}>

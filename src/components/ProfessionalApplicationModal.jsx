@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
 import { SPECIALTIES } from '../constants/catalog';
@@ -13,6 +13,7 @@ const EMPTY_APPLICATION = {
 
 // Se monta solo mientras está abierto, así cada apertura arranca con el formulario vacío.
 const ProfessionalApplicationModal = ({ onClose }) => {
+    const fieldId = useId();
     const { schedule } = useTimeouts();
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(0);
@@ -236,28 +237,28 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Nombres</label>
-                                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Juan Martín" />
+                                    <label htmlFor={`${fieldId}-nombres`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Nombres</label>
+                                    <input id={`${fieldId}-nombres`} type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Juan Martín" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Apellidos</label>
-                                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Pérez" />
+                                    <label htmlFor={`${fieldId}-apellidos`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Apellidos</label>
+                                    <input id={`${fieldId}-apellidos`} type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Pérez" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">DNI</label>
-                                    <input type="text" name="dni" value={formData.dni} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Sin puntos" />
+                                    <label htmlFor={`${fieldId}-dni`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">DNI</label>
+                                    <input id={`${fieldId}-dni`} type="text" name="dni" value={formData.dni} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Sin puntos" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">CUIT / CUIL</label>
-                                    <input type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. 20-XXXXXXXX-X" />
+                                    <label htmlFor={`${fieldId}-cuit-cuil`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">CUIT / CUIL</label>
+                                    <input id={`${fieldId}-cuit-cuil`} type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. 20-XXXXXXXX-X" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Correo Electrónico</label>
-                                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="tu@email.com" />
+                                    <label htmlFor={`${fieldId}-correo-electronico`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Correo Electrónico</label>
+                                    <input id={`${fieldId}-correo-electronico`} type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="tu@email.com" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Teléfono Celular</label>
-                                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Código de área + número" />
+                                    <label htmlFor={`${fieldId}-telefono-celular`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Teléfono Celular</label>
+                                    <input id={`${fieldId}-telefono-celular`} type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Código de área + número" />
                                 </div>
                             </div>
                         </div>
@@ -271,18 +272,18 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                             </h3>
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Especialidad Principal</label>
-                                    <select name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
+                                    <label htmlFor={`${fieldId}-especialidad-principal`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Especialidad Principal</label>
+                                    <select id={`${fieldId}-especialidad-principal`} name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
                                         <option value="">Seleccione una especialidad</option>
                                         {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Número de Matrícula (Provincial o Nacional)</label>
-                                    <input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. MP 12345" />
+                                    <label htmlFor={`${fieldId}-numero-de-matricula`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Número de Matrícula (Provincial o Nacional)</label>
+                                    <input id={`${fieldId}-numero-de-matricula`} type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. MP 12345" />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Tipo de Profesional</label>
+                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Tipo de Profesional</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         {['particular', 'clinica', 'hospital'].map(type => (
                                             <div 

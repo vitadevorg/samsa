@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Key, Shield, Trash2, Save, X, AlertTriangle, 
@@ -6,26 +6,30 @@ import {
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import { useAuth } from '../../context/useAuth';
-const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor = "slate" }) => (
-  <div className="space-y-1">
-    <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
-      <Icon className={`w-4 h-4 text-${themeColor}-500`} /> {label}
-    </label>
-    <input
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      required={required}
-      className={`w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:outline-none transition-all duration-200 ${
-        disabled 
-          ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' 
-          : `bg-white border-gray-300 focus:border-${themeColor}-500 focus:ring-${themeColor}-100 text-gray-800 shadow-sm`
-      }`}
-    />
-  </div>
-);
+const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor = "slate" }) => {
+  const id = useId();
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+        <Icon className={`w-4 h-4 text-${themeColor}-500`} /> {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        className={`w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:outline-none transition-all duration-200 ${
+          disabled 
+            ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' 
+            : `bg-white border-gray-300 focus:border-${themeColor}-500 focus:ring-${themeColor}-100 text-gray-800 shadow-sm`
+        }`}
+      />
+    </div>
+  );
+};
 const AdminProfile = () => {
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();

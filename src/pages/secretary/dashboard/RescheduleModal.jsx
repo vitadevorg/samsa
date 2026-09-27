@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import { Calendar, XCircle, Clock, Activity, ChevronDown, AlertCircle } from 'lucide-react';
 import SecretaryCalendar from './SecretaryCalendar';
 import { AGENDA_SLOTS, findNextFreeSlots, isSlotTaken } from './agenda';
@@ -8,6 +8,7 @@ const INITIAL_RESCHEDULE = { hasDate: 'yes', reason: '', notify: true, customDat
 
 // Reprograma el turno `appointmentId` a otra fecha/hora libre, o lo manda a la bolsa de suspenso.
 const RescheduleModal = ({ doctorAppointments, appointmentId, onSubmit, onClose }) => {
+  const fieldId = useId();
   const [rescheduleData, setRescheduleData] = useState(INITIAL_RESCHEDULE);
   const [isSelectingCustomTime, setIsSelectingCustomTime] = useState(false);
   const [tempSelectedDate, setTempSelectedDate] = useState('');
@@ -92,9 +93,9 @@ const RescheduleModal = ({ doctorAppointments, appointmentId, onSubmit, onClose 
                       <Activity className="w-4 h-4" /> Auditoría
                   </h3>
                   <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Reprogramación *</label>
+                      <label htmlFor={`${fieldId}-motivo-de-reprogramacion`} className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Reprogramación *</label>
                       <div className="relative">
-                          <select required value={rescheduleData.reason} onChange={e => setRescheduleData({...rescheduleData, reason: e.target.value})} className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
+                          <select id={`${fieldId}-motivo-de-reprogramacion`} required value={rescheduleData.reason} onChange={e => setRescheduleData({...rescheduleData, reason: e.target.value})} className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
                               <option value="">Seleccionar motivo...</option>
                               <option value="paciente">Solicitud del paciente</option>
                               <option value="medico">Ausencia/Demora del médico</option>

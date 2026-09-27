@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useCrudList } from '../../hooks/useCrudList';
@@ -10,6 +10,7 @@ const INITIAL_INSURANCES = [
 ];
 const EMPTY_FORM = { name: '', contact: '' };
 const AdminInsurances = () => {
+  const fieldId = useId();
   const {
     items: insurances, form, setForm, isEditing, editId,
     startEdit: handleEdit, cancelEdit, submit: handleSubmit,
@@ -53,12 +54,12 @@ const AdminInsurances = () => {
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
-                            <input required placeholder="Ej: OSDE" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition bg-gray-50 focus:bg-white" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} />
+                            <label htmlFor={`${fieldId}-nombre`} className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
+                            <input id={`${fieldId}-nombre`} required placeholder="Ej: OSDE" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition bg-gray-50 focus:bg-white" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} />
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Contacto (Opcional)</label>
-                            <input placeholder="Ej: 0800-..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition bg-gray-50 focus:bg-white" value={form.contact} onChange={e=>setForm({...form, contact: e.target.value})} />
+                            <label htmlFor={`${fieldId}-contacto`} className="text-xs font-bold text-gray-500 uppercase ml-1">Contacto (Opcional)</label>
+                            <input id={`${fieldId}-contacto`} placeholder="Ej: 0800-..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition bg-gray-50 focus:bg-white" value={form.contact} onChange={e=>setForm({...form, contact: e.target.value})} />
                         </div>
                         <button type="submit" className={`w-full py-3 rounded-xl font-bold text-white transition shadow-md flex justify-center gap-2 items-center mt-2 ${isEditing ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'}`}>
                             {isEditing ? <Save className="w-4 h-4"/> : <Plus className="w-4 h-4"/>}

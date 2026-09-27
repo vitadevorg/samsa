@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { 
@@ -88,6 +88,7 @@ const styles = `
   }
 `;
 const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
+  const fieldId = useId();
   const { schedule } = useTimeouts();
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
@@ -166,10 +167,10 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                 <form id="report-form" onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-diagnostico-evolucion`} className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-600"/> Diagnóstico / Evolución
                     </label>
-                    <textarea 
+                    <textarea id={`${fieldId}-diagnostico-evolucion`} 
                         required 
                         className="w-full bg-white border border-slate-200 rounded-2xl p-5 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none shadow-sm transition-all min-h-[140px] text-slate-700" 
                         placeholder="Detallá el cuadro clínico, síntomas y observaciones..." 
@@ -178,9 +179,9 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                     />
                     </div>
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <p className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <Paperclip className="w-5 h-5 text-blue-600"/> Archivos Adjuntos
-                    </label>
+                    </p>
                     <div 
                         onDragOver={handleDragOver} 
                         onDragLeave={handleDragLeave} 
@@ -220,10 +221,10 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                     )}
                     </div>
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-receta-indicaciones`} className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-amber-500"/> Receta / Indicaciones
                     </label>
-                    <textarea 
+                    <textarea id={`${fieldId}-receta-indicaciones`} 
                         className="w-full bg-amber-50/30 border border-amber-200/60 rounded-2xl p-5 focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 outline-none resize-none shadow-sm transition-all min-h-[100px] text-slate-700" 
                         placeholder="Prescripciones, reposo, o estudios solicitados..." 
                         value={prescription} 

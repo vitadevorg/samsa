@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import {
   Calendar, Plus, XCircle, User, Hash, Phone, Mail, CreditCard, ShieldCheck,
   ChevronDown, Clock, Activity, CheckCircle, Check,
@@ -17,6 +17,7 @@ const PATIENT_FIELDS_RESET = { patient: '', phone: '', email: '', obraSocial: ''
 
 // El formulario vive en el modal; el padre lo monta con `initialData` y recibe el turno en `onSubmit`.
 const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) => {
+  const fieldId = useId();
   const [newTurnData, setNewTurnData] = useState(() => ({ ...EMPTY_TURN, ...initialData }));
   const [showDobCalendar, setShowDobCalendar] = useState(false);
   const [showNewTurnDateCalendar, setShowNewTurnDateCalendar] = useState(false);
@@ -52,26 +53,26 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="col-span-1 md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Nombre Completo *</label>
+                            <label htmlFor={`${fieldId}-nombre-completo`} className="block text-xs font-bold text-slate-500 mb-1.5">Nombre Completo *</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><User className="h-5 w-5 text-slate-400" /></div>
-                                <input type="text" required value={newTurnData.patient} onChange={e => setNewTurnData({...newTurnData, patient: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Ej. Juan Pérez" />
+                                <input id={`${fieldId}-nombre-completo`} type="text" required value={newTurnData.patient} onChange={e => setNewTurnData({...newTurnData, patient: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Ej. Juan Pérez" />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">DNI *</label>
+                            <label htmlFor={`${fieldId}-dni`} className="block text-xs font-bold text-slate-500 mb-1.5">DNI *</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Hash className="h-5 w-5 text-slate-400" /></div>
-                                <input type="text" required value={newTurnData.dni} onChange={handleDniChange} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Nro de Documento" />
+                                <input id={`${fieldId}-dni`} type="text" required value={newTurnData.dni} onChange={handleDniChange} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Nro de Documento" />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Fecha de Nacimiento *</label>
+                            <label htmlFor={`${fieldId}-fecha-de-nacimiento`} className="block text-xs font-bold text-slate-500 mb-1.5">Fecha de Nacimiento *</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Calendar className="h-5 w-5 text-slate-400" /></div>
-                                <button 
+                                <button id={`${fieldId}-fecha-de-nacimiento`} 
                                     type="button"
                                     onClick={() => setShowDobCalendar(!showDobCalendar)}
                                     className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl outline-none font-semibold transition-all shadow-sm text-left ${newTurnData.dob ? 'text-slate-700 border-slate-200' : 'text-slate-400 border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50'}`}
@@ -89,18 +90,18 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Teléfono *</label>
+                            <label htmlFor={`${fieldId}-telefono`} className="block text-xs font-bold text-slate-500 mb-1.5">Teléfono *</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Phone className="h-5 w-5 text-slate-400" /></div>
-                                <input type="tel" required value={newTurnData.phone} onChange={e => setNewTurnData({...newTurnData, phone: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Ej. 381 444 5555" />
+                                <input id={`${fieldId}-telefono`} type="tel" required value={newTurnData.phone} onChange={e => setNewTurnData({...newTurnData, phone: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="Ej. 381 444 5555" />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Email (Opcional)</label>
+                            <label htmlFor={`${fieldId}-email`} className="block text-xs font-bold text-slate-500 mb-1.5">Email (Opcional)</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Mail className="h-5 w-5 text-slate-400" /></div>
-                                <input type="email" value={newTurnData.email} onChange={e => setNewTurnData({...newTurnData, email: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="correo@ejemplo.com" />
+                                <input id={`${fieldId}-email`} type="email" value={newTurnData.email} onChange={e => setNewTurnData({...newTurnData, email: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="correo@ejemplo.com" />
                             </div>
                         </div>
                     </div>
@@ -114,10 +115,10 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Obra Social</label>
+                            <label htmlFor={`${fieldId}-obra-social`} className="block text-xs font-bold text-slate-500 mb-1.5">Obra Social</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><ShieldCheck className="h-5 w-5 text-slate-400" /></div>
-                                <select value={newTurnData.obraSocial} onChange={e => setNewTurnData({...newTurnData, obraSocial: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
+                                <select id={`${fieldId}-obra-social`} value={newTurnData.obraSocial} onChange={e => setNewTurnData({...newTurnData, obraSocial: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
                                     {INSURANCE_OPTIONS.map(ins => (
                                         <option key={ins} value={ins}>{ins}</option>
                                     ))}
@@ -126,10 +127,10 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">CUIT / CUIL (Opcional)</label>
+                            <label htmlFor={`${fieldId}-cuit-cuil`} className="block text-xs font-bold text-slate-500 mb-1.5">CUIT / CUIL (Opcional)</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Hash className="h-5 w-5 text-slate-400" /></div>
-                                <input type="text" value={newTurnData.cuit} onChange={e => setNewTurnData({...newTurnData, cuit: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="XX-XXXXXXXX-X" />
+                                <input id={`${fieldId}-cuit-cuil`} type="text" value={newTurnData.cuit} onChange={e => setNewTurnData({...newTurnData, cuit: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 transition-all shadow-sm" placeholder="XX-XXXXXXXX-X" />
                             </div>
                         </div>
                     </div>
@@ -143,10 +144,10 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Fecha del Turno *</label>
+                            <label htmlFor={`${fieldId}-fecha-del-turno`} className="block text-xs font-bold text-slate-500 mb-1.5">Fecha del Turno *</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Calendar className="h-5 w-5 text-slate-400" /></div>
-                                <input 
+                                <input id={`${fieldId}-fecha-del-turno`} 
                                     type="text" 
                                     readOnly
                                     required 
@@ -165,10 +166,10 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Canal de Origen</label>
+                            <label htmlFor={`${fieldId}-canal-de-origen`} className="block text-xs font-bold text-slate-500 mb-1.5">Canal de Origen</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Activity className="h-5 w-5 text-slate-400" /></div>
-                                <select value={newTurnData.type} onChange={e => setNewTurnData({...newTurnData, type: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
+                                <select id={`${fieldId}-canal-de-origen`} value={newTurnData.type} onChange={e => setNewTurnData({...newTurnData, type: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
                                     <option>Presencial</option>
                                     <option>Telefónico</option>
                                 </select>
@@ -177,7 +178,7 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                         </div>
 
                         <div className="col-span-1 md:col-span-2 mt-2">
-                            <label className="block text-xs font-bold text-slate-500 mb-3">Horarios Disponibles *</label>
+                            <p className="block text-xs font-bold text-slate-500 mb-3">Horarios Disponibles *</p>
                             {newTurnData.date ? (
                                 <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
                                     {AGENDA_SLOTS.map(t => {
@@ -203,10 +204,10 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                         </div>
 
                         <div className="col-span-1 md:col-span-2 mt-2">
-                            <label className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Consulta</label>
+                            <label htmlFor={`${fieldId}-motivo-de-consulta`} className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Consulta</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><CheckCircle className="h-5 w-5 text-slate-400" /></div>
-                                <select value={newTurnData.motivoConsulta} onChange={e => setNewTurnData({...newTurnData, motivoConsulta: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
+                                <select id={`${fieldId}-motivo-de-consulta`} value={newTurnData.motivoConsulta} onChange={e => setNewTurnData({...newTurnData, motivoConsulta: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
                                     <option value="">Seleccione un motivo (Opcional)</option>
                                     <option value="Primera Vez">Primera vez</option>
                                     <option value="Control">Control</option>

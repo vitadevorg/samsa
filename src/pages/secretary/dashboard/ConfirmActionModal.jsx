@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 // Confirmación de 'arrive' (llegó a sala) o 'cancel' (con motivo y opción de pasar a suspenso).
 const ConfirmActionModal = ({ action, onConfirm, onClose }) => {
+  const fieldId = useId();
   const [reason, setReason] = useState('');
   const [sendToSuspend, setSendToSuspend] = useState(false);
   return (
@@ -21,8 +22,8 @@ const ConfirmActionModal = ({ action, onConfirm, onClose }) => {
             {action === 'cancel' && (
                 <div className="space-y-4 mb-6 text-left">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Baja *</label>
-                        <select 
+                        <label htmlFor={`${fieldId}-motivo-de-baja`} className="block text-xs font-bold text-slate-500 mb-1.5">Motivo de Baja *</label>
+                        <select id={`${fieldId}-motivo-de-baja`} 
                             required
                             value={reason} 
                             onChange={(e) => setReason(e.target.value)}

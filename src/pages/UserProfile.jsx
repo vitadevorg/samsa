@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Mail, Key, CreditCard, FileText, 
@@ -9,27 +9,32 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/useAuth';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import { useTimeouts } from '../hooks/useTimeouts';
-const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => (
-  <div className="space-y-1">
-    <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
-      <Icon className={`w-4 h-4 text-${themeColor}-500`} /> {label}
-    </label>
-    <input
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      required={required}
-      className={`w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:outline-none transition-all duration-200 ${
-        disabled 
-          ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' 
-          : `bg-white border-gray-300 focus:border-${themeColor}-500 focus:ring-${themeColor}-100 text-gray-800 shadow-sm`
-      }`}
-    />
-  </div>
-);
+const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => {
+  const id = useId();
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+        <Icon className={`w-4 h-4 text-${themeColor}-500`} /> {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        className={`w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:outline-none transition-all duration-200 ${
+          disabled 
+            ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' 
+            : `bg-white border-gray-300 focus:border-${themeColor}-500 focus:ring-${themeColor}-100 text-gray-800 shadow-sm`
+        }`}
+      />
+    </div>
+  );
+};
 const UserProfile = () => {
+  const fieldId = useId();
   const { schedule } = useTimeouts();
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -306,10 +311,10 @@ const UserProfile = () => {
                   themeColor={currentTheme.color}
                 />
                 <div className="space-y-1 col-span-1 md:col-span-2">
-                    <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-obra-social`} className="text-sm font-semibold text-gray-600 flex items-center gap-2">
                       <HeartPulse className={`w-4 h-4 text-${currentTheme.color}-500`} /> Obra Social
                     </label>
-                    <select
+                    <select id={`${fieldId}-obra-social`}
                       name="insurance"
                       value={formData.insurance}
                       onChange={handleInputChange}

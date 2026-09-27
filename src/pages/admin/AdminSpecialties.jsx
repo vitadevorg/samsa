@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useCrudList } from '../../hooks/useCrudList';
@@ -10,6 +10,7 @@ const INITIAL_SPECIALTIES = [
 ];
 const EMPTY_FORM = { name: '', desc: '' };
 const AdminSpecialties = () => {
+  const fieldId = useId();
   const {
     items: specialties, form, setForm, isEditing, editId,
     startEdit: handleEdit, cancelEdit, submit: handleSubmit,
@@ -54,8 +55,8 @@ const AdminSpecialties = () => {
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
-                            <input 
+                            <label htmlFor={`${fieldId}-nombre`} className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
+                            <input id={`${fieldId}-nombre`} 
                                 required 
                                 placeholder="Ej: Cardiología" 
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" 
@@ -64,8 +65,8 @@ const AdminSpecialties = () => {
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Descripción</label>
-                            <textarea 
+                            <label htmlFor={`${fieldId}-descripcion`} className="text-xs font-bold text-gray-500 uppercase ml-1">Descripción</label>
+                            <textarea id={`${fieldId}-descripcion`} 
                                 placeholder="Breve descripción..." 
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white resize-none h-24" 
                                 value={form.desc} 
