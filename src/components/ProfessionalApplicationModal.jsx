@@ -3,10 +3,11 @@ import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
 import { SPECIALTIES } from '../constants/catalog';
 import { generateTransactionId } from '../utils/ids';
+import { formatCuil, isValidCuil, dniFromCuil, formatDni } from '../utils/cuil';
 import { useTimeouts } from '../hooks/useTimeouts';
 
 const EMPTY_APPLICATION = {
-    firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
+    firstName: '', lastName: '', cuit: '', email: '', phone: '',
     specialty: '', licenseNumber: '', professionalType: 'particular',
     cv: null, profilePic: null
 };
@@ -21,6 +22,13 @@ const ProfessionalApplicationModal = ({ onClose }) => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [receiptNumber, setReceiptNumber] = useState('');
     const [formData, setFormData] = useState(EMPTY_APPLICATION);
+    const [cuitTouched, setCuitTouched] = useState(false);
+    // El DNI no se pide aparte: se extrae del CUIL (evita datos duplicados o inconsistentes).
+    const derivedDni = dniFromCuil(formData.cuit);
+    const cuitError = formData.cuit && !isValidCuil(formData.cuit)
+        ? 'CUIL/CUIT inválido: revisá los 11 dígitos.'
+        : '';
+    const canContinue = step !== 1 || !cuitError;
 
     // Bloquea el scroll de fondo mientras el modal está montado y lo restaura al cerrarse.
     useEffect(() => {
@@ -59,6 +67,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
     };
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleCuitChange = (e) => setFormData({ ...formData, cuit: formatCuil(e.target.value) });
 
     const handleSubmit = () => {
         setIsSubmitting(true);
@@ -167,7 +176,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Documento Nacional de Identidad</p>
-                                        <p className="font-medium text-lg text-slate-700">{formData.dni || 'No provisto'}</p>
+                                        <p className="font-medium text-lg text-slate-700">{derivedDni ? formatDni(derivedDni) : 'No provisto'}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Correo Electrónico de Contacto</p>
@@ -244,13 +253,28 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                                     <label htmlFor={`${fieldId}-apellidos`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Apellidos</label>
                                     <input id={`${fieldId}-apellidos`} type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Pérez" />
                                 </div>
-                                <div className="space-y-2">
-                                    <label htmlFor={`${fieldId}-dni`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">DNI</label>
-                                    <input id={`${fieldId}-dni`} type="text" name="dni" value={formData.dni} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Sin puntos" />
-                                </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 sm:col-span-2">
                                     <label htmlFor={`${fieldId}-cuit-cuil`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">CUIT / CUIL</label>
-                                    <input id={`${fieldId}-cuit-cuil`} type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. 20-XXXXXXXX-X" />
+                                    <input
+                                        id={`${fieldId}-cuit-cuil`}
+                                        type="text"
+                                        inputMode="numeric"
+                                        name="cuit"
+                                        value={formData.cuit}
+                                        onChange={handleCuitChange}
+                                        onBlur={() => setCuitTouched(true)}
+                                        aria-invalid={Boolean(cuitTouched && cuitError)}
+                                        aria-describedby={`${fieldId}-cuit-hint`}
+                                        className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-white focus:outline-none transition-colors ${cuitTouched && cuitError ? 'border-red-500 focus:border-red-400' : 'border-slate-800 focus:border-blue-500'}`}
+                                        placeholder="Ej. 20-12345678-6"
+                                    />
+                                    <p id={`${fieldId}-cuit-hint`} className={`text-xs font-medium ${cuitTouched && cuitError ? 'text-red-400' : 'text-slate-500'}`}>
+                                        {cuitTouched && cuitError
+                                            ? cuitError
+                                            : derivedDni
+                                                ? `DNI: ${formatDni(derivedDni)}`
+                                                : 'Tu DNI se obtiene automáticamente del CUIL.'}
+                                    </p>
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor={`${fieldId}-correo-electronico`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Correo Electrónico</label>
@@ -347,8 +371,8 @@ const ProfessionalApplicationModal = ({ onClose }) => {
 
                     {step < 3 ? (
                         <button 
-                            onClick={handleNext} 
-                            className="px-6 py-3 bg-white text-slate-900 hover:bg-slate-200 rounded-xl font-black flex items-center gap-2 shadow-lg transition-all"
+                            onClick={() => { setCuitTouched(true); if (canContinue) handleNext(); }} 
+                            className={`px-6 py-3 bg-white text-slate-900 hover:bg-slate-200 rounded-xl font-black flex items-center gap-2 shadow-lg transition-all ${canContinue ? '' : 'opacity-50 cursor-not-allowed'}`}
                         >
                             Siguiente <ChevronRight className="w-4 h-4" />
                         </button>
