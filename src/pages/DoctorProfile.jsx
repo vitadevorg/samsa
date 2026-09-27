@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { doctorsData } from '../data/doctors';
 const SPECIALTIES = [
   "Cardiología", "Clínica Médica", "Pediatría", "Nutrición", 

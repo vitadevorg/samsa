@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, User, CreditCard, Mail, FileText, ArrowLeft, Check, ChevronLeft, ChevronRight, AlertTriangle, Edit2, X, CheckCircle, Briefcase, HeartPulse, Calendar, ShieldCheck, MapPin, Printer, Building2, Smartphone } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/useAuth'; 
 import { doctorsData } from '../data/doctors';
 import html2pdf from 'html2pdf.js';
 const PrintReceipt = ({ appointmentData }) => {

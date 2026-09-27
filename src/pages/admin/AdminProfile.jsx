@@ -5,7 +5,7 @@ import {
   Lock, CheckCircle, LogOut 
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor = "slate" }) => (
   <div className="space-y-1">
     <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">

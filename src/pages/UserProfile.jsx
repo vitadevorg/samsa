@@ -6,7 +6,7 @@ import {
   Stethoscope, HeartPulse, Calendar, LogOut, CheckCircle, Phone, Bell
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 const INSURANCES = [
   "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
   "Galeno", "PAMI", "IOS", "OSECAC"

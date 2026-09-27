@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, User, XCircle, CheckCircle, AlertCircle, Search, Star, MessageSquare, Send, X, Heart, Activity, Stethoscope, Timer, Download, HeartPulse } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 const PrintReceipt = ({ appointmentData }) => {
     const { doctorName, patientName, dni, insurance, date, time, email, location, bookingDate } = appointmentData;
     const transactionId = Math.random().toString(36).substring(2, 12).toUpperCase();

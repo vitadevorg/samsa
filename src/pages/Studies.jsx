@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Download, Eye, Calendar, Search, Activity, FileCheck, AlertCircle, HeartPulse, X, Printer } from 'lucide-react';
 import Navbar from '../components/Navbar'; 
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 const MedicalReport = ({ study, isPreview, user }) => {
     const transactionId = Math.random().toString(36).substring(2, 12).toUpperCase();
     return (

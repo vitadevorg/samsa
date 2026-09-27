@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import { login as authenticate, InvalidCredentialsError } from '../services/authService';
+import { getHomeForRole } from '../constants/roles';
 import { Eye, EyeOff, Lock, Mail, Check, X, Activity, ChevronRight, ArrowLeft, AlertTriangle } from 'lucide-react';
 const customStyles = `
   @keyframes shake {
@@ -100,7 +102,21 @@ const MedicalAvatar = ({ currentState }) => {
 };
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const timeoutsRef = useRef([]);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+      isMountedRef.current = true;
+      const timeouts = timeoutsRef.current;
+      return () => {
+          isMountedRef.current = false;
+          timeouts.forEach(clearTimeout);
+      };
+  }, []);
+  const schedule = useCallback((fn, ms) => {
+      timeoutsRef.current.push(setTimeout(fn, ms));
+  }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -146,67 +162,31 @@ const Login = () => {
     if (!validateForm()) {
         setLoginState('error');
         setErrorMsg('Por favor, completá todos los campos.');
-        setTimeout(() => setLoginState('idle'), 2000);
+        schedule(() => setLoginState('idle'), 2000);
         return;
     }
     setLoginState('processing');
-    setTimeout(() => {
-        let success = false;
-        let roleData = null;
-        if (email === 'lglucasgabriel@gmail.com' && password === 'batman') {
-             success = true;
-             roleData = { 
-                name: 'Lucas Gabriel', 
-                lastname: 'Lazarte',
-                email: email, 
-                role: 'patient',
-                dni: '45275212',
-                phone: '3863409588',
-                location: 'Villa Quinteros',
-                img: 'https://placehold.co/100x100/3B82F6/FFFFFF?text=LL',
-                dob: '11/05/2004'
-            };
-        }
-        else if (email === 'jesus.zelarayan@samsa.med' && password === '12345') {
-            success = true;
-            roleData = { 
-                name: 'Jesús Zelarayan', 
-                email: email, 
-                role: 'doctor',
-                img: '/img/UTN-Jesus.jpg'
-            };
-        } 
-        else if (email === 'admin@samsa.med' && password === 'admin') {
-             success = true;
-             roleData = { name: 'Administrador', email: email, role: 'admin' };
-        }
-        else if (email === 'secretaria@samsa.med' && password === '12345') {
-            success = true;
-            roleData = { 
-                name: 'María González', 
-                email: email, 
-                role: 'secretary',
-                img: 'https://placehold.co/100x100/ec4899/FFFFFF?text=MG'
-            };
-        }
-        if (success) {
-            setLoginState('success');
-            setTimeout(() => {
-                login(roleData);
-                if(roleData.role === 'admin') navigate('/admin/doctors');
-                else if(roleData.role === 'doctor') navigate('/doctor/turns');
-                else navigate('/');
-            }, 800);
-        } else {
-            setLoginState('error');
-            setErrorMsg('Credenciales incorrectas. Intentalo de nuevo.');
-            setErrors({ email: true, password: true });
-            setTimeout(() => {
-                setLoginState('idle');
-                setPassword(''); 
-            }, 2500);
-        }
-    }, 2000); 
+    try {
+        const userData = await authenticate(email, password);
+        if (!isMountedRef.current) return;
+        setLoginState('success');
+        schedule(() => {
+            login(userData);
+            const from = location.state?.from?.pathname;
+            navigate(from || getHomeForRole(userData.role), { replace: true });
+        }, 800);
+    } catch (err) {
+        if (!isMountedRef.current) return;
+        setLoginState('error');
+        setErrorMsg(err instanceof InvalidCredentialsError
+            ? 'Credenciales incorrectas. Intentalo de nuevo.'
+            : 'No se pudo iniciar sesión. Intentalo más tarde.');
+        setErrors({ email: true, password: true });
+        schedule(() => {
+            setLoginState('idle');
+            setPassword('');
+        }, 2500);
+    }
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
@@ -302,7 +282,7 @@ const Login = () => {
                 disabled={loginState === 'processing' || loginState === 'success'}
                 className={`w-full flex items-center justify-center py-4 px-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all transform duration-200 ${
                     loginState === 'success' ? 'bg-green-500 hover:bg-green-600 scale-105' :
-                    loginState === 'error' ? 'bg-red-500 hover:bg-red-600 shake' :
+                    loginState === 'error' ? 'bg-red-500 hover:bg-red-600 animate-shake' :
                     'bg-blue-600 hover:bg-blue-700 hover:-translate-y-1 hover:shadow-blue-500/30'
                 } disabled:opacity-70 disabled:cursor-not-allowed`}
               >
