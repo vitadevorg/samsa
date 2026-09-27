@@ -1,45 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, Users, Activity, Phone, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-const FadeIn = ({ children, delay = 0, className = "" }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => setIsVisible(entry.isIntersecting));
-    }, { threshold: 0.1 }); 
-    const { current } = domRef;
-    if (current) observer.observe(current);
-    return () => {
-      if (current) observer.unobserve(current);
-    };
-  }, []);
-  return (
-    <div
-      ref={domRef}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-1000 ease-out transform ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-12' 
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
+import BaseFadeIn from '../components/FadeIn';
+import { useInView } from '../hooks/useInView';
+const FadeIn = (props) => (
+  <BaseFadeIn once={false} duration="duration-1000" offset="translate-y-12" {...props} />
+);
 const Counter = ({ end, duration = 2000, suffix = "" }) => {
   const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) setIsVisible(true);
-    });
-    if (domRef.current) observer.observe(domRef.current);
-  }, []);
+  const [domRef, isVisible] = useInView({ threshold: 0 });
   useEffect(() => {
     if (!isVisible) return;
     let startTime;

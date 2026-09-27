@@ -1,75 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Calendar, Activity, Users, ArrowRight, Star, MapPin, CheckCircle, Smartphone, Building, TrendingUp, Clock, FileText, HeartPulse, UserCheck, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProfessionalApplicationModal from './ProfessionalApplicationModal';
-
-const useScrollReveal = (threshold = 0.1) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold, rootMargin: "0px 0px -50px 0px" });
-
-    const currentRef = domRef.current;
-    if (currentRef) observer.observe(currentRef);
-
-    return () => {
-      if (currentRef) observer.unobserve(currentRef);
-    };
-  }, [threshold]);
-
-  return [domRef, isVisible];
-};
-
-const Reveal = ({ children, delay = 0, className = "" }) => {
-  const [ref, isVisible] = useScrollReveal();
-  const transitionStyle = {
-    transition: `all 1s cubic-bezier(0.215, 0.610, 0.355, 1.000) ${delay}ms`,
-    opacity: isVisible ? 1 : 0,
-    transform: isVisible ? 'translateY(0)' : 'translateY(30px)'
-  };
-
-  return (
-    <div ref={ref} style={transitionStyle} className={className}>
-      {children}
-    </div>
-  );
-};
+import Reveal from './Reveal';
+import { useInView } from '../hooks/useInView';
 
 const AnimatedStepsFlow = () => {
-    const [isVisible, setIsVisible] = useState(false);
-    const domRef = useRef();
-
-    useEffect(() => {
-        const currentRef = domRef.current;
-        if (!currentRef) return;
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
-            },
-            { threshold: 0.5 }
-        );
-
-        const timeout = setTimeout(() => {
-            observer.observe(currentRef);
-        }, 800);
-
-        return () => {
-            clearTimeout(timeout);
-            observer.disconnect();
-        };
-    }, []);
+    const [domRef, isVisible] = useInView({ threshold: 0.5, minRatio: 0.5, startDelay: 800 });
 
     return (
         <div ref={domRef} className="grid grid-cols-1 md:grid-cols-4 gap-8 relative mt-16 min-h-[200px]">
@@ -104,27 +41,7 @@ const AnimatedStepsFlow = () => {
 };
 
 const AnimatedChartTrigger = ({ children, threshold = 0.5 }) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const domRef = useRef();
-
-    useEffect(() => {
-        const currentRef = domRef.current;
-        if (!currentRef) return;
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting && entry.intersectionRatio >= (threshold * 0.8)) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
-            },
-            { threshold }
-        );
-        const timeout = setTimeout(() => observer.observe(currentRef), 500);
-        return () => {
-            clearTimeout(timeout);
-            observer.disconnect();
-        };
-    }, [threshold]);
+    const [domRef, isVisible] = useInView({ threshold, minRatio: threshold * 0.8, startDelay: 500 });
 
     return (
         <div ref={domRef} className={isVisible ? "chart-visible" : "chart-hidden"}>
@@ -143,6 +60,7 @@ const AnimatedNumber = ({ end, duration = 1500, isVisible, suffix = "" }) => {
         }
 
         let startTimestamp = null;
+        let frameId;
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
@@ -151,11 +69,12 @@ const AnimatedNumber = ({ end, duration = 1500, isVisible, suffix = "" }) => {
             setCount(Math.floor(easeProgress * end));
 
             if (progress < 1) {
-                window.requestAnimationFrame(step);
+                frameId = window.requestAnimationFrame(step);
             }
         };
 
-        window.requestAnimationFrame(step);
+        frameId = window.requestAnimationFrame(step);
+        return () => window.cancelAnimationFrame(frameId);
     }, [end, duration, isVisible]);
 
     return <span>{count}{suffix}</span>;

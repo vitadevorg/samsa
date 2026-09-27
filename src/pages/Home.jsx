@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, Stethoscope, Activity, User, ShieldCheck, Search, Phone, Calendar, ArrowRight, CheckCircle, HeartPulse } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ProfessionalB2BSection from '../components/ProfessionalB2BSection';
+import SharedReveal from '../components/Reveal';
 const homeStyles = `
   html {
     scroll-behavior: smooth;
@@ -48,39 +49,7 @@ const homeStyles = `
     animation: expand-x 2s ease-out forwards;
   }
 `;
-const useScrollReveal = (delay = 0) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
-    const currentRef = domRef.current;
-    if (currentRef) observer.observe(currentRef);
-    return () => {
-      if (currentRef) observer.unobserve(currentRef);
-    };
-  }, []);
-  return [domRef, isVisible];
-};
-const Reveal = ({ children, delay = 0, className = "" }) => {
-  const [ref, isVisible] = useScrollReveal();
-  const transitionStyle = {
-    transition: `all 1s cubic-bezier(0.215, 0.610, 0.355, 1.000) ${delay}ms`,
-    opacity: isVisible ? 1 : 0,
-    transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.98)'
-  };
-  return (
-    <div ref={ref} style={transitionStyle} className={className}>
-      {children}
-    </div>
-  );
-};
+const Reveal = (props) => <SharedReveal scale {...props} />;
 const IntroOverlay = ({ onComplete }) => {
   const [stage, setStage] = useState(0);
   useEffect(() => {
