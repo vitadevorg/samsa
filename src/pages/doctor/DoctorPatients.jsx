@@ -11,12 +11,12 @@ const initialPatients = [
   { 
     id: 1, 
     name: 'Lucas Gabriel Lazarte', 
-    dni: '45.275.212', 
+    dni: '40.111.222', 
     age: 24, 
     lastVisit: '2025-10-20',
-    historyId: 'HC-45275',
-    phone: '3863-409588',
-    email: 'lglucasgabriel@gmail.com',
+    historyId: 'HC-40111',
+    phone: '381-0000001',
+    email: 'lucas.lazarte@example.com',
     img: '/img/patients/masc4.jpg',
     status: 'active',
     history: [

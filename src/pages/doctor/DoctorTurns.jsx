@@ -21,7 +21,7 @@ const initialAppointments = [
     status: 'attending', 
     img: '/img/patients/masc4.jpg',
     age: 24,
-    historyId: 'HC-45275'
+    historyId: 'HC-40111'
   },
   { 
     id: 2, 

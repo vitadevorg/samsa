@@ -4,7 +4,7 @@ import ConfirmModal from '../../components/ConfirmModal';
 import { Users, Trash2, ShieldAlert } from 'lucide-react';
 const AdminPatients = () => {
   const [patients, setPatients] = useState([
-    { id: 1, name: "Lucas Gabriel Lazarte", dni: "45.275.212", email: "lglucas@gmail.com" },
+    { id: 1, name: "Lucas Gabriel Lazarte", dni: "40.111.222", email: "lucas.lazarte@example.com" },
     { id: 2, name: "Juan Pérez", dni: "30.123.456", email: "juan@test.com" },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
