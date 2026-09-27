@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
 import { Trash2, Edit2, UserPlus, Stethoscope, Save, X } from 'lucide-react';
+import { SPECIALTIES } from '../../constants/catalog';
 const AdminDoctors = () => {
   const [doctors, setDoctors] = useState([
     { id: 1, name: "Francisco Matar", specialty: "Clínica Médica", email: "fran@samsa.com" },
@@ -90,10 +91,7 @@ const AdminDoctors = () => {
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Especialidad</label>
                 <select required className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white appearance-none" value={form.specialty} onChange={e=>setForm({...form, specialty: e.target.value})}>
                     <option value="">Seleccionar...</option>
-                    <option value="Cardiología">Cardiología</option>
-                    <option value="Nutrición">Nutrición</option>
-                    <option value="Clínica Médica">Clínica Médica</option>
-                    <option value="Pediatría">Pediatría</option>
+                    {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
             </div>
             <div className="lg:col-span-1">

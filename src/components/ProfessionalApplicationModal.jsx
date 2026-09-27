@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
+import { SPECIALTIES } from '../constants/catalog';
 
 const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
     const [step, setStep] = useState(1);
@@ -275,11 +276,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                     <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Especialidad Principal</label>
                                     <select name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
                                         <option value="">Seleccione una especialidad</option>
-                                        <option value="Cardiología">Cardiología</option>
-                                        <option value="Clínica Médica">Clínica Médica</option>
-                                        <option value="Pediatría">Pediatría</option>
-                                        <option value="Dermatología">Dermatología</option>
-                                        <option value="Traumatología">Traumatología</option>
+                                        {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">

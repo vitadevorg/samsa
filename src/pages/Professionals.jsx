@@ -8,6 +8,7 @@ import {
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { doctorsData } from '../data/doctors';
+import { SPECIALTIES, INSURANCES, WEEK_DAYS } from '../constants/catalog';
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
@@ -38,18 +39,8 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
     </div>
   );
 };
-const SPECIALTIES = [
-  "Todas", "Cardiología", "Clínica Médica", "Dermatología", "Diagnóstico", 
-  "Endocrinología", "Fonoaudiología", "Ginecología", "Hemoterapia", 
-  "Infectología", "Kinesiología", "Neumonología", "Neurología", 
-  "Nutrición", "Odontología", "Oftalmología", "Pediatría", 
-  "Psicología", "Psiquiatría", "Radiología", "Traumatología", "Urología"
-];
-const INSURANCES = [
-  "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
-const DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const SPECIALTY_FILTERS = ['Todas', ...SPECIALTIES];
+const WORKING_DAYS = WEEK_DAYS.filter(day => day !== 'Dom');
 const DoctorCard = ({ doctor }) => {
     const hoursString = doctor.hours.map(h => `${h.start}-${h.end}`).join(" / ");
     const isPublic = doctor.attentionType === 'Pública';
@@ -126,9 +117,9 @@ const Professionals = () => {
     const params = new URLSearchParams(location.search);
     const specialtyParam = params.get('specialty');
     if (specialtyParam) {
-        const exists = SPECIALTIES.some(s => s.toLowerCase() === specialtyParam.toLowerCase());
+        const exists = SPECIALTY_FILTERS.some(s => s.toLowerCase() === specialtyParam.toLowerCase());
         if (exists) {
-            const exactMatch = SPECIALTIES.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
+            const exactMatch = SPECIALTY_FILTERS.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
             setSelectedSpecialty(exactMatch || 'Todas');
         } else if (specialtyParam !== 'Todas') {
              setSearch(specialtyParam);
@@ -219,7 +210,7 @@ const Professionals = () => {
                                 onChange={(e) => setSelectedSpecialty(e.target.value)}
                                 className="w-full p-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer hover:border-blue-300 transition-colors shadow-sm text-gray-700"
                             >
-                                {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                                {SPECIALTY_FILTERS.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         </div>
@@ -275,7 +266,7 @@ const Professionals = () => {
                             Disponibilidad
                         </h3>
                         <div className="grid grid-cols-3 gap-2 mb-3">
-                            {DAYS.map(day => (
+                            {WORKING_DAYS.map(day => (
                                 <button
                                     key={day}
                                     onClick={() => toggleDay(day)}

@@ -7,10 +7,7 @@ import {
   Search, Phone, ChevronLeft, ChevronRight, List, ShieldCheck, Activity, Hash, CreditCard, Mail, FileText, LayoutGrid
 } from 'lucide-react';
 
-const INSURANCES = [
-  "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
+import { INSURANCE_OPTIONS } from '../../constants/catalog';
 
 const getToday = () => {
     const d = new Date();
@@ -748,7 +745,7 @@ const SecretaryDashboard = () => {
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><ShieldCheck className="h-5 w-5 text-slate-400" /></div>
                                     <select value={newTurnData.obraSocial} onChange={e => setNewTurnData({...newTurnData, obraSocial: e.target.value})} className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-semibold text-slate-700 appearance-none shadow-sm transition-all">
-                                        {INSURANCES.map(ins => (
+                                        {INSURANCE_OPTIONS.map(ins => (
                                             <option key={ins} value={ins}>{ins}</option>
                                         ))}
                                     </select>

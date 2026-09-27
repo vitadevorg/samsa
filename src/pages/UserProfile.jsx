@@ -7,10 +7,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/useAuth';
-const INSURANCES = [
-  "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
+import { INSURANCE_OPTIONS } from '../constants/catalog';
 const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => (
   <div className="space-y-1">
     <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
@@ -323,7 +320,7 @@ const UserProfile = () => {
                           : `bg-white border-gray-300 focus:border-${currentTheme.color}-500 focus:ring-${currentTheme.color}-100 text-gray-800 shadow-sm`
                       }`}
                     >
-                      {INSURANCES.map((ins) => (
+                      {INSURANCE_OPTIONS.map((ins) => (
                         <option key={ins} value={ins}>{ins}</option>
                       ))}
                     </select>

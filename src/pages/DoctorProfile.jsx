@@ -9,16 +9,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/useAuth';
 import { doctorsData } from '../data/doctors';
-const SPECIALTIES = [
-  "Cardiología", "Clínica Médica", "Pediatría", "Nutrición", 
-  "Neurología", "Dermatología", "Traumatología", "Ginecología", 
-  "Oftalmología", "Psiquiatría"
-];
-const INSURANCES = [
-  "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
-const DAYS_OF_WEEK = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+import { SPECIALTIES, INSURANCE_OPTIONS, WEEK_DAYS } from '../constants/catalog';
 const SuccessModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
@@ -141,7 +132,7 @@ const DoctorProfile = () => {
           const newDays = prev.days.includes(day) 
               ? prev.days.filter(d => d !== day)
               : [...prev.days, day];
-          return { ...prev, days: DAYS_OF_WEEK.filter(d => newDays.includes(d)) };
+          return { ...prev, days: WEEK_DAYS.filter(d => newDays.includes(d)) };
       });
   };
   const addTimeRange = () => {
@@ -364,7 +355,7 @@ const DoctorProfile = () => {
                             <div className="space-y-2 animate-fadeIn">
                                 <label className="block text-sm font-bold text-gray-700 uppercase">Obras Sociales</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {INSURANCES.map(ins => (
+                                    {INSURANCE_OPTIONS.map(ins => (
                                         <button
                                             key={ins}
                                             onClick={() => toggleInsurance(ins)}
@@ -383,7 +374,7 @@ const DoctorProfile = () => {
                         <div className="space-y-2">
                             <label className="block text-sm font-bold text-gray-700 uppercase">Días de Atención</label>
                             <div className="flex justify-between gap-1">
-                                {DAYS_OF_WEEK.map(day => (
+                                {WEEK_DAYS.map(day => (
                                     <button
                                         key={day}
                                         onClick={() => toggleDay(day)}
