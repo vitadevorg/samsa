@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   Heart, Stethoscope, Wind, Sun, Scan, ShieldCheck, Ear, Baby, 
   Droplet, Bug, Activity, Brain, Utensils, Smile, Eye, MessageCircle, 
@@ -7,38 +7,8 @@ import {
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-const FadeIn = ({ children, delay = 0, className = "" }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target); 
-        }
-      });
-    }, { threshold: 0.1 });
-    const { current } = domRef;
-    if (current) observer.observe(current);
-    return () => {
-      if (current) observer.unobserve(current);
-    };
-  }, []);
-  return (
-    <div
-      ref={domRef}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-1000 ease-out transform ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-8'
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
+import BaseFadeIn from '../components/FadeIn';
+const FadeIn = (props) => <BaseFadeIn duration="duration-1000" {...props} />;
 const Turns = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const specialties = [
@@ -116,7 +86,7 @@ const Turns = () => {
         {filteredSpecialties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {filteredSpecialties.map((item, index) => (
-              <FadeIn key={index} delay={Math.min(index * 50, 600)} className="h-full">
+              <FadeIn key={item.title} delay={Math.min(index * 50, 600)} className="h-full">
                 <Link 
                   to={`/professionals?specialty=${encodeURIComponent(item.title)}`} 
                   className="group block h-full"

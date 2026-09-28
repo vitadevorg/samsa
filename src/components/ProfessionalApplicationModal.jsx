@@ -1,34 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
+import { SPECIALTIES } from '../constants/catalog';
+import { generateTransactionId } from '../utils/ids';
+import { formatCuil, isValidCuil, dniFromCuil, formatDni } from '../utils/cuil';
+import { useTimeouts } from '../hooks/useTimeouts';
 
-const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
+const EMPTY_APPLICATION = {
+    firstName: '', lastName: '', cuit: '', email: '', phone: '',
+    specialty: '', licenseNumber: '', professionalType: 'particular',
+    cv: null, profilePic: null
+};
+
+// Se monta solo mientras está abierto, así cada apertura arranca con el formulario vacío.
+const ProfessionalApplicationModal = ({ onClose }) => {
+    const fieldId = useId();
+    const { schedule } = useTimeouts();
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [formData, setFormData] = useState({
-        firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
-        specialty: '', licenseNumber: '', professionalType: 'particular',
-        cv: null, profilePic: null
-    });
+    const [receiptNumber, setReceiptNumber] = useState('');
+    const [formData, setFormData] = useState(EMPTY_APPLICATION);
+    const [cuitTouched, setCuitTouched] = useState(false);
+    // El DNI no se pide aparte: se extrae del CUIL (evita datos duplicados o inconsistentes).
+    const derivedDni = dniFromCuil(formData.cuit);
+    const cuitError = formData.cuit && !isValidCuil(formData.cuit)
+        ? 'CUIL/CUIT inválido: revisá los 11 dígitos.'
+        : '';
+    const canContinue = step !== 1 || !cuitError;
 
+    // Bloquea el scroll de fondo mientras el modal está montado y lo restaura al cerrarse.
     useEffect(() => {
-        if (isOpen) {
-            setStep(1);
-            setIsSubmitting(false);
-            setIsSuccess(false);
-            setProgress(0);
-            setFormData({
-                firstName: '', lastName: '', dni: '', cuit: '', email: '', phone: '',
-                specialty: '', licenseNumber: '', professionalType: 'particular',
-                cv: null, profilePic: null
-            });
-            document.body.style.overflow = 'hidden';
-        } else {
+        document.body.style.overflow = 'hidden';
+        return () => {
             document.body.style.overflow = 'unset';
-        }
-    }, [isOpen]);
+        };
+    }, []);
 
     useEffect(() => {
         if (isSuccess) {
@@ -41,7 +49,6 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
         };
     }, [isSuccess]);
 
-    if (!isOpen) return null;
 
     const handleNext = () => {
         setStep(prev => {
@@ -60,11 +67,13 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
     };
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleCuitChange = (e) => setFormData({ ...formData, cuit: formatCuil(e.target.value) });
 
     const handleSubmit = () => {
         setIsSubmitting(true);
         setProgress(100);
-        setTimeout(() => {
+        setReceiptNumber(generateTransactionId());
+        schedule(() => {
             setIsSubmitting(false);
             setIsSuccess(true);
         }, 1000);
@@ -147,7 +156,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                             </div>
                             <div className="text-right font-sans">
                                 <p className="text-slate-400 uppercase text-xs font-bold tracking-wider mb-1">Comprobante Oficial N°</p>
-                                <p className="font-mono font-bold text-2xl text-slate-800">{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                                <p className="font-mono font-bold text-2xl text-slate-800">{receiptNumber}</p>
                                 <p className="text-sm text-slate-500 mt-1">{new Date().toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                             </div>
                         </div>
@@ -167,7 +176,7 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Documento Nacional de Identidad</p>
-                                        <p className="font-medium text-lg text-slate-700">{formData.dni || 'No provisto'}</p>
+                                        <p className="font-medium text-lg text-slate-700">{derivedDni ? formatDni(derivedDni) : 'No provisto'}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Correo Electrónico de Contacto</p>
@@ -237,28 +246,43 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Nombres</label>
-                                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Juan Martín" />
+                                    <label htmlFor={`${fieldId}-nombres`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Nombres</label>
+                                    <input id={`${fieldId}-nombres`} type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Juan Martín" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Apellidos</label>
-                                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Pérez" />
+                                    <label htmlFor={`${fieldId}-apellidos`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Apellidos</label>
+                                    <input id={`${fieldId}-apellidos`} type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. Pérez" />
+                                </div>
+                                <div className="space-y-2 sm:col-span-2">
+                                    <label htmlFor={`${fieldId}-cuit-cuil`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">CUIT / CUIL</label>
+                                    <input
+                                        id={`${fieldId}-cuit-cuil`}
+                                        type="text"
+                                        inputMode="numeric"
+                                        name="cuit"
+                                        value={formData.cuit}
+                                        onChange={handleCuitChange}
+                                        onBlur={() => setCuitTouched(true)}
+                                        aria-invalid={Boolean(cuitTouched && cuitError)}
+                                        aria-describedby={`${fieldId}-cuit-hint`}
+                                        className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-white focus:outline-none transition-colors ${cuitTouched && cuitError ? 'border-red-500 focus:border-red-400' : 'border-slate-800 focus:border-blue-500'}`}
+                                        placeholder="Ej. 20-12345678-6"
+                                    />
+                                    <p id={`${fieldId}-cuit-hint`} className={`text-xs font-medium ${cuitTouched && cuitError ? 'text-red-400' : 'text-slate-500'}`}>
+                                        {cuitTouched && cuitError
+                                            ? cuitError
+                                            : derivedDni
+                                                ? `DNI: ${formatDni(derivedDni)}`
+                                                : 'Tu DNI se obtiene automáticamente del CUIL.'}
+                                    </p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">DNI</label>
-                                    <input type="text" name="dni" value={formData.dni} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Sin puntos" />
+                                    <label htmlFor={`${fieldId}-correo-electronico`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Correo Electrónico</label>
+                                    <input id={`${fieldId}-correo-electronico`} type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="tu@email.com" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">CUIT / CUIL</label>
-                                    <input type="text" name="cuit" value={formData.cuit} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. 20-XXXXXXXX-X" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Correo Electrónico</label>
-                                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="tu@email.com" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Teléfono Celular</label>
-                                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Código de área + número" />
+                                    <label htmlFor={`${fieldId}-telefono-celular`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Teléfono Celular</label>
+                                    <input id={`${fieldId}-telefono-celular`} type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Código de área + número" />
                                 </div>
                             </div>
                         </div>
@@ -272,22 +296,18 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
                             </h3>
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Especialidad Principal</label>
-                                    <select name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
+                                    <label htmlFor={`${fieldId}-especialidad-principal`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Especialidad Principal</label>
+                                    <select id={`${fieldId}-especialidad-principal`} name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
                                         <option value="">Seleccione una especialidad</option>
-                                        <option value="Cardiología">Cardiología</option>
-                                        <option value="Clínica Médica">Clínica Médica</option>
-                                        <option value="Pediatría">Pediatría</option>
-                                        <option value="Dermatología">Dermatología</option>
-                                        <option value="Traumatología">Traumatología</option>
+                                        {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Número de Matrícula (Provincial o Nacional)</label>
-                                    <input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. MP 12345" />
+                                    <label htmlFor={`${fieldId}-numero-de-matricula`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Número de Matrícula (Provincial o Nacional)</label>
+                                    <input id={`${fieldId}-numero-de-matricula`} type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. MP 12345" />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">Tipo de Profesional</label>
+                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Tipo de Profesional</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         {['particular', 'clinica', 'hospital'].map(type => (
                                             <div 
@@ -351,8 +371,8 @@ const ProfessionalApplicationModal = ({ isOpen, onClose }) => {
 
                     {step < 3 ? (
                         <button 
-                            onClick={handleNext} 
-                            className="px-6 py-3 bg-white text-slate-900 hover:bg-slate-200 rounded-xl font-black flex items-center gap-2 shadow-lg transition-all"
+                            onClick={() => { setCuitTouched(true); if (canContinue) handleNext(); }} 
+                            className={`px-6 py-3 bg-white text-slate-900 hover:bg-slate-200 rounded-xl font-black flex items-center gap-2 shadow-lg transition-all ${canContinue ? '' : 'opacity-50 cursor-not-allowed'}`}
                         >
                             Siguiente <ChevronRight className="w-4 h-4" />
                         </button>

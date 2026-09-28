@@ -1,57 +1,29 @@
-import React, { useState } from 'react';
+import React, { useId } from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useCrudList } from '../../hooks/useCrudList';
 import { MapPin, Trash2, Save, Building, Edit2, X, Plus } from 'lucide-react';
+const INITIAL_OFFICES = [
+  { id: 1, name: "Consultorio 1", location: "Planta Baja - Ala Norte" },
+  { id: 2, name: "Consultorio 2", location: "Planta Baja - Ala Sur" },
+];
+const EMPTY_FORM = { name: '', location: '' };
 const AdminOffices = () => {
-  const [offices, setOffices] = useState([
-    { id: 1, name: "Consultorio 1", location: "Planta Baja - Ala Norte" },
-    { id: 2, name: "Consultorio 2", location: "Planta Baja - Ala Sur" },
-  ]);
-  const initialFormState = { name: '', location: '' };
-  const [form, setForm] = useState(initialFormState);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const handleSubmit = (e) => {
-      e.preventDefault();
-      if (!form.name || !form.location) return;
-      if (isEditing) {
-          setOffices(prev => prev.map(item => 
-              item.id === editId ? { ...item, ...form } : item
-          ));
-          cancelEdit();
-      } else {
-          setOffices([...offices, { ...form, id: Date.now() }]);
-          setForm(initialFormState);
-      }
-  }
-  const handleEdit = (item) => {
-      setIsEditing(true);
-      setEditId(item.id);
-      setForm({ name: item.name, location: item.location });
-  };
-  const cancelEdit = () => {
-      setIsEditing(false);
-      setEditId(null);
-      setForm(initialFormState);
-  };
-  const openDeleteModal = (id) => {
-      setDeleteId(id);
-      setIsModalOpen(true);
-  }
-  const confirmDelete = () => {
-      setOffices(offices.filter(o => o.id !== deleteId));
-      if (deleteId === editId) cancelEdit();
-      setIsModalOpen(false);
-      setDeleteId(null);
-  }
+  const fieldId = useId();
+  const {
+    items: offices, form, setForm, isEditing, editId,
+    startEdit: handleEdit, cancelEdit, submit: handleSubmit,
+    isDeleteOpen: isModalOpen, requestDelete: openDeleteModal, cancelDelete, confirmDelete,
+  } = useCrudList(INITIAL_OFFICES, {
+    emptyForm: EMPTY_FORM,
+    validate: (form) => Boolean(form.name.trim() && form.location.trim()),
+  });
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <ConfirmModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
         title="Eliminar Consultorio"
         message="¿Está seguro que desea eliminar este consultorio? Esto podría afectar los turnos asignados a esta ubicación."
@@ -75,8 +47,8 @@ const AdminOffices = () => {
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
-                            <input 
+                            <label htmlFor={`${fieldId}-nombre`} className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre</label>
+                            <input id={`${fieldId}-nombre`} 
                                 required 
                                 placeholder="Ej: Consultorio 10" 
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" 
@@ -85,8 +57,8 @@ const AdminOffices = () => {
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Ubicación</label>
-                            <input 
+                            <label htmlFor={`${fieldId}-ubicacion`} className="text-xs font-bold text-gray-500 uppercase ml-1">Ubicación</label>
+                            <input id={`${fieldId}-ubicacion`} 
                                 required 
                                 placeholder="Ej: Piso 1, Ala Oeste" 
                                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" 

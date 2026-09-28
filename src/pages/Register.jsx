@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Eye, EyeOff, Lock, Mail, User, Phone, MapPin, Calendar, 
@@ -6,10 +6,8 @@ import {
   Hash, CreditCard, HeartPulse, ChevronDown, ChevronRight,
   ShieldCheck, Activity, Check
 } from 'lucide-react';
-const INSURANCES = [
-  "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
+import { INSURANCE_OPTIONS } from '../constants/catalog';
+import { useTimeouts } from '../hooks/useTimeouts';
 const SuccessModal = ({ isOpen, onNavigate }) => {
     if (!isOpen) return null;
     return (
@@ -108,6 +106,7 @@ const RegistrationAvatar = ({ currentState }) => {
   );
 };
 const Register = () => {
+  const { schedule, clear } = useTimeouts();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
       name: '', lastname: '', dni: '', cuil: '', dob: '',
@@ -119,7 +118,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [writingTimeout, setWritingTimeout] = useState(null);
+  const writingTimeoutRef = useRef(null);
   const [passValidations, setPassValidations] = useState({
       length: false, uppercase: false, number: false
   });
@@ -137,10 +136,10 @@ const Register = () => {
       if (name === 'password') checkPassword(value);
       if (avatarState !== 'processing' && !showSuccess) {
           setAvatarState('writing');
-          if (writingTimeout) clearTimeout(writingTimeout);
-          setWritingTimeout(setTimeout(() => {
+          clear(writingTimeoutRef.current);
+          writingTimeoutRef.current = schedule(() => {
               setAvatarState('idle');
-          }, 600));
+          }, 600);
       }
   };
   const validateForm = () => {
@@ -158,19 +157,19 @@ const Register = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (writingTimeout) clearTimeout(writingTimeout);
+    clear(writingTimeoutRef.current);
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
         setErrors(formErrors);
         setAvatarState('error');
-        setTimeout(() => setAvatarState('idle'), 2500);
+        schedule(() => setAvatarState('idle'), 2500);
         return;
     }
     setAvatarState('processing');
     setErrors({});
-    setTimeout(() => {
+    schedule(() => {
         setAvatarState('success');
-        setTimeout(() => {
+        schedule(() => {
             setShowSuccess(true);
         }, 600);
     }, 2000);
@@ -233,7 +232,7 @@ const Register = () => {
                       <ChevronDown className="absolute top-4 right-4 h-4 w-4 text-slate-400 pointer-events-none" />
                       <select name="insurance" value={formData.insurance} onChange={handleChange} className={`w-full pl-10 pr-10 py-3 bg-slate-50 border rounded-xl text-sm outline-none appearance-none cursor-pointer transition focus:bg-white ${errors.insurance ? 'border-red-300 ring-1 ring-red-100' : 'border-slate-200 focus:border-blue-500'}`}>
                           <option value="" disabled>Seleccionar Obra Social</option>
-                          {INSURANCES.map((ins, i) => <option key={i} value={ins}>{ins}</option>)}
+                          {INSURANCE_OPTIONS.map(ins => <option key={ins} value={ins}>{ins}</option>)}
                       </select>
                       {errors.insurance && <p className="text-red-500 text-xs mt-1 ml-1">{errors.insurance}</p>}
                   </div>

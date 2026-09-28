@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { LifeBuoy, Send, MessageSquare, PhoneCall, Mail, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Printer } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
 
 const faqs = [
   {
@@ -23,6 +24,8 @@ const faqs = [
 ];
 
 const DoctorSupport = () => {
+  const fieldId = useId();
+  const { schedule } = useTimeouts();
   const [openFaq, setOpenFaq] = useState(null);
   const [ticketStatus, setTicketStatus] = useState('idle'); 
   const [ticketId, setTicketId] = useState(null);
@@ -31,7 +34,7 @@ const DoctorSupport = () => {
     e.preventDefault();
     setTicketStatus('sending');
     const newId = Math.floor(Math.random() * 9000) + 1000;
-    setTimeout(() => {
+    schedule(() => {
       setTicketId(newId);
       setTicketStatus('success');
     }, 1500);
@@ -99,14 +102,14 @@ const DoctorSupport = () => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                 <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Asunto</label>
-                  <input type="text" required placeholder="Ej: Error al guardar historia clínica" className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm" />
+                  <label htmlFor={`${fieldId}-asunto`} className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Asunto</label>
+                  <input id={`${fieldId}-asunto`} type="text" required placeholder="Ej: Error al guardar historia clínica" className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Categoría</label>
-                    <select className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm appearance-none">
+                    <label htmlFor={`${fieldId}-categoria`} className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Categoría</label>
+                    <select id={`${fieldId}-categoria`} className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm appearance-none">
                       <option>Problema en el Sistema</option>
                       <option>Sugerencia de Mejora</option>
                       <option>Problema de Hardware</option>
@@ -114,8 +117,8 @@ const DoctorSupport = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Prioridad</label>
-                    <select className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm appearance-none">
+                    <label htmlFor={`${fieldId}-prioridad`} className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Prioridad</label>
+                    <select id={`${fieldId}-prioridad`} className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-700 shadow-sm appearance-none">
                       <option>Baja (Consulta)</option>
                       <option>Media (Fallo menor)</option>
                       <option>Alta (Crítico)</option>
@@ -124,8 +127,8 @@ const DoctorSupport = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Descripción Detallada</label>
-                  <textarea required rows="4" placeholder="Describí el problema con la mayor cantidad de detalles posible..." className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none font-medium text-slate-700 shadow-sm"></textarea>
+                  <label htmlFor={`${fieldId}-descripcion-detallada`} className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Descripción Detallada</label>
+                  <textarea id={`${fieldId}-descripcion-detallada`} required rows="4" placeholder="Describí el problema con la mayor cantidad de detalles posible..." className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none font-medium text-slate-700 shadow-sm"></textarea>
                 </div>
 
                 <button 
@@ -172,7 +175,7 @@ const DoctorSupport = () => {
 
               <div className="space-y-3">
                 {faqs.map((faq, index) => (
-                  <div key={index} className={`border ${openFaq === index ? 'border-blue-200 bg-blue-50/30' : 'border-slate-200'} rounded-2xl overflow-hidden transition-colors`}>
+                  <div key={faq.q} className={`border ${openFaq === index ? 'border-blue-200 bg-blue-50/30' : 'border-slate-200'} rounded-2xl overflow-hidden transition-colors`}>
                     <button 
                       onClick={() => setOpenFaq(openFaq === index ? null : index)}
                       className="w-full px-6 py-5 text-left font-bold text-slate-800 flex justify-between items-center hover:bg-slate-50 transition-colors"

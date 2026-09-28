@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, Stethoscope, Activity, User, ShieldCheck, Search, Phone, Calendar, ArrowRight, CheckCircle, HeartPulse } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ProfessionalB2BSection from '../components/ProfessionalB2BSection';
+import SharedReveal from '../components/Reveal';
 const homeStyles = `
   html {
     scroll-behavior: smooth;
@@ -48,39 +49,7 @@ const homeStyles = `
     animation: expand-x 2s ease-out forwards;
   }
 `;
-const useScrollReveal = (delay = 0) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
-    const currentRef = domRef.current;
-    if (currentRef) observer.observe(currentRef);
-    return () => {
-      if (currentRef) observer.unobserve(currentRef);
-    };
-  }, []);
-  return [domRef, isVisible];
-};
-const Reveal = ({ children, delay = 0, className = "" }) => {
-  const [ref, isVisible] = useScrollReveal();
-  const transitionStyle = {
-    transition: `all 1s cubic-bezier(0.215, 0.610, 0.355, 1.000) ${delay}ms`,
-    opacity: isVisible ? 1 : 0,
-    transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.98)'
-  };
-  return (
-    <div ref={ref} style={transitionStyle} className={className}>
-      {children}
-    </div>
-  );
-};
+const Reveal = (props) => <SharedReveal scale {...props} />;
 const IntroOverlay = ({ onComplete }) => {
   const [stage, setStage] = useState(0);
   useEffect(() => {
@@ -219,7 +188,7 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <Reveal key={index} delay={index * 100} className="h-full">
+              <Reveal key={service.title} delay={index * 100} className="h-full">
                   <Link to={`/professionals?specialty=${encodeURIComponent(service.title)}`} className="block group relative bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 h-full hover:-translate-y-2 overflow-hidden">
                     <div className={`absolute top-0 right-0 w-32 h-32 ${service.color} opacity-0 group-hover:opacity-5 rounded-bl-[100%] transition-all duration-500 translate-x-10 -translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0`}></div>
                     <div className={`inline-flex items-center justify-center p-4 ${service.color} rounded-2xl shadow-lg shadow-${service.color}/30 mb-6 group-hover:scale-110 transition-transform duration-300`}>

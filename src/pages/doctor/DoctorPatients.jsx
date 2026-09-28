@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { 
@@ -7,16 +7,18 @@ import {
   Calendar, Phone, Mail, MapPin, Clock, File, Printer, HeartPulse,
   User, CheckCircle, AlertCircle, ClipboardList
 } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
+import { useFileAttachments } from '../../hooks/useFileAttachments';
 const initialPatients = [
   { 
     id: 1, 
     name: 'Lucas Gabriel Lazarte', 
-    dni: '45.275.212', 
+    dni: '40.111.222', 
     age: 24, 
     lastVisit: '2025-10-20',
-    historyId: 'HC-45275',
-    phone: '3863-409588',
-    email: 'lglucasgabriel@gmail.com',
+    historyId: 'HC-40111',
+    phone: '381-0000001',
+    email: 'lucas.lazarte@example.com',
     img: '/img/patients/masc4.jpg',
     status: 'active',
     history: [
@@ -95,8 +97,8 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
                                             <div className="mt-4 pt-4 border-t border-slate-100/60">
                                                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Adjuntos</p>
                                                 <div className="flex gap-2 flex-wrap">
-                                                    {entry.files.map((f, i) => (
-                                                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer">
+                                                    {entry.files.map((f) => (
+                                                        <div key={f.name} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer">
                                                             <Paperclip className="w-3.5 h-3.5 text-blue-500"/> {f.name}
                                                         </div>
                                                     ))}
@@ -202,35 +204,21 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
     );
 };
 const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
+  const fieldId = useId();
+  const { schedule } = useTimeouts();
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
-  const [files, setFiles] = useState([]);
+  const { files, addFiles, removeFile, clearFiles } = useFileAttachments();
   const [isDragging, setIsDragging] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   if (!isOpen || !patient) return null;
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).map(file => ({
-        file,
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-        type: file.type.split('/')[1]?.toUpperCase() || 'FILE'
-      }));
-      setFiles(prev => [...prev, ...newFiles]);
-    }
-  };
-  const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
+  const handleFileChange = (e) => addFiles(e.target.files);
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => setIsDragging(false);
   const handleDrop = (e) => {
     e.preventDefault(); setIsDragging(false);
-    if (e.dataTransfer.files?.length > 0) {
-        const newFiles = Array.from(e.dataTransfer.files).map(file => ({
-            file, name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB', type: file.type.split('/')[1]?.toUpperCase() || 'FILE'
-        }));
-        setFiles(prev => [...prev, ...newFiles]);
-    }
+    addFiles(e.dataTransfer.files);
   };
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -239,9 +227,9 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
   const confirmSave = () => {
     setShowConfirm(false);
     setShowSuccess(true);
-    setTimeout(() => {
+    schedule(() => {
         onSave(patient.id, { diagnosis, prescription, files, date: new Date().toISOString() });
-        setDiagnosis(''); setPrescription(''); setFiles([]);
+        setDiagnosis(''); setPrescription(''); clearFiles();
         setShowSuccess(false);
     }, 1500);
   };
@@ -295,10 +283,10 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                 <form id="evolution-form" onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-diagnostico-evolucion`} className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-600"/> Diagnóstico / Evolución
                     </label>
-                    <textarea 
+                    <textarea id={`${fieldId}-diagnostico-evolucion`} 
                         required 
                         className="w-full bg-white border border-slate-200 rounded-2xl p-5 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none shadow-sm transition-all min-h-[140px] text-slate-700" 
                         placeholder="Detallá el cuadro clínico, síntomas y observaciones..." 
@@ -307,9 +295,9 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                     />
                     </div>
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <p className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <Paperclip className="w-5 h-5 text-blue-600"/> Archivos Adjuntos
-                    </label>
+                    </p>
                     <div 
                         onDragOver={handleDragOver} 
                         onDragLeave={handleDragLeave} 
@@ -329,8 +317,8 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                     </div>
                     {files.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                            {files.map((f, i) => (
-                                <div key={i} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            {files.map((f) => (
+                                <div key={f.id} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex items-center gap-4 overflow-hidden">
                                         <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center shrink-0 text-blue-600 font-black text-xs border border-blue-100/50 shadow-inner">
                                             {f.type}
@@ -340,7 +328,7 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                                             <p className="text-xs text-slate-400 font-medium mt-0.5">{f.size}</p>
                                         </div>
                                     </div>
-                                    <button type="button" onClick={() => removeFile(i)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                                    <button type="button" onClick={() => removeFile(f.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-full transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -349,10 +337,10 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
                     )}
                     </div>
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-receta-indicaciones`} className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-amber-500"/> Receta / Indicaciones
                     </label>
-                    <textarea 
+                    <textarea id={`${fieldId}-receta-indicaciones`} 
                         className="w-full bg-amber-50/30 border border-amber-200/60 rounded-2xl p-5 focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 outline-none resize-none shadow-sm transition-all min-h-[100px] text-slate-700" 
                         placeholder="Prescripciones, reposo, o estudios solicitados..." 
                         value={prescription} 
@@ -376,6 +364,8 @@ const MedicalReportModal = ({ isOpen, onClose, patient, onSave }) => {
   );
 };
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
+    const fieldId = useId();
+    const { schedule } = useTimeouts();
     const [newPatient, setNewPatient] = useState({ name: '', dni: '', email: '', phone: '' });
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -387,7 +377,7 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const confirmSave = () => {
         setShowConfirm(false);
         setShowSuccess(true);
-        setTimeout(() => {
+        schedule(() => {
             onAdd({ ...newPatient, id: Date.now(), age: 'N/A', historyId: `HC-${Math.floor(Math.random()*10000)}`, lastVisit: '-', img: 'https://i.pravatar.cc/150?u=new', history: [] });
             setNewPatient({ name: '', dni: '', email: '', phone: '' });
             setShowSuccess(false);
@@ -431,21 +421,21 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
                 ) : (
                     <form onSubmit={handleSubmit} className="p-8 space-y-5 bg-slate-50/50">
                         <div>
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre Completo</label>
-                            <input required placeholder="Ej: Juan Pérez" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
+                            <label htmlFor={`${fieldId}-nombre-completo`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre Completo</label>
+                            <input id={`${fieldId}-nombre-completo`} required placeholder="Ej: Juan Pérez" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
                         </div>
                         <div>
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Documento (DNI)</label>
-                            <input required placeholder="Ej: 30.123.456" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.dni} onChange={e => setNewPatient({...newPatient, dni: e.target.value})} />
+                            <label htmlFor={`${fieldId}-documento`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Documento (DNI)</label>
+                            <input id={`${fieldId}-documento`} required placeholder="Ej: 30.123.456" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.dni} onChange={e => setNewPatient({...newPatient, dni: e.target.value})} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
-                                <input type="email" placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
+                                <label htmlFor={`${fieldId}-email`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
+                                <input id={`${fieldId}-email`} type="email" placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
                             </div>
                             <div>
-                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
-                                <input placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
+                                <label htmlFor={`${fieldId}-telefono`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
+                                <input id={`${fieldId}-telefono`} placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
                             </div>
                         </div>
                         <div className="flex gap-3 pt-6 border-t border-slate-100">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronDown, HelpCircle, Phone, Calendar, Mail, 
   MessageCircle, ArrowRight, Search, FileText 
@@ -6,36 +6,7 @@ import {
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-const FadeIn = ({ children, delay = 0, className = "" }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-    const { current } = domRef;
-    if (current) observer.observe(current);
-    return () => {
-      if (current) observer.unobserve(current);
-    };
-  }, []);
-  return (
-    <div
-      ref={domRef}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
+import FadeIn from '../components/FadeIn';
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const toggleQuestion = (index) => {
@@ -114,7 +85,7 @@ const FAQ = () => {
       <div className="max-w-3xl mx-auto px-6 lg:px-8 pb-24 flex-grow">
         <div className="space-y-4">
           {faqs.map((item, index) => (
-            <FadeIn key={index} delay={Math.min(index * 50, 500)}>
+            <FadeIn key={item.question} delay={Math.min(index * 50, 500)}>
                 <div 
                     className={`group bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
                         activeIndex === index 

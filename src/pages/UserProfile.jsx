@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Mail, Key, CreditCard, FileText, 
@@ -6,32 +6,36 @@ import {
   Stethoscope, HeartPulse, Calendar, LogOut, CheckCircle, Phone, Bell
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { useAuth } from '../context/AuthContext';
-const INSURANCES = [
-  "Ninguna", "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
-const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => (
-  <div className="space-y-1">
-    <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
-      <Icon className={`w-4 h-4 text-${themeColor}-500`} /> {label}
-    </label>
-    <input
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      required={required}
-      className={`w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:outline-none transition-all duration-200 ${
-        disabled 
-          ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' 
-          : `bg-white border-gray-300 focus:border-${themeColor}-500 focus:ring-${themeColor}-100 text-gray-800 shadow-sm`
-      }`}
-    />
-  </div>
-);
+import { useAuth } from '../context/useAuth';
+import { INSURANCE_OPTIONS } from '../constants/catalog';
+import { useTimeouts } from '../hooks/useTimeouts';
+const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => {
+  const id = useId();
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+        <Icon className={`w-4 h-4 text-${themeColor}-500`} /> {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        className={`w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:outline-none transition-all duration-200 ${
+          disabled 
+            ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' 
+            : `bg-white border-gray-300 focus:border-${themeColor}-500 focus:ring-${themeColor}-100 text-gray-800 shadow-sm`
+        }`}
+      />
+    </div>
+  );
+};
 const UserProfile = () => {
+  const fieldId = useId();
+  const { schedule } = useTimeouts();
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -119,7 +123,7 @@ const UserProfile = () => {
     setIsEditing(false);
     setShowSaveModal(false);
     setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
+    schedule(() => setShowSuccessToast(false), 3000);
   };
   const handleSavePassword = (e) => {
     e.preventDefault();
@@ -135,23 +139,23 @@ const UserProfile = () => {
     setShowPasswordModal(true);
   };
   const confirmPasswordChange = () => {
-    console.log("Cambiando contraseña...");
     setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
     setIsChangingPassword(false);
     setShowPasswordModal(false);
     setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
+    schedule(() => setShowSuccessToast(false), 3000);
   };
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setShowRelievedToast(true);
-    setTimeout(() => setShowRelievedToast(false), 4000);
+    schedule(() => setShowRelievedToast(false), 4000);
   };
   const handleDeleteAccount = () => {
     setShowDeleteModal(false);
     setShowGoodbyeToast(true);
+    // setTimeout directo a propósito (no `schedule`): el cierre de sesión tiene que ocurrir
+    // aunque el usuario salga de la página durante el mensaje de despedida.
     setTimeout(() => {
-      console.log("Cuenta eliminada permanentemente:", user.id);
       logout();
       navigate('/');
     }, 4000);
@@ -309,10 +313,10 @@ const UserProfile = () => {
                   themeColor={currentTheme.color}
                 />
                 <div className="space-y-1 col-span-1 md:col-span-2">
-                    <label className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-obra-social`} className="text-sm font-semibold text-gray-600 flex items-center gap-2">
                       <HeartPulse className={`w-4 h-4 text-${currentTheme.color}-500`} /> Obra Social
                     </label>
-                    <select
+                    <select id={`${fieldId}-obra-social`}
                       name="insurance"
                       value={formData.insurance}
                       onChange={handleInputChange}
@@ -323,7 +327,7 @@ const UserProfile = () => {
                           : `bg-white border-gray-300 focus:border-${currentTheme.color}-500 focus:ring-${currentTheme.color}-100 text-gray-800 shadow-sm`
                       }`}
                     >
-                      {INSURANCES.map((ins) => (
+                      {INSURANCE_OPTIONS.map((ins) => (
                         <option key={ins} value={ins}>{ins}</option>
                       ))}
                     </select>

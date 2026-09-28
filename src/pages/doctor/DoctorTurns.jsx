@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { 
@@ -6,6 +6,8 @@ import {
   AlertCircle, Upload, X, Paperclip, Stethoscope,
   Megaphone, ClipboardList, Save
 } from 'lucide-react';
+import { useTimeouts } from '../../hooks/useTimeouts';
+import { useFileAttachments } from '../../hooks/useFileAttachments';
 const getToday = () => new Date().toISOString().split('T')[0];
 const getFutureDate = (days) => {
     const date = new Date();
@@ -21,7 +23,7 @@ const initialAppointments = [
     status: 'attending', 
     img: '/img/patients/masc4.jpg',
     age: 24,
-    historyId: 'HC-45275'
+    historyId: 'HC-40111'
   },
   { 
     id: 2, 
@@ -86,35 +88,21 @@ const styles = `
   }
 `;
 const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
+  const fieldId = useId();
+  const { schedule } = useTimeouts();
   const [diagnosis, setDiagnosis] = useState('');
   const [prescription, setPrescription] = useState('');
-  const [files, setFiles] = useState([]);
+  const { files, addFiles, removeFile, clearFiles } = useFileAttachments();
   const [isDragging, setIsDragging] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   if (!isOpen || !appointment) return null;
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).map(file => ({
-        file,
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-        type: file.type.split('/')[1]?.toUpperCase() || 'FILE'
-      }));
-      setFiles(prev => [...prev, ...newFiles]);
-    }
-  };
-  const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
+  const handleFileChange = (e) => addFiles(e.target.files);
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => setIsDragging(false);
   const handleDrop = (e) => {
     e.preventDefault(); setIsDragging(false);
-    if (e.dataTransfer.files?.length > 0) {
-        const newFiles = Array.from(e.dataTransfer.files).map(file => ({
-            file, name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB', type: file.type.split('/')[1]?.toUpperCase() || 'FILE'
-        }));
-        setFiles(prev => [...prev, ...newFiles]);
-    }
+    addFiles(e.dataTransfer.files);
   };
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -123,9 +111,9 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
   const confirmSave = () => {
     setShowConfirm(false);
     setShowSuccess(true);
-    setTimeout(() => {
+    schedule(() => {
         onSave(appointment.id, { diagnosis, prescription, files });
-        setDiagnosis(''); setPrescription(''); setFiles([]);
+        setDiagnosis(''); setPrescription(''); clearFiles();
         setShowSuccess(false);
     }, 1500);
   };
@@ -179,10 +167,10 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                 <form id="report-form" onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-diagnostico-evolucion`} className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-600"/> Diagnóstico / Evolución
                     </label>
-                    <textarea 
+                    <textarea id={`${fieldId}-diagnostico-evolucion`} 
                         required 
                         className="w-full bg-white border border-slate-200 rounded-2xl p-5 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none shadow-sm transition-all min-h-[140px] text-slate-700" 
                         placeholder="Detallá el cuadro clínico, síntomas y observaciones..." 
@@ -191,9 +179,9 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                     />
                     </div>
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <p className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <Paperclip className="w-5 h-5 text-blue-600"/> Archivos Adjuntos
-                    </label>
+                    </p>
                     <div 
                         onDragOver={handleDragOver} 
                         onDragLeave={handleDragLeave} 
@@ -213,8 +201,8 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                     </div>
                     {files.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                            {files.map((f, i) => (
-                                <div key={i} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            {files.map((f) => (
+                                <div key={f.id} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex items-center gap-4 overflow-hidden">
                                         <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center shrink-0 text-blue-600 font-black text-xs border border-blue-100/50 shadow-inner">
                                             {f.type}
@@ -224,7 +212,7 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                                             <p className="text-xs text-slate-400 font-medium mt-0.5">{f.size}</p>
                                         </div>
                                     </div>
-                                    <button type="button" onClick={() => removeFile(i)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                                    <button type="button" onClick={() => removeFile(f.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-full transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -233,10 +221,10 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
                     )}
                     </div>
                     <div className="space-y-3">
-                    <label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor={`${fieldId}-receta-indicaciones`} className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <FileText className="w-5 h-5 text-amber-500"/> Receta / Indicaciones
                     </label>
-                    <textarea 
+                    <textarea id={`${fieldId}-receta-indicaciones`} 
                         className="w-full bg-amber-50/30 border border-amber-200/60 rounded-2xl p-5 focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 outline-none resize-none shadow-sm transition-all min-h-[100px] text-slate-700" 
                         placeholder="Prescripciones, reposo, o estudios solicitados..." 
                         value={prescription} 
@@ -270,7 +258,7 @@ export default function DoctorTurns() {
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
   };
-  const handleFinishAppointment = (id, data) => {
+  const handleFinishAppointment = (id) => {
     setAppointments(prev => prev.map(app => app.id === id ? { ...app, status: 'finished' } : app));
     setIsModalOpen(false);
     setSelectedAppointment(null);
@@ -282,7 +270,6 @@ export default function DoctorTurns() {
   };
   const formatDate = (dateString) => {
       const date = new Date(dateString);
-      const todayDate = new Date();
       date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
       if (dateString === today) return 'Hoy';
       return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', weekday: 'long' });

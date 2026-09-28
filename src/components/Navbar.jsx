@@ -4,7 +4,8 @@ import {
   HeartPulse, LogOut, ChevronDown, Menu, X,
   Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
+import { ROLES, getHomeForRole } from '../constants/roles';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -31,15 +32,15 @@ const Navbar = () => {
   };
   const displayName = getFirstName(user?.name);
   const userInitial = displayName ? displayName.charAt(0) : '';
-  const isAdmin = user?.role === 'admin';
-  const isDoctor = user?.role === 'doctor';
-  const isSecretary = user?.role === 'secretary';
+  const isAdmin = user?.role === ROLES.ADMIN;
+  const isDoctor = user?.role === ROLES.DOCTOR;
+  const isSecretary = user?.role === ROLES.SECRETARY;
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center">
-            <Link to={isAdmin ? "/admin/doctors" : isDoctor ? "/doctor/turns" : isSecretary ? "/secretary/dashboard" : "/"} className="flex items-center gap-2 group">
+            <Link to={getHomeForRole(user?.role)} className="flex items-center gap-2 group">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-2.5 rounded-xl group-hover:shadow-md group-hover:shadow-blue-500/20 transition-all duration-300 border border-blue-100">
                 <HeartPulse className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />
               </div>

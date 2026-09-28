@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import { ROLES } from './constants/roles';
 
 import Home from './pages/Home';
 import AboutUs from './pages/AboutUs';
@@ -63,26 +65,37 @@ function App() {
           <Route path="/professionals/:id" element={<DoctorProfile />} />
           <Route path="/book-appointment/:id" element={<BookAppointment />} />
 
-          <Route path="/user-profile" element={<UserProfile />} />
-          <Route path="/studies" element={<Studies />} />
-          <Route path="/my-turns" element={<MyTurns />} />
-          <Route path="/my-reviews" element={<MyReviews />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/user-profile" element={<UserProfile />} />
+          </Route>
 
-          <Route path="/doctor/turns" element={<DoctorTurns />} />
-          <Route path="/doctor/patients" element={<DoctorPatients />} />
-          <Route path="/doctor/profile" element={<DoctorProfile />} />
-          <Route path="/doctor/protocols" element={<DoctorProtocols />} />
-          <Route path="/doctor/support" element={<DoctorSupport />} />
+          <Route element={<ProtectedRoute roles={[ROLES.PATIENT]} />}>
+            <Route path="/studies" element={<Studies />} />
+            <Route path="/my-turns" element={<MyTurns />} />
+            <Route path="/my-reviews" element={<MyReviews />} />
+          </Route>
 
-          <Route path="/secretary/dashboard" element={<SecretaryDashboard />} />
-          <Route path="/secretary/patients" element={<SecretaryPatients />} />
+          <Route element={<ProtectedRoute roles={[ROLES.DOCTOR]} />}>
+            <Route path="/doctor/turns" element={<DoctorTurns />} />
+            <Route path="/doctor/patients" element={<DoctorPatients />} />
+            <Route path="/doctor/profile" element={<DoctorProfile />} />
+            <Route path="/doctor/protocols" element={<DoctorProtocols />} />
+            <Route path="/doctor/support" element={<DoctorSupport />} />
+          </Route>
 
-          <Route path="/admin/doctors" element={<AdminDoctors />} />
-          <Route path="/admin/specialties" element={<AdminSpecialties />} />
-          <Route path="/admin/offices" element={<AdminOffices />} />
-          <Route path="/admin/patients" element={<AdminPatients />} />
-          <Route path="/admin/insurances" element={<AdminInsurances />} />
-          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route element={<ProtectedRoute roles={[ROLES.SECRETARY]} />}>
+            <Route path="/secretary/dashboard" element={<SecretaryDashboard />} />
+            <Route path="/secretary/patients" element={<SecretaryPatients />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
+            <Route path="/admin/doctors" element={<AdminDoctors />} />
+            <Route path="/admin/specialties" element={<AdminSpecialties />} />
+            <Route path="/admin/offices" element={<AdminOffices />} />
+            <Route path="/admin/patients" element={<AdminPatients />} />
+            <Route path="/admin/insurances" element={<AdminInsurances />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

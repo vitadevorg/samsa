@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Star, MessageSquare, Edit2, Trash2, Calendar, MapPin, Search, AlertCircle, X, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useTimeouts } from '../hooks/useTimeouts';
 
 const mockReviews = [
   {
@@ -34,6 +35,8 @@ const mockReviews = [
 ];
 
 const MyReviews = () => {
+  const fieldId = useId();
+  const { schedule } = useTimeouts();
   const [reviews, setReviews] = useState(mockReviews);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -71,7 +74,7 @@ const MyReviews = () => {
     setEditingReview(null);
     setConfirmingEdit(false);
     setShowSuccessModal(true);
-    setTimeout(() => {
+    schedule(() => {
       setShowSuccessModal(false);
     }, 2500);
   };
@@ -198,7 +201,7 @@ const MyReviews = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-bold text-slate-700">Calificación</label>
+                <p className="text-sm font-bold text-slate-700">Calificación</p>
                 <div className="flex gap-2">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <button 
@@ -213,8 +216,8 @@ const MyReviews = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-bold text-slate-700">Comentario</label>
-                <textarea 
+                <label htmlFor={`${fieldId}-comentario`} className="text-sm font-bold text-slate-700">Comentario</label>
+                <textarea id={`${fieldId}-comentario`} 
                   value={editFormData.comment}
                   onChange={(e) => setEditFormData({...editFormData, comment: e.target.value})}
                   className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none h-32"

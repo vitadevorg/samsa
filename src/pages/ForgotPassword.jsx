@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Check, X, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { useTimeouts } from '../hooks/useTimeouts';
 
 const customStyles = `
   @keyframes scan {
@@ -95,7 +96,7 @@ const RecoveryAnimation = ({ currentState }) => {
 };
 
 const ForgotPassword = () => {
-  const navigate = useNavigate();
+  const { schedule } = useTimeouts();
   const [email, setEmail] = useState('');
   const [animState, setAnimState] = useState('idle'); 
   const [errorMessage, setErrorMessage] = useState('');
@@ -118,20 +119,20 @@ const ForgotPassword = () => {
     if (!email) {
       setAnimState('error');
       setErrorMessage('Por favor, ingresá tu correo electrónico.');
-      setTimeout(() => setAnimState('idle'), 2000);
+      schedule(() => setAnimState('idle'), 2000);
       return;
     }
 
     setAnimState('processing');
     setErrorMessage('');
 
-    setTimeout(() => {
+    schedule(() => {
       if (email.includes('@')) {
         setAnimState('success');
       } else {
         setAnimState('error');
         setErrorMessage('El formato del correo es inválido.');
-        setTimeout(() => setAnimState('idle'), 3000);
+        schedule(() => setAnimState('idle'), 3000);
       }
     }, 2000);
   };

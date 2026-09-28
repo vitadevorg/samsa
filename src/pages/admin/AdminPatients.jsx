@@ -1,29 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useCrudList } from '../../hooks/useCrudList';
 import { Users, Trash2, ShieldAlert } from 'lucide-react';
+const INITIAL_PATIENTS = [
+  { id: 1, name: "Lucas Gabriel Lazarte", dni: "40.111.222", email: "lucas.lazarte@example.com" },
+  { id: 2, name: "Juan Pérez", dni: "30.123.456", email: "juan@test.com" },
+];
 const AdminPatients = () => {
-  const [patients, setPatients] = useState([
-    { id: 1, name: "Lucas Gabriel Lazarte", dni: "45.275.212", email: "lglucas@gmail.com" },
-    { id: 2, name: "Juan Pérez", dni: "30.123.456", email: "juan@test.com" },
-  ]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const openDeleteModal = (id) => {
-      setSelectedId(id);
-      setIsModalOpen(true);
-  };
-  const confirmDelete = () => {
-      setPatients(patients.filter(p => p.id !== selectedId));
-      setIsModalOpen(false);
-      setSelectedId(null);
-  };
+  const {
+    items: patients,
+    isDeleteOpen: isModalOpen, requestDelete: openDeleteModal, cancelDelete, confirmDelete,
+  } = useCrudList(INITIAL_PATIENTS);
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <ConfirmModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
         title="Eliminar Paciente"
         message="¿Está completamente seguro? Eliminar un paciente borrará también su historial de turnos y estudios asociados."

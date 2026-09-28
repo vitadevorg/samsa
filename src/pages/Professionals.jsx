@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
   Search, Filter, MapPin, Clock, Star, ChevronDown, 
@@ -7,49 +7,11 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import FadeIn from '../components/FadeIn';
 import { doctorsData } from '../data/doctors';
-const FadeIn = ({ children, delay = 0, className = "" }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-    const { current } = domRef;
-    if (current) observer.observe(current);
-    return () => {
-      if (current) observer.unobserve(current);
-    };
-  }, []);
-  return (
-    <div
-      ref={domRef}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
-const SPECIALTIES = [
-  "Todas", "Cardiología", "Clínica Médica", "Dermatología", "Diagnóstico", 
-  "Endocrinología", "Fonoaudiología", "Ginecología", "Hemoterapia", 
-  "Infectología", "Kinesiología", "Neumonología", "Neurología", 
-  "Nutrición", "Odontología", "Oftalmología", "Pediatría", 
-  "Psicología", "Psiquiatría", "Radiología", "Traumatología", "Urología"
-];
-const INSURANCES = [
-  "Prensa", "Subsidio de Salud", "OSDE", "Swiss Medical", 
-  "Galeno", "PAMI", "IOS", "OSECAC"
-];
-const DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+import { SPECIALTIES, INSURANCES, WEEK_DAYS } from '../constants/catalog';
+const SPECIALTY_FILTERS = ['Todas', ...SPECIALTIES];
+const WORKING_DAYS = WEEK_DAYS.filter(day => day !== 'Dom');
 const DoctorCard = ({ doctor }) => {
     const hoursString = doctor.hours.map(h => `${h.start}-${h.end}`).join(" / ");
     const isPublic = doctor.attentionType === 'Pública';
@@ -113,28 +75,25 @@ const DoctorCard = ({ doctor }) => {
         </div>
     );
 };
+// Filtros iniciales a partir de ?specialty= (links desde Home y Turnos): si coincide con
+// una especialidad conocida la selecciona; si no, la usa como texto de búsqueda.
+const getInitialFilters = (queryString) => {
+  const specialtyParam = new URLSearchParams(queryString).get('specialty');
+  if (!specialtyParam) return { specialty: 'Todas', search: '' };
+  const match = SPECIALTY_FILTERS.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
+  if (match) return { specialty: match, search: '' };
+  return { specialty: 'Todas', search: specialtyParam };
+};
 const Professionals = () => {
   const location = useLocation();
-  const [search, setSearch] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('Todas');
+  const [initialFilters] = useState(() => getInitialFilters(location.search));
+  const [search, setSearch] = useState(initialFilters.search);
+  const [selectedSpecialty, setSelectedSpecialty] = useState(initialFilters.specialty);
   const [selectedInsurance, setSelectedInsurance] = useState('');
   const [selectedDays, setSelectedDays] = useState([]);
   const [timeOfDay, setTimeOfDay] = useState('');
   const [attentionType, setAttentionType] = useState('all');
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const specialtyParam = params.get('specialty');
-    if (specialtyParam) {
-        const exists = SPECIALTIES.some(s => s.toLowerCase() === specialtyParam.toLowerCase());
-        if (exists) {
-            const exactMatch = SPECIALTIES.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
-            setSelectedSpecialty(exactMatch || 'Todas');
-        } else if (specialtyParam !== 'Todas') {
-             setSearch(specialtyParam);
-        }
-    }
-  }, [location]);
   const filteredDoctors = useMemo(() => {
       return doctorsData.filter(doc => {
           const matchesSearch = doc.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -219,7 +178,7 @@ const Professionals = () => {
                                 onChange={(e) => setSelectedSpecialty(e.target.value)}
                                 className="w-full p-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer hover:border-blue-300 transition-colors shadow-sm text-gray-700"
                             >
-                                {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                                {SPECIALTY_FILTERS.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         </div>
@@ -275,7 +234,7 @@ const Professionals = () => {
                             Disponibilidad
                         </h3>
                         <div className="grid grid-cols-3 gap-2 mb-3">
-                            {DAYS.map(day => (
+                            {WORKING_DAYS.map(day => (
                                 <button
                                     key={day}
                                     onClick={() => toggleDay(day)}
