@@ -1,20 +1,21 @@
 import React, { useState, useMemo, useId } from 'react';
 import { Calendar, XCircle, Clock, Activity, ChevronDown, AlertCircle } from 'lucide-react';
 import SecretaryCalendar from './SecretaryCalendar';
-import { AGENDA_SLOTS, findNextFreeSlots, isSlotTaken } from './agenda';
+import { findNextFreeSlots, getScheduleSlots, isSlotTaken } from './agenda';
 import { formatDateToLocale } from './dates';
 
 const INITIAL_RESCHEDULE = { hasDate: 'yes', reason: '', notify: true, customDate: '', customTime: '' };
 
 // Reprograma el turno `appointmentId` a otra fecha/hora libre, o lo manda a la bolsa de suspenso.
-const RescheduleModal = ({ doctorAppointments, appointmentId, onSubmit, onClose }) => {
+// `doctorSchedule`: horario del profesional; las sugerencias y horarios salen de ahí.
+const RescheduleModal = ({ doctorAppointments, doctorSchedule, appointmentId, onSubmit, onClose }) => {
   const fieldId = useId();
   const [rescheduleData, setRescheduleData] = useState(INITIAL_RESCHEDULE);
   const [isSelectingCustomTime, setIsSelectingCustomTime] = useState(false);
   const [tempSelectedDate, setTempSelectedDate] = useState('');
   const suggestions = useMemo(
-    () => findNextFreeSlots(doctorAppointments, 3, appointmentId),
-    [doctorAppointments, appointmentId]
+    () => findNextFreeSlots(doctorAppointments, doctorSchedule, 3, appointmentId),
+    [doctorAppointments, doctorSchedule, appointmentId]
   );
 
   const hasChosenSlot = Boolean(rescheduleData.customDate && rescheduleData.customTime);
@@ -44,7 +45,7 @@ const RescheduleModal = ({ doctorAppointments, appointmentId, onSubmit, onClose 
                           Seleccionar Fecha
                       </h3>
                       <div className="max-w-sm mx-auto bg-slate-50 p-4 rounded-xl border border-slate-100">
-                          <SecretaryCalendar inline={true} selectedDate={tempSelectedDate} onSelect={(d) => setTempSelectedDate(d)} onClose={() => {}} />
+                          <SecretaryCalendar inline={true} selectedDate={tempSelectedDate} onSelect={(d) => setTempSelectedDate(d)} onClose={() => {}} appointments={doctorAppointments} schedule={doctorSchedule} />
                       </div>
                   </div>
 
@@ -55,7 +56,7 @@ const RescheduleModal = ({ doctorAppointments, appointmentId, onSubmit, onClose 
                               Seleccionar Horario Libre
                           </h3>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                              {AGENDA_SLOTS.map(time => {
+                              {getScheduleSlots(doctorSchedule).map(time => {
                                   const isTimeDisabled = isSlotTaken(doctorAppointments, tempSelectedDate, time, appointmentId);
                                   return (
                                   <button 

@@ -9,11 +9,13 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FadeIn from '../components/FadeIn';
 import { doctorsData } from '../data/doctors';
+import { useClinicData } from './clinic/clinicDataContext';
+import { getDoctorLocations } from '../data/institutions';
 import { SPECIALTIES, INSURANCES, WEEK_DAYS } from '../constants/catalog';
 const SPECIALTY_FILTERS = ['Todas', ...SPECIALTIES];
 const WORKING_DAYS = WEEK_DAYS.filter(day => day !== 'Dom');
-const DoctorCard = ({ doctor }) => {
-    const hoursString = doctor.hours.map(h => `${h.start}-${h.end}`).join(" / ");
+// `locations`: dónde y cuándo atiende (una por institución, o su atención particular).
+const DoctorCard = ({ doctor, locations }) => {
     const isPublic = doctor.attentionType === 'Pública';
     return (
         <div className="bg-white rounded-[1.5rem] border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 group flex flex-col h-full relative overflow-hidden">
@@ -44,20 +46,23 @@ const DoctorCard = ({ doctor }) => {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold mt-1">
                         {doctor.specialty}
                     </span>
-                    <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> {doctor.location}
-                    </p>
                 </div>
             </div>
             <div className="space-y-3 mt-2 mb-6">
-                <div className="flex items-start gap-3 text-sm text-gray-600">
-                    <Calendar className="w-4 h-4 text-blue-500 mt-0.5 shrink-0"/> 
-                    <span className="leading-tight">{doctor.days.join(", ")}</span>
-                </div>
-                <div className="flex items-start gap-3 text-sm text-gray-600">
-                    <Clock className="w-4 h-4 text-blue-500 mt-0.5 shrink-0"/>
-                    <span className="leading-tight">{hoursString}</span>
-                </div>
+                {/* Una línea por sede: nombre, consultorio, días y horario */}
+                {locations.map(place => (
+                    <div key={place.key} className="flex items-start gap-3 text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 text-blue-500 mt-0.5 shrink-0"/>
+                        <span className="leading-tight">
+                            <span className="font-medium text-gray-800">{place.name}</span>
+                            {place.institutionId && <span className="text-gray-400"> · {place.office}</span>}
+                            <span className="flex items-center gap-1 mt-0.5">
+                                <Clock className="w-3 h-3 text-gray-400 shrink-0"/>
+                                {place.days.join(", ")} · {place.hours.map(h => `${h.start}-${h.end}`).join(" / ")}
+                            </span>
+                        </span>
+                    </div>
+                ))}
                 <div className="flex items-start gap-3 text-sm text-gray-600">
                     <Wallet className="w-4 h-4 text-blue-500 mt-0.5 shrink-0"/>
                     <span className="leading-tight font-medium">
@@ -94,20 +99,29 @@ const Professionals = () => {
   const [timeOfDay, setTimeOfDay] = useState('');
   const [attentionType, setAttentionType] = useState('all');
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+  // Horarios reales de cada médico (los que fija cada institución), del estado compartido.
+  const { allAssignments } = useClinicData();
+  const locationsByDoctor = useMemo(
+      () => Object.fromEntries(doctorsData.map(doc => [doc.id, getDoctorLocations(doc, allAssignments)])),
+      [allAssignments]
+  );
   const filteredDoctors = useMemo(() => {
       return doctorsData.filter(doc => {
+          const places = locationsByDoctor[doc.id];
           const matchesSearch = doc.name.toLowerCase().includes(search.toLowerCase()) || 
                                 doc.specialty.toLowerCase().includes(search.toLowerCase());
           const matchesSpecialty = selectedSpecialty === 'Todas' || doc.specialty === selectedSpecialty;
           const matchesInsurance = !selectedInsurance || 
                                    (doc.attentionType === 'Particular' && doc.insurance.includes(selectedInsurance));
           const matchesType = attentionType === 'all' || doc.attentionType === attentionType;
-          const matchesDays = selectedDays.length === 0 || 
-                              selectedDays.some(day => doc.days.includes(day));
+          // Coincide si atiende ese día en alguna de sus sedes.
+          const matchesDays = selectedDays.length === 0 ||
+                              selectedDays.some(day => places.some(place => place.days.includes(day)));
           let matchesTime = true;
           if (timeOfDay) {
-              const hasMorning = doc.hours.some(h => parseInt(h.start) < 13);
-              const hasAfternoon = doc.hours.some(h => parseInt(h.start) >= 12);
+              const allHours = places.flatMap(place => place.hours);
+              const hasMorning = allHours.some(h => parseInt(h.start) < 13);
+              const hasAfternoon = allHours.some(h => parseInt(h.start) >= 12);
               if (timeOfDay === 'both') {
                   matchesTime = hasMorning && hasAfternoon;
               } else if (timeOfDay === 'morning') {
@@ -118,7 +132,7 @@ const Professionals = () => {
           }
           return matchesSearch && matchesSpecialty && matchesInsurance && matchesType && matchesDays && matchesTime;
       });
-  }, [search, selectedSpecialty, selectedInsurance, attentionType, selectedDays, timeOfDay]);
+  }, [search, selectedSpecialty, selectedInsurance, attentionType, selectedDays, timeOfDay, locationsByDoctor]);
   const toggleDay = (day) => {
       setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]);
   };
@@ -300,7 +314,7 @@ const Professionals = () => {
                     {filteredDoctors.length > 0 ? (
                         filteredDoctors.map((doc, index) => (
                             <FadeIn key={doc.id} delay={index * 100}>
-                                <DoctorCard doctor={doc} />
+                                <DoctorCard doctor={doc} locations={locationsByDoctor[doc.id]} />
                             </FadeIn>
                         ))
                     ) : (

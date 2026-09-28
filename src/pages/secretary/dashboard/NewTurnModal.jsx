@@ -5,9 +5,9 @@ import {
 } from 'lucide-react';
 import SecretaryCalendar from './SecretaryCalendar';
 import { INSURANCE_OPTIONS } from '../../../constants/catalog';
-import { AGENDA_SLOTS, isSlotTaken } from './agenda';
+import { getScheduleSlots, isSlotTaken, isWorkingDay } from './agenda';
 import { findPatientByDni } from './mockData';
-import { formatDateToLocale, getToday } from './dates';
+import { formatDateToLocale, getToday, parseISODate } from './dates';
 
 const EMPTY_TURN = {
   patient: '', dni: '', cuit: '', dob: '', obraSocial: '', email: '', phone: '',
@@ -16,7 +16,8 @@ const EMPTY_TURN = {
 const PATIENT_FIELDS_RESET = { patient: '', phone: '', email: '', obraSocial: '', dob: '' };
 
 // El formulario vive en el modal; el padre lo monta con `initialData` y recibe el turno en `onSubmit`.
-const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) => {
+// `doctorSchedule`: horario del profesional en la clínica (días y franja horaria).
+const NewTurnModal = ({ doctorAppointments, doctorSchedule, initialData, onSubmit, onClose }) => {
   const fieldId = useId();
   const [newTurnData, setNewTurnData] = useState(() => ({ ...EMPTY_TURN, ...initialData }));
   const [showDobCalendar, setShowDobCalendar] = useState(false);
@@ -27,6 +28,9 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
     const patientData = findPatientByDni(dni);
     setNewTurnData(prev => ({ ...prev, ...(patientData || PATIENT_FIELDS_RESET), dni }));
   };
+
+  // Solo se ofrecen horarios si el profesional atiende el día elegido.
+  const worksThatDay = Boolean(newTurnData.date) && isWorkingDay(parseISODate(newTurnData.date), doctorSchedule);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -161,6 +165,7 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                                         onSelect={(date) => setNewTurnData({...newTurnData, date, time: ''})} 
                                         onClose={() => setShowNewTurnDateCalendar(false)} 
                                         appointments={doctorAppointments}
+                                        schedule={doctorSchedule}
                                     />
                                 )}
                             </div>
@@ -179,9 +184,9 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
 
                         <div className="col-span-1 md:col-span-2 mt-2">
                             <p className="block text-xs font-bold text-slate-500 mb-3">Horarios Disponibles *</p>
-                            {newTurnData.date ? (
+                            {worksThatDay ? (
                                 <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                                    {AGENDA_SLOTS.map(t => {
+                                    {getScheduleSlots(doctorSchedule).map(t => {
                                         const isOccupied = isSlotTaken(doctorAppointments, newTurnData.date, t);
                                         return (
                                             <button 
@@ -198,7 +203,9 @@ const NewTurnModal = ({ doctorAppointments, initialData, onSubmit, onClose }) =>
                                 </div>
                             ) : (
                                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center text-sm font-medium text-slate-500">
-                                    Selecciona una fecha para ver los horarios disponibles.
+                                    {newTurnData.date
+                                        ? 'El profesional no atiende ese día. Elegí otra fecha.'
+                                        : 'Selecciona una fecha para ver los horarios disponibles.'}
                                 </div>
                             )}
                         </div>

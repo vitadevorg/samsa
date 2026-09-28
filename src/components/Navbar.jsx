@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   HeartPulse, LogOut, ChevronDown, Menu, X,
-  Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star
+  Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole } from '../constants/roles';
+import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +36,15 @@ const Navbar = () => {
   const isAdmin = user?.role === ROLES.ADMIN;
   const isDoctor = user?.role === ROLES.DOCTOR;
   const isSecretary = user?.role === ROLES.SECRETARY;
+  const isClinicAdmin = user?.role === ROLES.CLINIC_ADMIN;
+  const isHospitalAdmin = user?.role === ROLES.HOSPITAL_ADMIN;
+  const isVitadevAdmin = user?.role === ROLES.VITADEV_ADMIN;
+  // Los administradores de institución usan el mismo estilo oscuro que el admin general.
+  const isInstitutionAdmin = isClinicAdmin || isHospitalAdmin || isVitadevAdmin;
+  // En las pantallas de clínica el Navbar está dentro de ClinicDataProvider y puede leer
+  // las solicitudes; en el resto del sitio el contexto es null y el contador queda en 0.
+  const clinicData = useContext(ClinicDataContext);
+  const pendingRequests = clinicData?.requests.filter((r) => r.status === 'pendiente').length ?? 0;
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,6 +76,34 @@ const Navbar = () => {
                   <Wallet className="w-4 h-4"/> Obras Sociales
                 </Link>
               </>
+            ) : isClinicAdmin ? (
+              <>
+                <Link to="/clinic/doctors" className={getLinkClass('/clinic/doctors')}>
+                  <Stethoscope className="w-4 h-4"/> Médicos
+                </Link>
+                <Link to="/clinic/secretaries" className={getLinkClass('/clinic/secretaries')}>
+                  <Users className="w-4 h-4"/> Secretarias
+                </Link>
+                <Link to="/clinic/staff" className={getLinkClass('/clinic/staff')}>
+                  <Contact className="w-4 h-4"/> Personal
+                </Link>
+                <Link to="/clinic/requests" className={getLinkClass('/clinic/requests')}>
+                  <Inbox className="w-4 h-4"/> Solicitudes
+                  {pendingRequests > 0 && (
+                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingRequests} pendientes`}>
+                      {pendingRequests}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : isHospitalAdmin ? (
+              <Link to="/hospital/dashboard" className={getLinkClass('/hospital/dashboard')}>
+                <Building className="w-4 h-4"/> Panel del Hospital
+              </Link>
+            ) : isVitadevAdmin ? (
+              <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
+                <Shield className="w-4 h-4"/> Panel VitaDev
+              </Link>
             ) : isDoctor ? (
               <>
                 <Link to="/doctor/turns" className={getLinkClass('/doctor/turns')}>
@@ -97,10 +135,10 @@ const Navbar = () => {
               <div className="relative ml-4">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin || isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
                 >
                   <div 
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-pink-500 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-pink-500 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
                     style={{
                       backgroundImage: user.img ? `url(${user.img})` : 'none',
                       backgroundSize: 'cover',
@@ -110,7 +148,7 @@ const Navbar = () => {
                     {!user.img && userInitial}
                   </div>
                   <span className="text-sm font-bold px-1 tracking-wide">
-                    {isAdmin ? 'Admin' : isDoctor ? `Dr. ${displayName}` : isSecretary ? `Sec. ${displayName}` : displayName}
+                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? `Dr. ${displayName}` : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
@@ -129,6 +167,10 @@ const Navbar = () => {
                             Modo Gestión
                          </div>
                        </>
+                    ) : isInstitutionAdmin ? (
+                       <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
+                          Modo Gestión
+                       </div>
                     ) : isDoctor ? (
                       <>
                         <Link to="/doctor/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
@@ -193,7 +235,20 @@ const Navbar = () => {
               <Link to="/admin/insurances" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Obras Sociales</Link>
               <Link to="/admin/profile" className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 bg-blue-50">Mi Perfil Admin</Link>
             </>
-            ) : isDoctor ? (
+            ) : isClinicAdmin ? (
+            <>
+              <Link to="/clinic/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
+              <Link to="/clinic/secretaries" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
+              <Link to="/clinic/staff" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Personal</Link>
+              <Link to="/clinic/requests" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+                Solicitudes{pendingRequests > 0 && ` (${pendingRequests})`}
+              </Link>
+            </>
+          ) : isHospitalAdmin ? (
+            <Link to="/hospital/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Panel del Hospital</Link>
+          ) : isVitadevAdmin ? (
+            <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Panel VitaDev</Link>
+          ) : isDoctor ? (
             <>
               <Link to="/doctor/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>
               <Link to="/doctor/turns" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos Asignados</Link>

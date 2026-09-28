@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getToday } from './dates';
-import { isDayBlocked, MAX_DAILY_APPOINTMENTS } from './agenda';
+import { getScheduleSlots, isWorkingDay } from './agenda';
 
 // `appointments` (opcional): turnos del profesional, para marcar días con turnos o completos.
-const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, appointments = null }) => {
+// `schedule` (opcional): horario del profesional; deshabilita los días que no atiende.
+const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, appointments = null, schedule = null }) => {
     const initialDate = selectedDate ? new Date(selectedDate + 'T12:00:00Z') : new Date();
     const [viewDate, setViewDate] = useState(initialDate);
     const [showYearSelector, setShowYearSelector] = useState(false);
@@ -28,9 +29,9 @@ const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, ap
 
             const docAppointmentsCount = appointments ? appointments.filter(app => app.date === dateStr && app.status !== 'cancelled').length : 0;
             const hasAppointments = docAppointmentsCount > 0;
-            const isFullyBooked = docAppointmentsCount >= MAX_DAILY_APPOINTMENTS;
+            const isFullyBooked = schedule !== null && docAppointmentsCount >= getScheduleSlots(schedule).length;
 
-            const isDisabled = isDayBlocked(new Date(year, month, i)) || isFullyBooked;
+            const isDisabled = !isWorkingDay(new Date(year, month, i), schedule) || isFullyBooked;
 
             days.push(
                 <button 

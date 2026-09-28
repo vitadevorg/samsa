@@ -2,8 +2,10 @@ import React, { useState, useCallback } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { createId } from '../../utils/ids';
+import { useAuth } from '../../context/useAuth';
+import { useClinicData } from '../clinic/clinicDataContext';
 import { useAgenda } from './dashboard/useAgenda';
-import { ASSIGNED_DOCTORS, findPatientByName } from './dashboard/mockData';
+import { buildSecretaryDoctors, findPatientByName } from './dashboard/mockData';
 import { filterAgenda } from './dashboard/agenda';
 import { buildDateCarousel, formatDateToLocale, getToday } from './dashboard/dates';
 import AgendaHeader from './dashboard/AgendaHeader';
@@ -21,12 +23,19 @@ import PatientProfileModal from './dashboard/PatientProfileModal';
 // Página contenedora: coordina el estado de interfaz (filtros y modales abiertos)
 // y delega los cambios de la agenda en useAgenda.
 const SecretaryDashboard = () => {
+  // Médicos de esta secretaria: los que le asignó el admin de su clínica.
+  // Se la busca por su email entre las secretarias del estado compartido.
+  const { user } = useAuth();
+  const { allSecretaries, allAssignments } = useClinicData();
+  const secretary = allSecretaries.find(s => s.email === user?.email);
+  const doctors = buildSecretaryDoctors(secretary, allAssignments);
+
   const {
     appointments, suspended,
     createAppointment, markArrived, moveAppointment, cancelAppointment, suspendAppointment, removeSuspended,
-  } = useAgenda();
+  } = useAgenda(doctors);
 
-  const [selectedDoctorId, setSelectedDoctorId] = useState(ASSIGNED_DOCTORS[0].id);
+  const [selectedDoctorId, setSelectedDoctorId] = useState(() => doctors[0]?.id ?? null);
   const [selectedDate, setSelectedDate] = useState(getToday);
   const [dateCarousel] = useState(buildDateCarousel);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,13 +50,15 @@ const SecretaryDashboard = () => {
   const [showSuspended, setShowSuspended] = useState(false);
   const [showChat, setShowChat] = useState(false);
 
-  const currentDoctor = ASSIGNED_DOCTORS.find(d => d.id === selectedDoctorId);
-  const currentAppointments = filterAgenda(appointments[selectedDoctorId], selectedDate, searchTerm);
+  // Si el médico elegido ya no está asignado, se muestra el primero de la lista.
+  const currentDoctor = doctors.find(d => d.id === selectedDoctorId) ?? doctors[0];
+  const currentAppointments = filterAgenda(appointments[currentDoctor?.id], selectedDate, searchTerm);
+  const findSchedule = (doctorId) => doctors.find(d => d.id === doctorId)?.schedule;
 
   const notify = (message, options = {}) => setNotification({ message, ...options });
   const closeNotification = useCallback(() => setNotification(null), []);
 
-  const openNewTurn = (doctorId = selectedDoctorId, initialData = {}, fromSuspendedId = null) => {
+  const openNewTurn = (doctorId = currentDoctor?.id, initialData = {}, fromSuspendedId = null) => {
     setSelectedDoctorId(doctorId);
     setNewTurnDraft({ doctorId, initialData: { date: selectedDate, ...initialData }, fromSuspendedId });
   };
@@ -105,7 +116,7 @@ const SecretaryDashboard = () => {
     const patientData = findPatientByName(patient.patient) ?? { patient: patient.patient, phone: patient.phone };
     setShowSuspended(false);
     openNewTurn(
-      patient.doctorId ?? selectedDoctorId,
+      patient.doctorId ?? currentDoctor?.id,
       { ...patientData, type: patient.type || 'Presencial', isReschedule: true },
       patient.id
     );
@@ -123,14 +134,28 @@ const SecretaryDashboard = () => {
       : { patient: app.patient, phone: app.phone, nextTurn: app });
   };
 
+  // Sin médicos asignados no hay agenda que mostrar.
+  if (doctors.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <Navbar />
+        <main className="flex-grow max-w-3xl mx-auto w-full px-4 py-20 text-center">
+          <h1 className="text-2xl font-black text-slate-800 mb-2">Todavía no tenés agendas asignadas</h1>
+          <p className="text-slate-500">Pedile a la administración de tu clínica que te asigne los médicos cuyas agendas vas a manejar.</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
         <AgendaHeader
-          doctors={ASSIGNED_DOCTORS}
-          selectedDoctorId={selectedDoctorId}
+          doctors={doctors}
+          selectedDoctorId={currentDoctor.id}
           onSelectDoctor={setSelectedDoctorId}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -149,12 +174,12 @@ const SecretaryDashboard = () => {
             suspendedCount={suspended.length}
             onOpenSuspended={() => setShowSuspended(true)}
             onNewTurn={() => openNewTurn()}
-            onAction={(type, app) => handleAction(type, selectedDoctorId, app)}
+            onAction={(type, app) => handleAction(type, currentDoctor.id, app)}
             onPatientClick={handlePatientClick}
           />
         ) : (
           <AgendaColumns
-            doctors={ASSIGNED_DOCTORS}
+            doctors={doctors}
             appointmentsByDoctor={appointments}
             date={selectedDate}
             searchTerm={searchTerm}
@@ -169,6 +194,7 @@ const SecretaryDashboard = () => {
       {newTurnDraft && (
         <NewTurnModal
           doctorAppointments={appointments[newTurnDraft.doctorId] || []}
+          doctorSchedule={findSchedule(newTurnDraft.doctorId)}
           initialData={newTurnDraft.initialData}
           onSubmit={handleCreateTurn}
           onClose={() => setNewTurnDraft(null)}
@@ -186,6 +212,7 @@ const SecretaryDashboard = () => {
       {rescheduleTarget && (
         <RescheduleModal
           doctorAppointments={appointments[rescheduleTarget.doctorId] || []}
+          doctorSchedule={findSchedule(rescheduleTarget.doctorId)}
           appointmentId={rescheduleTarget.appointment.id}
           onSubmit={handleReschedule}
           onClose={() => setRescheduleTarget(null)}

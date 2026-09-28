@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useId } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { login as authenticate, InvalidCredentialsError } from '../services/authService';
+import { login as authenticate, InvalidCredentialsError, AccountDeactivatedError } from '../services/authService';
 import { getHomeForRole } from '../constants/roles';
 import { useTimeouts } from '../hooks/useTimeouts';
 import { Eye, EyeOff, Lock, Mail, Check, X, Activity, ChevronRight, ArrowLeft, AlertTriangle } from 'lucide-react';
@@ -172,9 +172,9 @@ const Login = () => {
     } catch (err) {
         if (!isMountedRef.current) return;
         setLoginState('error');
-        setErrorMsg(err instanceof InvalidCredentialsError
-            ? 'Credenciales incorrectas. Intentalo de nuevo.'
-            : 'No se pudo iniciar sesión. Intentalo más tarde.');
+        if (err instanceof InvalidCredentialsError) setErrorMsg('Credenciales incorrectas. Intentalo de nuevo.');
+        else if (err instanceof AccountDeactivatedError) setErrorMsg(err.message);
+        else setErrorMsg('No se pudo iniciar sesión. Intentalo más tarde.');
         setErrors({ email: true, password: true });
         schedule(() => {
             setLoginState('idle');

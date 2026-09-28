@@ -35,6 +35,14 @@ import AdminPatients from './pages/admin/AdminPatients';
 import AdminInsurances from './pages/admin/AdminInsurances';
 import AdminProfile from './pages/admin/AdminProfile';
 
+import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
+import ClinicDoctors from './pages/clinic/ClinicDoctors';
+import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
+import ClinicRequests from './pages/clinic/ClinicRequests';
+import ClinicStaff from './pages/clinic/ClinicStaff';
+import HospitalDashboard from './pages/hospital/HospitalDashboard';
+import VitadevDashboard from './pages/vitadev/VitadevDashboard';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -50,6 +58,9 @@ function App() {
     <AuthProvider>
       <Router>
         <ScrollToTop />
+        {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
+            (pantallas de clínica, Navbar, perfil del médico...) */}
+        <ClinicDataProvider>
         <Routes>
 
           <Route path="/" element={<Home />} />
@@ -96,7 +107,24 @@ function App() {
             <Route path="/admin/insurances" element={<AdminInsurances />} />
             <Route path="/admin/profile" element={<AdminProfile />} />
           </Route>
+
+          {/* Administradores de institución: cada grupo solo es accesible para su rol */}
+          <Route element={<ProtectedRoute roles={[ROLES.CLINIC_ADMIN]} />}>
+            <Route path="/clinic/doctors" element={<ClinicDoctors />} />
+            <Route path="/clinic/secretaries" element={<ClinicSecretaries />} />
+            <Route path="/clinic/staff" element={<ClinicStaff />} />
+            <Route path="/clinic/requests" element={<ClinicRequests />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={[ROLES.HOSPITAL_ADMIN]} />}>
+            <Route path="/hospital/dashboard" element={<HospitalDashboard />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={[ROLES.VITADEV_ADMIN]} />}>
+            <Route path="/vitadev/dashboard" element={<VitadevDashboard />} />
+          </Route>
         </Routes>
+        </ClinicDataProvider>
       </Router>
     </AuthProvider>
   );
