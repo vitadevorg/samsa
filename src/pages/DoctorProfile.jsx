@@ -3,7 +3,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { 
   MapPin, Clock, Star, ShieldCheck, Award, User, MessageSquare, 
   Edit3, Save, Plus, X, Wallet, Info, Trash2, ChevronDown, 
-  ChevronUp, CheckCircle, AlertTriangle
+  ChevronUp, CheckCircle, AlertTriangle, Building2, Stethoscope, Send
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -11,7 +11,18 @@ import { useAuth } from '../context/useAuth';
 import { doctorsData } from '../data/doctors';
 import { createId } from '../utils/ids';
 import { SPECIALTIES, INSURANCE_OPTIONS, WEEK_DAYS } from '../constants/catalog';
-const SuccessModal = ({ isOpen, onClose }) => {
+import { useClinicData } from './clinic/clinicDataContext';
+import { getInstitutionById, getInstitutionType, formatSchedule, schedulesOverlap } from '../data/institutions';
+import { formatDate } from './clinic/clinicDates';
+// En la vista propia (/doctor/profile) el usuario de prueba es el Dr. Zelarayan,
+// cuyo id en doctors.js es 'juan-perez'.
+const SELF_DOCTOR_ID = 'juan-perez';
+// `title` y `message` son opcionales: por defecto, los textos de guardar el perfil.
+const SuccessModal = ({
+  isOpen, onClose,
+  title = '¡Datos Actualizados!',
+  message = 'Tu perfil profesional ha sido modificado exitosamente. Los pacientes ahora verán tu nueva información.',
+}) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
@@ -19,9 +30,9 @@ const SuccessModal = ({ isOpen, onClose }) => {
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
           <CheckCircle className="w-8 h-8 text-green-600" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">¡Datos Actualizados!</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">{title}</h3>
         <p className="text-gray-500 text-center mb-6 text-sm leading-relaxed">
-          Tu perfil profesional ha sido modificado exitosamente. Los pacientes ahora verán tu nueva información.
+          {message}
         </p>
         <button 
           onClick={onClose} 
@@ -33,7 +44,13 @@ const SuccessModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
+// `title`, `message` y `confirmLabel` son opcionales: por defecto, los textos de guardar el perfil.
+const ConfirmModal = ({
+  isOpen, onClose, onConfirm,
+  title = '¿Guardar cambios?',
+  message = 'Estás por modificar tu perfil público. Asegúrate de que la información sea correcta antes de confirmar.',
+  confirmLabel = 'Sí, Guardar',
+}) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
@@ -41,9 +58,9 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
         <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
           <AlertTriangle className="w-8 h-8 text-yellow-600" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">¿Guardar cambios?</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">{title}</h3>
         <p className="text-gray-500 text-center mb-6 text-sm leading-relaxed">
-          Estás por modificar tu perfil público. Asegúrate de que la información sea correcta antes de confirmar.
+          {message}
         </p>
         <div className="flex gap-3 w-full">
           <button 
@@ -56,10 +73,128 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm }) => {
             onClick={onConfirm} 
             className="flex-1 bg-yellow-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-yellow-600 transition shadow-lg shadow-yellow-200"
           >
-            Sí, Guardar
+            {confirmLabel}
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+// Formulario para que el médico le pida a una institución cambiar su horario.
+// No guarda nada: valida el pedido y se lo pasa a la página con `onSubmit`,
+// que pide confirmación y lo envía a la clínica (addRequest del estado compartido).
+// - `assignment`: su vinculación actual con esa institución (días y horario).
+// - `otherAssignments`: sus vinculaciones con OTRAS instituciones (para no superponerse).
+const ScheduleRequestModal = ({ institutionName, assignment, otherAssignments, onCancel, onSubmit }) => {
+  const fieldId = useId();
+  // El formulario arranca con el horario actual, así el médico solo cambia lo que necesita.
+  const [days, setDays] = useState(assignment.days);
+  const [startTime, setStartTime] = useState(assignment.startTime);
+  const [endTime, setEndTime] = useState(assignment.endTime);
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+
+  // Marca o desmarca un día, manteniendo el orden de la semana.
+  const toggleDay = (day) => {
+    setDays(prev => {
+      const next = prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day];
+      return WEEK_DAYS.filter(d => next.includes(d));
+    });
+    setError('');
+  };
+
+  // Devuelve el problema del pedido, o '' si está todo bien.
+  const validate = (requested) => {
+    if (requested.days.length === 0) return 'Elegí al menos un día.';
+    if (requested.startTime >= requested.endTime) return 'La hora de fin tiene que ser posterior a la de inicio.';
+    const isSameAsNow = requested.days.join() === assignment.days.join()
+      && requested.startTime === assignment.startTime
+      && requested.endTime === assignment.endTime;
+    if (isSameAsNow) return 'El horario pedido es igual al que ya tenés.';
+    const conflict = otherAssignments.find(other => schedulesOverlap(other, requested));
+    if (conflict) {
+      return `Se superpone con tu horario en ${getInstitutionById(conflict.institutionId)?.name} (${formatSchedule(conflict)}).`;
+    }
+    if (!reason.trim()) return 'Contá brevemente el motivo del cambio.';
+    return '';
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // evita que el navegador recargue la página al enviar el form
+    const requested = { days, startTime, endTime };
+    const problem = validate(requested);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    onSubmit({ requestedSchedule: requested, reason: reason.trim() });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fadeIn p-4">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-slideUp">
+        <div className="bg-blue-600 p-5 flex justify-between items-center text-white">
+          <div>
+            <h3 className="font-bold text-lg">Solicitar cambio de horario</h3>
+            <p className="text-blue-100 text-sm">{institutionName} · actual: {formatSchedule(assignment)}</p>
+          </div>
+          <button type="button" onClick={onCancel} className="hover:bg-blue-700 p-1.5 rounded-full transition" title="Cerrar">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-6 space-y-5">
+          <div className="space-y-2">
+            <p id={`${fieldId}-dias`} className="block text-sm font-bold text-gray-700 uppercase">Días pedidos</p>
+            <div role="group" aria-labelledby={`${fieldId}-dias`} className="flex justify-between gap-1">
+              {WEEK_DAYS.map(day => (
+                <button
+                  key={day}
+                  type="button"
+                  aria-pressed={days.includes(day)}
+                  onClick={() => toggleDay(day)}
+                  className={`w-10 h-10 rounded-full text-xs font-bold flex items-center justify-center transition ${
+                    days.includes(day) ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                  }`}
+                >
+                  {day}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-3 items-end">
+            <div className="flex-1">
+              <label htmlFor={`${fieldId}-desde`} className="block text-sm font-bold text-gray-700 uppercase mb-1">Desde</label>
+              <input id={`${fieldId}-desde`} type="time" required value={startTime} onChange={(e) => { setStartTime(e.target.value); setError(''); }} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div className="flex-1">
+              <label htmlFor={`${fieldId}-hasta`} className="block text-sm font-bold text-gray-700 uppercase mb-1">Hasta</label>
+              <input id={`${fieldId}-hasta`} type="time" required value={endTime} onChange={(e) => { setEndTime(e.target.value); setError(''); }} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label htmlFor={`${fieldId}-motivo`} className="block text-sm font-bold text-gray-700 uppercase mb-1">Motivo</label>
+            <textarea
+              id={`${fieldId}-motivo`}
+              rows={3}
+              value={reason}
+              onChange={(e) => { setReason(e.target.value); setError(''); }}
+              placeholder="Ej: empiezo una residencia por las mañanas."
+              className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+          {error && (
+            <p role="alert" className="flex items-start gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-xl border border-red-100 font-medium">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /> {error}
+            </p>
+          )}
+        </div>
+        <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-100">
+          <button type="button" onClick={onCancel} className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">Cancelar</button>
+          <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2">
+            <Send className="w-4 h-4" /> Enviar solicitud
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
@@ -131,6 +266,47 @@ const DoctorProfile = () => {
       ]
   } : publicDoctor;
   const [profileData, setProfileData] = useState(() => withRangeIds(initialData));
+
+  // Instituciones donde atiende el médico. Se leen del estado compartido
+  // (ClinicDataProvider): si una clínica lo dio de baja, esa vinculación ya no está.
+  const { allAssignments, allRequests, addRequest } = useClinicData();
+  const doctorId = isSelfView ? SELF_DOCTOR_ID : publicDoctor.id;
+  const doctorAssignments = allAssignments.filter(a => a.doctorId === doctorId);
+  // Si pertenece a alguna institución, sus días y horarios los gestiona la institución.
+  const isManagedByInstitution = doctorAssignments.length > 0;
+  // Texto del aviso, por ejemplo "Tus horarios en Clínica del Norte los administra la clínica."
+  const institutionNames = doctorAssignments.map(a => getInstitutionById(a.institutionId)?.name);
+  const scheduleManager = doctorAssignments.length > 1
+      ? 'cada institución'
+      : getInstitutionType(doctorAssignments[0]?.institutionId) === 'Hospital' ? 'el hospital' : 'la clínica';
+  const managedScheduleNotice = `Tus horarios en ${institutionNames.join(' y ')} los administra ${scheduleManager}.`;
+
+  // --- Solicitud de cambio de horario (solo en la vista propia) ---
+  const [requestingFor, setRequestingFor] = useState(null);       // vinculación para la que se pide el cambio
+  const [requestDraft, setRequestDraft] = useState(null);         // pedido validado, esperando confirmación
+  const [requestSentTo, setRequestSentTo] = useState(null);       // nombre de la institución (ventana de éxito)
+  const requestInstitutionName = getInstitutionById(requestingFor?.institutionId)?.name;
+
+  // Solicitudes del médico en una institución: la pendiente (si hay) y la última resuelta.
+  // Como solo puede haber una pendiente a la vez, la última pedida es también la última
+  // resuelta: nos quedamos con la de fecha más nueva y, si empatan (mismo día), con la
+  // que está más atrás en la lista, que es la que se creó después.
+  const getRequestStatus = (institutionId) => {
+    const mine = allRequests.filter(r => r.doctorId === doctorId && r.institutionId === institutionId);
+    const pending = mine.find(r => r.status === 'pendiente');
+    const lastResolved = mine
+      .filter(r => r.status !== 'pendiente')
+      .reduce((latest, r) => (!latest || r.date >= latest.date ? r : latest), undefined);
+    return { pending, lastResolved };
+  };
+
+  // El médico confirmó en la ventana amarilla: se envía a la institución.
+  const handleConfirmRequest = () => {
+    addRequest({ doctorId, institutionId: requestingFor.institutionId, ...requestDraft });
+    setRequestSentTo(requestInstitutionName);
+    setRequestDraft(null);
+    setRequestingFor(null);
+  };
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -194,6 +370,29 @@ const DoctorProfile = () => {
       <Navbar />
       <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
       <ConfirmModal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} onConfirm={handleConfirmSave} />
+      {requestingFor && (
+        <ScheduleRequestModal
+          institutionName={requestInstitutionName}
+          assignment={requestingFor}
+          otherAssignments={doctorAssignments.filter(a => a.institutionId !== requestingFor.institutionId)}
+          onCancel={() => setRequestingFor(null)}
+          onSubmit={setRequestDraft}
+        />
+      )}
+      <ConfirmModal
+        isOpen={requestDraft !== null}
+        onClose={() => setRequestDraft(null)}
+        onConfirm={handleConfirmRequest}
+        title="¿Enviar solicitud?"
+        message={requestDraft ? `Vas a pedirle a ${requestInstitutionName} atender ${formatSchedule(requestDraft.requestedSchedule)}. Tu horario no cambia hasta que la acepten.` : ''}
+        confirmLabel="Sí, Enviar"
+      />
+      <SuccessModal
+        isOpen={requestSentTo !== null}
+        onClose={() => setRequestSentTo(null)}
+        title="¡Solicitud enviada!"
+        message={`${requestSentTo} va a revisar tu pedido. Vas a ver la respuesta en "Dónde atiende".`}
+      />
       <div className="max-w-5xl mx-auto px-4 py-12">
         {isSelfView && (
             <div className="bg-indigo-600 text-white p-4 rounded-xl shadow-lg mb-8 flex items-center justify-between">
@@ -240,13 +439,6 @@ const DoctorProfile = () => {
                                 <p className="font-medium">{profileData.attentionType}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700">
-                            <div className="bg-blue-50 p-2 rounded-lg"><MapPin className="w-5 h-5 text-blue-600"/></div>
-                            <div>
-                                <p className="text-xs text-gray-400 uppercase font-bold">Ubicación</p>
-                                <p className="font-medium">{profileData.location}</p>
-                            </div>
-                        </div>
                     </div>
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-gray-700">
@@ -262,17 +454,81 @@ const DoctorProfile = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700">
-                            <div className="bg-blue-50 p-2 rounded-lg"><Clock className="w-5 h-5 text-blue-600"/></div>
-                            <div>
-                                <p className="text-xs text-gray-400 uppercase font-bold">Días y Horarios</p>
-                                <p className="font-medium text-sm">
-                                    {formatDays(profileData.days)} <br/> 
-                                    <span className="text-gray-500">{formatHours(profileData.hours)}</span>
-                                </p>
-                            </div>
-                        </div>
                     </div>
+                </div>
+                {/* Dónde atiende: una tarjeta por institución, o "Atención particular" si no tiene ninguna */}
+                <div className="border-t border-gray-100 pt-8 pb-4">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-blue-600"/> Dónde atiende
+                    </h2>
+                    {isSelfView && isManagedByInstitution && (
+                        <p className="text-sm text-indigo-700 bg-indigo-50 rounded-xl p-3 mb-4 flex items-start gap-2">
+                            <Info className="w-4 h-4 shrink-0 mt-0.5"/> {managedScheduleNotice}
+                        </p>
+                    )}
+                    {isManagedByInstitution ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {doctorAssignments.map(assignment => {
+                                const institution = getInstitutionById(assignment.institutionId);
+                                const institutionType = getInstitutionType(assignment.institutionId);
+                                const { pending, lastResolved } = getRequestStatus(assignment.institutionId);
+                                return (
+                                    <div key={assignment.id} className="p-5 rounded-2xl border border-blue-100 bg-blue-50/40 space-y-3">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <p className="font-bold text-gray-900">{institution?.name}</p>
+                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 shrink-0">{institutionType}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 flex items-start gap-2">
+                                            <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/> {institution?.address}
+                                        </p>
+                                        <p className="text-sm text-gray-600 flex items-start gap-2">
+                                            <Stethoscope className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/>
+                                            {institutionType === 'Hospital' ? 'Sector' : 'Área'}: {assignment.area} · {assignment.office}
+                                        </p>
+                                        <p className="text-sm font-medium text-gray-800 flex items-start gap-2">
+                                            <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/> {formatSchedule(assignment)}
+                                        </p>
+                                        {/* Solo el propio médico ve sus solicitudes y puede pedir un cambio */}
+                                        {isSelfView && (pending ? (
+                                            <div className="text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
+                                                <p className="font-bold">Solicitud pendiente</p>
+                                                <p>Pediste {formatSchedule(pending.requestedSchedule)} el {formatDate(pending.date)}. La institución todavía no respondió.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="pt-1 space-y-2">
+                                                {lastResolved && (
+                                                    <p className="text-xs text-gray-500">
+                                                        Última solicitud ({formatDate(lastResolved.resolvedAt ?? lastResolved.date)}):{' '}
+                                                        <span className={`font-bold ${lastResolved.status === 'aceptada' ? 'text-green-600' : 'text-red-600'}`}>
+                                                            {lastResolved.status === 'aceptada' ? 'Aceptada' : 'Rechazada'}
+                                                        </span>
+                                                    </p>
+                                                )}
+                                                <button
+                                                    onClick={() => setRequestingFor(assignment)}
+                                                    className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1"
+                                                >
+                                                    <Send className="w-4 h-4"/> Solicitar cambio de horario
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        // Sin instituciones: los datos particulares que ya tenía el perfil.
+                        <div className="p-5 rounded-2xl border border-gray-200 bg-gray-50 space-y-3 md:max-w-md">
+                            <p className="font-bold text-gray-900">Atención particular</p>
+                            <p className="text-sm text-gray-600 flex items-start gap-2">
+                                <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/> {profileData.location}
+                            </p>
+                            <p className="text-sm font-medium text-gray-800 flex items-start gap-2">
+                                <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/>
+                                {formatDays(profileData.days)} · {formatHours(profileData.hours)}
+                            </p>
+                        </div>
+                    )}
                 </div>
                 {!isSelfView && (
                   <div className="mt-4 bg-indigo-50 rounded-xl p-6 text-center">
@@ -380,6 +636,13 @@ const DoctorProfile = () => {
                                 </div>
                             </div>
                         )}
+                        {/* Si pertenece a una institución, los horarios los gestiona ella: no se editan acá */}
+                        {isManagedByInstitution ? (
+                            <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800 flex items-start gap-2">
+                                <Info className="w-4 h-4 shrink-0 mt-0.5"/>
+                                <span>{managedScheduleNotice} Para cambiarlos, usá "Solicitar cambio de horario" en la sección "Dónde atiende".</span>
+                            </div>
+                        ) : (<>
                         <div className="space-y-2">
                             <p className="block text-sm font-bold text-gray-700 uppercase">Días de Atención</p>
                             <div className="flex justify-between gap-1">
@@ -416,6 +679,7 @@ const DoctorProfile = () => {
                                 ))}
                             </div>
                         </div>
+                        </>)}
                     </div>
                 </div>
             </div>

@@ -1,0 +1,208 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
+import ConfirmModal from '../../components/ConfirmModal';
+import { useClinicData } from './clinicDataContext';
+import { doctorsData } from '../../data/doctors';
+import { formatSchedule } from '../../data/institutions';
+import { Users, MapPin, Stethoscope, UserRound, Edit2, Trash2, LayoutGrid, List } from 'lucide-react';
+
+const findDoctor = (doctorId) => doctorsData.find((doctor) => doctor.id === doctorId);
+
+// Las dos pestañas de la pantalla.
+const TABS = [
+  { id: 'byArea', label: 'Por área', Icon: LayoutGrid },
+  { id: 'all', label: 'Todo el personal', Icon: List },
+];
+
+// Badge de tipo de personal (mismos colores que usa el proyecto: azul médico, rosa secretaria).
+const TypeBadge = ({ type }) =>
+  type === 'doctor' ? (
+    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">Médico</span>
+  ) : (
+    <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-bold border border-pink-200">Secretaria</span>
+  );
+
+// Pantalla del administrador de clínica: todo el personal de la clínica.
+// No tiene formularios propios: para editar lleva a Médicos o Secretarias con el
+// formulario ya abierto, y para eliminar usa las mismas funciones del contexto.
+const ClinicStaff = () => {
+  const navigate = useNavigate();
+  const { clinic, assignments, secretaries, removeAssignment, removeSecretary } = useClinicData();
+  const [activeTab, setActiveTab] = useState('byArea');
+  // Persona a eliminar: { type: 'doctor' | 'secretary', id, name } o null.
+  const [toDelete, setToDelete] = useState(null);
+
+  if (!clinic) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
+          Tu usuario no tiene una clínica asignada.
+        </div>
+      </div>
+    );
+  }
+
+  // Unificamos médicos y secretarias en una sola lista con la misma forma,
+  // así las dos pestañas pueden mostrarlos juntos.
+  const staff = [
+    ...assignments.map((a) => ({
+      type: 'doctor',
+      id: a.id,
+      name: findDoctor(a.doctorId)?.name,
+      area: a.area,
+      detail: `${a.office} · ${formatSchedule(a)}`,
+    })),
+    ...secretaries.map((s) => ({
+      type: 'secretary',
+      id: s.id,
+      name: s.name,
+      area: s.area,
+      detail: `${s.email}${s.phone ? ` · ${s.phone}` : ''}`,
+    })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
+  // Editar: vamos a la pantalla correspondiente pasando el id en `state`
+  // (ClinicDoctors / ClinicSecretaries lo leen y abren el formulario en modo edición).
+  const handleEdit = (person) => {
+    const path = person.type === 'doctor' ? '/clinic/doctors' : '/clinic/secretaries';
+    navigate(path, { state: { editId: person.id } });
+  };
+
+  const handleConfirmDelete = () => {
+    if (toDelete.type === 'doctor') removeAssignment(toDelete.id);
+    else removeSecretary(toDelete.id);
+    setToDelete(null);
+  };
+
+  // Botones de editar y eliminar (los mismos íconos que en las otras pantallas).
+  const actions = (person) => (
+    <div className="flex justify-end gap-2">
+      <button onClick={() => handleEdit(person)} className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Editar">
+        <Edit2 className="w-5 h-5"/>
+      </button>
+      <button onClick={() => setToDelete(person)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Eliminar">
+        <Trash2 className="w-5 h-5"/>
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <ConfirmModal
+        isOpen={toDelete !== null}
+        onClose={() => setToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title={toDelete?.type === 'doctor' ? 'Quitar Profesional' : 'Eliminar Secretaria'}
+        message={toDelete?.type === 'doctor'
+          ? `¿Confirma que desea quitar a ${toDelete?.name} de ${clinic.name}? Si no trabaja en otra institución, se dará de baja su cuenta.`
+          : `¿Confirma que desea eliminar a ${toDelete?.name} de ${clinic.name}? Se dará de baja su cuenta y no podrá volver a iniciar sesión.`}
+      />
+
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div className="bg-blue-100 p-2 rounded-lg"><Users className="text-blue-600 w-8 h-8"/></div>
+            Personal de {clinic.name}
+          </h1>
+          <p className="text-gray-500 mt-2 flex items-center gap-1 text-sm">
+            <MapPin className="w-4 h-4"/> {clinic.address} · {assignments.length} médico(s) y {secretaries.length} secretaria(s)
+          </p>
+        </div>
+
+        {/* Pestañas */}
+        <div role="tablist" className="inline-flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm mb-8">
+          {TABS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              role="tab"
+              aria-selected={activeTab === id}
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition ${activeTab === id ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-blue-700 hover:bg-blue-50'}`}
+            >
+              <Icon className="w-4 h-4"/> {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'byArea' ? (
+          // ---------------- Por área ----------------
+          // Recorremos las áreas de la clínica (si hay una sola, se muestra igual).
+          <div className="space-y-6">
+            {clinic.areas.map((area) => {
+              const doctorsInArea = staff.filter((p) => p.type === 'doctor' && p.area === area);
+              const secretariesInArea = staff.filter((p) => p.type === 'secretary' && p.area === area);
+              return (
+                <section key={area} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                  <h2 className="bg-gray-50 border-b border-gray-100 px-6 py-4 font-bold text-gray-800 flex items-center justify-between">
+                    {area}
+                    <span className="text-xs font-bold text-gray-400 uppercase">
+                      {doctorsInArea.length + secretariesInArea.length} persona(s)
+                    </span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                    {[
+                      { title: 'Médicos', Icon: Stethoscope, people: doctorsInArea, empty: 'Sin médicos en esta área.' },
+                      { title: 'Secretarias', Icon: UserRound, people: secretariesInArea, empty: 'Sin secretarias en esta área.' },
+                    ].map(({ title, Icon, people, empty }) => (
+                      <div key={title} className="p-6">
+                        <p className="text-xs font-bold text-gray-500 uppercase mb-3 flex items-center gap-1">
+                          <Icon className="w-4 h-4"/> {title}
+                        </p>
+                        {people.length === 0 ? (
+                          <p className="text-sm text-gray-400">{empty}</p>
+                        ) : (
+                          <ul className="space-y-3">
+                            {people.map((person) => (
+                              <li key={person.id}>
+                                <p className="font-bold text-gray-900">{person.name}</p>
+                                <p className="text-xs text-gray-500">{person.detail}</p>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          // ---------------- Todo el personal ----------------
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Nombre</th>
+                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Tipo</th>
+                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Área</th>
+                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Detalle</th>
+                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {staff.map((person) => (
+                  <tr key={person.id} className="hover:bg-blue-50/50 transition">
+                    <td className="p-5 font-bold text-gray-900">{person.name}</td>
+                    <td className="p-5"><TypeBadge type={person.type} /></td>
+                    <td className="p-5 text-gray-600">{person.area}</td>
+                    <td className="p-5 text-sm text-gray-500">{person.detail}</td>
+                    <td className="p-5 text-right">{actions(person)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {staff.length === 0 && (
+              <div className="p-10 text-center text-gray-400">La clínica todavía no tiene personal.</div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ClinicStaff;
