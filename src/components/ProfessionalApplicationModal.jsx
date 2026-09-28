@@ -69,14 +69,60 @@ const ProfessionalApplicationModal = ({ onClose }) => {
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handleCuitChange = (e) => setFormData({ ...formData, cuit: formatCuil(e.target.value) });
 
-    const handleSubmit = () => {
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]); // Solo la parte base64
+        reader.onerror = error => reject(error);
+    });
+
+    const handleSubmit = async () => {
         setIsSubmitting(true);
         setProgress(100);
-        setReceiptNumber(generateTransactionId());
-        schedule(() => {
+
+        try {
+            const payload = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                cuit: formData.cuit,
+                email: formData.email,
+                phone: formData.phone,
+                specialty: formData.specialty,
+                licenseNumber: formData.licenseNumber,
+                professionalType: formData.professionalType,
+            };
+            
+            if (formData.profilePic) {
+                payload.profilePic = {
+                    filename: formData.profilePic.name,
+                    base64: await fileToBase64(formData.profilePic)
+                };
+            }
+            if (formData.cv) {
+                payload.cv = {
+                    filename: formData.cv.name,
+                    base64: await fileToBase64(formData.cv)
+                };
+            }
+
+            const response = await fetch('/api/submit-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                setReceiptNumber(generateTransactionId());
+                setIsSuccess(true);
+            } else {
+                alert('Hubo un error al enviar la solicitud. Por favor intenta de nuevo.');
+            }
+        } catch (error) {
+            console.error('Error enviando formulario:', error);
+            alert('Error de conexión.');
+        } finally {
             setIsSubmitting(false);
-            setIsSuccess(true);
-        }, 1000);
+        }
     };
 
     const stepMessages = {
@@ -332,23 +378,39 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-                                <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-2xl p-6 text-center hover:border-blue-500 transition-colors group cursor-pointer">
+                                <label className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-2xl p-6 text-center hover:border-blue-500 transition-colors group cursor-pointer relative overflow-hidden">
+                                    <input 
+                                        type="file" 
+                                        accept="image/jpeg,image/png" 
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={(e) => setFormData({...formData, profilePic: e.target.files[0]})}
+                                    />
                                     <div className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-full mx-auto flex items-center justify-center mb-4 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
-                                        <ImageIcon className="w-6 h-6 text-slate-500 group-hover:text-blue-400" />
+                                        {formData.profilePic ? <Check className="w-6 h-6 text-green-500" /> : <ImageIcon className="w-6 h-6 text-slate-500 group-hover:text-blue-400" />}
                                     </div>
                                     <h4 className="text-white font-bold mb-1">Foto de Perfil</h4>
-                                    <p className="text-slate-400 text-sm">Formato JPG o PNG</p>
-                                    <div className="mt-4 inline-block px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">Seleccionar Archivo</div>
-                                </div>
+                                    <p className="text-slate-400 text-sm truncate">{formData.profilePic ? formData.profilePic.name : 'Formato JPG o PNG'}</p>
+                                    <div className="mt-4 inline-block px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        {formData.profilePic ? 'Cambiar Archivo' : 'Seleccionar Archivo'}
+                                    </div>
+                                </label>
 
-                                <div className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-2xl p-6 text-center hover:border-blue-500 transition-colors group cursor-pointer">
+                                <label className="border-2 border-dashed border-slate-800 bg-slate-950 rounded-2xl p-6 text-center hover:border-blue-500 transition-colors group cursor-pointer relative overflow-hidden">
+                                    <input 
+                                        type="file" 
+                                        accept="application/pdf" 
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={(e) => setFormData({...formData, cv: e.target.files[0]})}
+                                    />
                                     <div className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-full mx-auto flex items-center justify-center mb-4 group-hover:bg-blue-500/10 group-hover:text-blue-400 transition-colors">
-                                        <File className="w-6 h-6 text-slate-500 group-hover:text-blue-400" />
+                                        {formData.cv ? <Check className="w-6 h-6 text-green-500" /> : <File className="w-6 h-6 text-slate-500 group-hover:text-blue-400" />}
                                     </div>
                                     <h4 className="text-white font-bold mb-1">Currículum Vitae</h4>
-                                    <p className="text-slate-400 text-sm">Formato PDF</p>
-                                    <div className="mt-4 inline-block px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">Seleccionar PDF</div>
-                                </div>
+                                    <p className="text-slate-400 text-sm truncate">{formData.cv ? formData.cv.name : 'Formato PDF'}</p>
+                                    <div className="mt-4 inline-block px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        {formData.cv ? 'Cambiar PDF' : 'Seleccionar PDF'}
+                                    </div>
+                                </label>
                             </div>
 
                             <div className="bg-blue-900/10 border border-blue-900/30 p-4 rounded-xl mt-6">
