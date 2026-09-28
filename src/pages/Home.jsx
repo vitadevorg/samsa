@@ -64,7 +64,7 @@ const IntroOverlay = ({ onComplete }) => {
         <div className="relative">
           <HeartPulse strokeWidth={1.2} className="w-24 h-24 lg:w-32 lg:h-32 text-blue-700 mb-8 opacity-0 animate-heartbeat-intro" style={{ animationDelay: '200ms' }} />
         </div>
-        <h1 className="text-4xl lg:text-6xl tracking-[0.3em] lg:tracking-[0.4em] font-serif font-medium text-slate-800 ml-[0.3em] lg:ml-[0.4em]">
+        <h1 className="flex whitespace-nowrap text-4xl lg:text-6xl tracking-[0.3em] lg:tracking-[0.4em] font-serif font-medium text-slate-800 ml-[0.3em] lg:ml-[0.4em]">
           {"SAMSA".split('').map((letter, i) => (
             <span key={i} className="inline-block opacity-0 animate-elegant-reveal" style={{ animationDelay: `${i * 100 + 700}ms` }}>
               {letter}
@@ -72,7 +72,7 @@ const IntroOverlay = ({ onComplete }) => {
           ))}
         </h1>
         <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent my-6 opacity-0 animate-elegant-reveal" style={{ animationDelay: '1300ms' }}></div>
-        <p className="text-sm lg:text-base tracking-[0.2em] lg:tracking-[0.3em] font-medium text-slate-600 uppercase opacity-0 animate-elegant-reveal" style={{ animationDelay: '1600ms' }}>
+        <p className="text-sm lg:text-base tracking-[0.2em] lg:tracking-[0.3em] font-medium text-slate-600 uppercase opacity-0 animate-elegant-reveal text-center px-4" style={{ animationDelay: '1600ms' }}>
           Sistema de Salud Integral
         </p>
       </div>
