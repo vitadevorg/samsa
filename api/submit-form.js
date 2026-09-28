@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     const { data: emailData, error } = await resend.emails.send({
       from: 'SAMSA <onboarding@resend.dev>', // Update this in production
       to: ['vitadev.org@gmail.com'],
-      subject: \`Nueva Solicitud: \${data.firstName} \${data.lastName}\`,
+      subject: `Nueva Solicitud: ${data.firstName} ${data.lastName}`,
       html: generateEmailHtml(data),
       attachments: attachments,
     });
