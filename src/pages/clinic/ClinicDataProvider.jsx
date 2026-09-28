@@ -157,10 +157,11 @@ const ClinicDataProvider = ({ children }) => {
 
   // Todo lo que las pantallas (y el Navbar) pueden leer o usar.
   // - Pantallas de clínica: `clinic`, `assignments`, `secretaries`, `requests` (ya filtrados).
-  // - Resto de la app (por ejemplo el perfil del médico): `allAssignments`, `allRequests`, `addRequest`.
+  // - Resto de la app: `allAssignments`, `allRequests`, `addRequest` (perfil del médico,
+  //   reserva de turnos, listado de profesionales) y `allSecretaries` (panel de la secretaria).
   const value = {
     clinic,
-    allAssignments, allRequests, addRequest,
+    allAssignments, allRequests, addRequest, allSecretaries,
     assignments, addAssignment, updateAssignment, removeAssignment, updateDocument,
     secretaries, addSecretary, updateSecretary, removeSecretary,
     requests, acceptRequest, rejectRequest,

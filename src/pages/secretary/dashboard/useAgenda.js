@@ -40,10 +40,11 @@ const agendaReducer = (state, action) => {
   }
 };
 
-const initAgenda = () => ({ appointments: buildInitialAppointments(), suspended: [] });
+// `doctors`: médicos de la secretaria; se usan solo para armar los turnos de ejemplo.
+const initAgenda = (doctors) => ({ appointments: buildInitialAppointments(doctors), suspended: [] });
 
-export const useAgenda = () => {
-  const [state, dispatch] = useReducer(agendaReducer, undefined, initAgenda);
+export const useAgenda = (doctors) => {
+  const [state, dispatch] = useReducer(agendaReducer, doctors, initAgenda);
   return {
     appointments: state.appointments,
     suspended: state.suspended,

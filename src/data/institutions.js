@@ -64,6 +64,8 @@ export const SECRETARIES = [
   { id: 'sec-2', name: 'Florencia Juárez', email: 'florencia.juarez@samsa.med', phone: '381 400-1002', institutionId: 'clinica-del-norte', area: 'Nutrición', doctorIds: ['agustina-vega', 'carlos-rodriguez'] },
   { id: 'sec-3', name: 'Micaela Soria', email: 'micaela.soria@samsa.med', phone: '381 400-1003', institutionId: 'centro-dermatologico', area: 'Dermatología', doctorIds: ['laura-quiroga', 'sofia-blanco'] },
   { id: 'sec-4', name: 'Rodrigo Paz', email: 'rodrigo.paz@samsa.med', phone: '381 400-1004', institutionId: 'hospital-central', area: 'Pediatría', doctorIds: ['sofia-bermudez'] },
+  // La secretaria de prueba original (usuario secretaria@samsa.med).
+  { id: 'sec-5', name: 'María González', email: 'secretaria@samsa.med', phone: '381 400-1005', institutionId: 'clinica-del-norte', area: 'Clínica Médica', doctorIds: ['juan-perez', 'carlos-rodriguez', 'agustina-vega'] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -113,6 +115,34 @@ export const findScheduleConflict = (doctorId, schedule, institutionId) =>
       assignment.institutionId !== institutionId &&
       schedulesOverlap(assignment, schedule)
   );
+
+// Dónde y cuándo atiende un médico. Devuelve una "sede" por cada institución
+// donde está vinculado o, si no tiene ninguna, una sola con su atención particular
+// (location, days y hours de doctors.js). Todas tienen la misma forma, así cada
+// pantalla (reserva de turnos, listado de profesionales) las usa igual:
+// { key, institutionId (null si es particular), name, office, days, hours: [{ start, end }] }
+// `assignments` es la lista de vinculaciones actual (la del estado compartido).
+export const getDoctorLocations = (doctor, assignments) => {
+  const mine = assignments.filter((assignment) => assignment.doctorId === doctor.id);
+  if (mine.length === 0) {
+    return [{
+      key: 'particular',
+      institutionId: null,
+      name: 'Atención particular',
+      office: doctor.location,
+      days: doctor.days,
+      hours: doctor.hours,
+    }];
+  }
+  return mine.map((assignment) => ({
+    key: assignment.id,
+    institutionId: assignment.institutionId,
+    name: getInstitutionById(assignment.institutionId)?.name,
+    office: assignment.office,
+    days: assignment.days,
+    hours: [{ start: assignment.startTime, end: assignment.endTime }],
+  }));
+};
 
 // Texto legible de un horario, por ejemplo "Lun, Mié · 08:00 a 13:00".
 export const formatSchedule = ({ days, startTime, endTime }) =>

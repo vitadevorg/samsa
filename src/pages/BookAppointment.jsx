@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/useAuth'; 
 import { doctorsData } from '../data/doctors';
+import { useClinicData } from './clinic/clinicDataContext';
+import { getDoctorLocations } from '../data/institutions';
 import PrintReceipt from '../components/PrintReceipt';
 import { generateTransactionId } from '../utils/ids';
 import {
@@ -35,14 +37,38 @@ const BookAppointment = () => {
     const [today] = useState(startOfDay);
     const [currentDisplayDate, setCurrentDisplayDate] = useState(() => startOfMonth(today));
     const [formData, setFormData] = useState(() => buildInitialForm(user));
+    // Sedes donde atiende el médico: una por institución (con el horario que le fijó
+    // cada una) o, si no tiene ninguna, su atención particular. Salen del estado
+    // compartido, así un cambio de horario aceptado por la clínica se refleja acá.
+    const { allAssignments } = useClinicData();
+    const locations = useMemo(
+        () => (doctor ? getDoctorLocations(doctor, allAssignments) : []),
+        [doctor, allAssignments]
+    );
+    const [selectedLocationKey, setSelectedLocationKey] = useState(null);
+    // Sede elegida: la que marcó el paciente o, por defecto, la primera.
+    const selectedLocation = locations.find(place => place.key === selectedLocationKey) ?? locations[0];
+    // Texto de la sede para el resumen y el comprobante, por ejemplo "Clínica del Norte · Consultorio 4".
+    const locationLabel = selectedLocation?.institutionId
+        ? `${selectedLocation.name} · ${selectedLocation.office}`
+        : selectedLocation?.office;
+    // El calendario y los horarios usan los días y el horario de la sede elegida.
     const calendarDays = useMemo(
-        () => buildCalendarMonth(currentDisplayDate, getWorkingDayIndexes(doctor?.days), today),
-        [currentDisplayDate, doctor, today]
+        () => buildCalendarMonth(currentDisplayDate, getWorkingDayIndexes(selectedLocation?.days), today),
+        [currentDisplayDate, selectedLocation, today]
     );
     const dailyTimeSlots = useMemo(
-        () => (selectedDate ? getSlotAvailability(doctor?.id, selectedDate.date, buildTimeSlots(doctor?.hours)) : []),
-        [selectedDate, doctor]
+        () => (selectedDate
+            ? getSlotAvailability(`${doctor?.id}@${selectedLocation?.key}`, selectedDate.date, buildTimeSlots(selectedLocation?.hours))
+            : []),
+        [selectedDate, doctor, selectedLocation]
     );
+    // Cambiar de sede cambia los días disponibles: se borra el día y la hora elegidos.
+    const handleLocationChange = (key) => {
+        setSelectedLocationKey(key);
+        setSelectedDate(null);
+        setSelectedTime(null);
+    };
     const canGoPrev = () => currentDisplayDate > startOfMonth(today);
     const canGoNext = () => currentDisplayDate < addMonths(today, 1);
     const changeMonth = (offset) => {
@@ -91,7 +117,7 @@ const BookAppointment = () => {
         email: formData.email,
         date: selectedDate ? `${selectedDate.day} de ${currentDisplayDate.toLocaleString('es-ES', { month: 'long' })}` : '',
         time: selectedTime,
-        location: doctor?.location,
+        location: locationLabel,
         transactionId,
     };
     return (
@@ -122,6 +148,36 @@ const BookAppointment = () => {
             {step === 1 && (
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-500">
                     <div className="p-6 md:p-8">
+                        {/* Sede: si atiende en varias, el paciente elige; si es una sola, se informa */}
+                        {locations.length > 0 && (
+                            <div className="mb-8">
+                                <p className="text-sm font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-blue-600"/> {locations.length > 1 ? '¿Dónde querés atenderte?' : 'Lugar de atención'}
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {locations.map(place => {
+                                        const isSelected = place.key === selectedLocation.key;
+                                        return (
+                                            <button
+                                                key={place.key}
+                                                type="button"
+                                                aria-pressed={isSelected}
+                                                disabled={locations.length === 1}
+                                                onClick={() => handleLocationChange(place.key)}
+                                                className={`text-left p-4 rounded-2xl border transition ${isSelected ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                                            >
+                                                <p className="font-bold text-gray-900">{place.name}</p>
+                                                <p className="text-sm text-gray-500">{place.office}</p>
+                                                <p className="text-sm text-gray-700 mt-1 flex items-center gap-1">
+                                                    <Clock className="w-4 h-4 text-blue-500 shrink-0"/>
+                                                    {place.days.join(', ')} · {place.hours.map(h => `${h.start} a ${h.end}`).join(' / ')}
+                                                </p>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
                             <div className="flex items-center gap-4 select-none">
                                 <button onClick={() => changeMonth(-1)} disabled={!canGoPrev()} className={`p-2 rounded-full transition ${!canGoPrev() ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-600'}`}><ChevronLeft className="w-5 h-5"/></button>
@@ -205,6 +261,7 @@ const BookAppointment = () => {
                                 <p className="text-xs font-bold text-gray-400 uppercase">Turno</p>
                                 <p className="font-bold text-gray-800">{selectedDate?.day} de {currentDisplayDate.toLocaleString('es-ES', { month: 'long' })} - {selectedTime} hs</p>
                                 <p className="text-sm text-gray-500">Con: {doctorName}</p>
+                                {locationLabel && <p className="text-sm text-gray-500">En: {locationLabel}</p>}
                             </div>
                         </div>
                     </div>
