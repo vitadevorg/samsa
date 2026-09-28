@@ -17,7 +17,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
     const fieldId = useId();
     const { schedule } = useTimeouts();
     const [step, setStep] = useState(1);
-    const [progress, setProgress] = useState(0);
+    const progress = (step - 1) * 50;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [receiptNumber, setReceiptNumber] = useState('');
@@ -51,19 +51,11 @@ const ProfessionalApplicationModal = ({ onClose }) => {
 
 
     const handleNext = () => {
-        setStep(prev => {
-            const next = Math.min(prev + 1, 3);
-            setProgress((next - 1) * 33.33);
-            return next;
-        });
+        setStep(prev => Math.min(prev + 1, 3));
     };
 
     const handlePrev = () => {
-        setStep(prev => {
-            const next = Math.max(prev - 1, 1);
-            setProgress((next - 1) * 33.33);
-            return next;
-        });
+        setStep(prev => Math.max(prev - 1, 1));
     };
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -168,11 +160,11 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                             Nuestro equipo evaluará tu perfil y te contactará a la brevedad.
                         </p>
 
-                        <div className="flex items-center gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
-                            <button onClick={handlePrint} className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-lg shadow-lg shadow-emerald-500/20">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 w-full opacity-0 animate-fade-in-up" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
+                            <button onClick={handlePrint} className="w-full sm:w-auto justify-center bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-lg shadow-lg shadow-emerald-500/20">
                                 <Printer className="w-6 h-6" /> Imprimir Comprobante
                             </button>
-                            <button onClick={onClose} className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-8 py-4 rounded-xl font-bold transition-colors text-lg">
+                            <button onClick={onClose} className="w-full sm:w-auto justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 px-8 py-4 rounded-xl font-bold transition-colors text-lg">
                                 Volver al Inicio
                             </button>
                         </div>
