@@ -70,7 +70,6 @@ const ProfessionalApplicationModal = ({ onClose }) => {
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
-        setProgress(100);
 
         try {
             const payload = {
