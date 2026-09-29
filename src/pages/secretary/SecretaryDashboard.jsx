@@ -115,8 +115,10 @@ const SecretaryDashboard = () => {
   const handleScheduleSuspended = (patient) => {
     const patientData = findPatientByName(patient.patient) ?? { patient: patient.patient, phone: patient.phone };
     setShowSuspended(false);
+    // Se reagenda con su médico original, salvo que ya no esté entre los asignados.
+    const stillAssigned = doctors.some(d => d.id === patient.doctorId);
     openNewTurn(
-      patient.doctorId ?? currentDoctor?.id,
+      stillAssigned ? patient.doctorId : currentDoctor?.id,
       { ...patientData, type: patient.type || 'Presencial', isReschedule: true },
       patient.id
     );
