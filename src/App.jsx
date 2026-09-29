@@ -40,7 +40,6 @@ import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
 import ClinicStaff from './pages/clinic/ClinicStaff';
-import HospitalDashboard from './pages/hospital/HospitalDashboard';
 import VitadevDashboard from './pages/vitadev/VitadevDashboard';
 
 function ScrollToTop() {
@@ -116,8 +115,12 @@ function App() {
             <Route path="/clinic/requests" element={<ClinicRequests />} />
           </Route>
 
+          {/* El hospital usa las mismas pantallas que la clínica, bajo /hospital/... */}
           <Route element={<ProtectedRoute roles={[ROLES.HOSPITAL_ADMIN]} />}>
-            <Route path="/hospital/dashboard" element={<HospitalDashboard />} />
+            <Route path="/hospital/doctors" element={<ClinicDoctors />} />
+            <Route path="/hospital/secretaries" element={<ClinicSecretaries />} />
+            <Route path="/hospital/staff" element={<ClinicStaff />} />
+            <Route path="/hospital/requests" element={<ClinicRequests />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={[ROLES.VITADEV_ADMIN]} />}>

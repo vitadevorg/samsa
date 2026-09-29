@@ -5,7 +5,7 @@ import {
   Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
-import { ROLES, getHomeForRole } from '../constants/roles';
+import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -41,6 +41,8 @@ const Navbar = () => {
   const isVitadevAdmin = user?.role === ROLES.VITADEV_ADMIN;
   // Los administradores de institución usan el mismo estilo oscuro que el admin general.
   const isInstitutionAdmin = isClinicAdmin || isHospitalAdmin || isVitadevAdmin;
+  // Ruta base de las pantallas de administración: '/clinic', '/hospital' o undefined.
+  const institutionBase = INSTITUTION_ADMIN_PATHS[user?.role];
   // En las pantallas de clínica el Navbar está dentro de ClinicDataProvider y puede leer
   // las solicitudes; en el resto del sitio el contexto es null y el contador queda en 0.
   const clinicData = useContext(ClinicDataContext);
@@ -76,18 +78,18 @@ const Navbar = () => {
                   <Wallet className="w-4 h-4"/> Obras Sociales
                 </Link>
               </>
-            ) : isClinicAdmin ? (
+            ) : institutionBase ? (
               <>
-                <Link to="/clinic/doctors" className={getLinkClass('/clinic/doctors')}>
+                <Link to={`${institutionBase}/doctors`} className={getLinkClass(`${institutionBase}/doctors`)}>
                   <Stethoscope className="w-4 h-4"/> Médicos
                 </Link>
-                <Link to="/clinic/secretaries" className={getLinkClass('/clinic/secretaries')}>
+                <Link to={`${institutionBase}/secretaries`} className={getLinkClass(`${institutionBase}/secretaries`)}>
                   <Users className="w-4 h-4"/> Secretarias
                 </Link>
-                <Link to="/clinic/staff" className={getLinkClass('/clinic/staff')}>
+                <Link to={`${institutionBase}/staff`} className={getLinkClass(`${institutionBase}/staff`)}>
                   <Contact className="w-4 h-4"/> Personal
                 </Link>
-                <Link to="/clinic/requests" className={getLinkClass('/clinic/requests')}>
+                <Link to={`${institutionBase}/requests`} className={getLinkClass(`${institutionBase}/requests`)}>
                   <Inbox className="w-4 h-4"/> Solicitudes
                   {pendingRequests > 0 && (
                     <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingRequests} pendientes`}>
@@ -96,10 +98,6 @@ const Navbar = () => {
                   )}
                 </Link>
               </>
-            ) : isHospitalAdmin ? (
-              <Link to="/hospital/dashboard" className={getLinkClass('/hospital/dashboard')}>
-                <Building className="w-4 h-4"/> Panel del Hospital
-              </Link>
             ) : isVitadevAdmin ? (
               <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
                 <Shield className="w-4 h-4"/> Panel VitaDev
@@ -235,17 +233,15 @@ const Navbar = () => {
               <Link to="/admin/insurances" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Obras Sociales</Link>
               <Link to="/admin/profile" className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 bg-blue-50">Mi Perfil Admin</Link>
             </>
-            ) : isClinicAdmin ? (
+            ) : institutionBase ? (
             <>
-              <Link to="/clinic/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to="/clinic/secretaries" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
-              <Link to="/clinic/staff" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Personal</Link>
-              <Link to="/clinic/requests" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+              <Link to={`${institutionBase}/doctors`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
+              <Link to={`${institutionBase}/secretaries`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
+              <Link to={`${institutionBase}/staff`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Personal</Link>
+              <Link to={`${institutionBase}/requests`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
                 Solicitudes{pendingRequests > 0 && ` (${pendingRequests})`}
               </Link>
             </>
-          ) : isHospitalAdmin ? (
-            <Link to="/hospital/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Panel del Hospital</Link>
           ) : isVitadevAdmin ? (
             <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Panel VitaDev</Link>
           ) : isDoctor ? (
