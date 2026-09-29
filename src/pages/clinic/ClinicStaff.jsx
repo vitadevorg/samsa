@@ -5,15 +5,14 @@ import ConfirmModal from '../../components/ConfirmModal';
 import { useClinicData } from './clinicDataContext';
 import { doctorsData } from '../../data/doctors';
 import { formatSchedule } from '../../data/institutions';
-import { Users, MapPin, Stethoscope, UserRound, Edit2, Trash2, LayoutGrid, List } from 'lucide-react';
+import { Users, MapPin, Edit2, Trash2, Search, X } from 'lucide-react';
 
 const findDoctor = (doctorId) => doctorsData.find((doctor) => doctor.id === doctorId);
 
-// Las dos pestañas de la pantalla.
-const TABS = [
-  { id: 'byArea', label: 'Por área', Icon: LayoutGrid },
-  { id: 'all', label: 'Todo el personal', Icon: List },
-];
+// Texto para comparar en la búsqueda: minúsculas y sin tildes,
+// así "gonzalez" encuentra a "González". normalize('NFD') separa la letra de
+// su tilde ("á" -> "a" + "´") y el replace borra las tildes sueltas.
+const normalizeText = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 
 // Badge de tipo de personal (mismos colores que usa el proyecto: azul médico, rosa secretaria).
 const TypeBadge = ({ type }) =>
@@ -23,22 +22,23 @@ const TypeBadge = ({ type }) =>
     <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-bold border border-pink-200">Secretaria</span>
   );
 
-// Pantalla del administrador de clínica: todo el personal de la clínica.
+// Pantalla del administrador de institución (clínica u hospital): todo su personal.
 // No tiene formularios propios: para editar lleva a Médicos o Secretarias con el
 // formulario ya abierto, y para eliminar usa las mismas funciones del contexto.
 const ClinicStaff = () => {
   const navigate = useNavigate();
-  const { clinic, assignments, secretaries, removeAssignment, removeSecretary } = useClinicData();
-  const [activeTab, setActiveTab] = useState('byArea');
+  const { clinic, units, terms, basePath, assignments, secretaries, removeAssignment, removeSecretary } = useClinicData();
   // Persona a eliminar: { type: 'doctor' | 'secretary', id, name } o null.
   const [toDelete, setToDelete] = useState(null);
+  // Lo que se escribe en la barra de búsqueda.
+  const [search, setSearch] = useState('');
 
   if (!clinic) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
-          Tu usuario no tiene una clínica asignada.
+          Tu usuario no tiene una institución asignada.
         </div>
       </div>
     );
@@ -61,12 +61,33 @@ const ClinicStaff = () => {
       area: s.area,
       detail: `${s.email}${s.phone ? ` · ${s.phone}` : ''}`,
     })),
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  ]
+    // Orden: primero los médicos y después las secretarias; dentro de cada tipo, por nombre.
+    .sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
+
+  // Búsqueda: una persona aparece si el texto buscado está en su nombre, su tipo
+  // (médico / secretaria), su área o sector, o su detalle (consultorio, email, teléfono).
+  const query = normalizeText(search.trim());
+  const isSearching = query !== '';
+  const matches = (person) => {
+    const typeLabel = person.type === 'doctor' ? 'medico' : 'secretaria';
+    const text = normalizeText(`${person.name} ${typeLabel} ${person.area} ${person.detail}`);
+    return text.includes(query);
+  };
+  const visibleStaff = isSearching ? staff.filter(matches) : staff;
+
+  // Una lista por área o sector. Si alguien quedó con un área que ya no existe,
+  // va a un grupo aparte para que no desaparezca de la pantalla.
+  let groups = units.map((unit) => ({ unit, people: visibleStaff.filter((p) => p.area === unit) }));
+  const withoutUnit = visibleStaff.filter((p) => !units.includes(p.area));
+  if (withoutUnit.length > 0) groups.push({ unit: `Sin ${terms.unitLower}`, people: withoutUnit });
+  // Mientras se busca, ocultamos las áreas o sectores sin resultados.
+  if (isSearching) groups = groups.filter((group) => group.people.length > 0);
 
   // Editar: vamos a la pantalla correspondiente pasando el id en `state`
   // (ClinicDoctors / ClinicSecretaries lo leen y abren el formulario en modo edición).
   const handleEdit = (person) => {
-    const path = person.type === 'doctor' ? '/clinic/doctors' : '/clinic/secretaries';
+    const path = person.type === 'doctor' ? `${basePath}/doctors` : `${basePath}/secretaries`;
     navigate(path, { state: { editId: person.id } });
   };
 
@@ -112,94 +133,84 @@ const ClinicStaff = () => {
           </p>
         </div>
 
-        {/* Pestañas */}
-        <div role="tablist" className="inline-flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm mb-8">
-          {TABS.map(({ id, label, Icon }) => (
+        {/* Barra de búsqueda (mismo estilo que la de Profesionales) */}
+        <div className="relative mb-6 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+          <input
+            type="search"
+            aria-label="Buscar personal"
+            placeholder={`Buscar por nombre, ${terms.unitLower}, consultorio o email...`}
+            maxLength={60}
+            className="w-full pl-12 pr-12 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {isSearching && (
             <button
-              key={id}
-              role="tab"
-              aria-selected={activeTab === id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition ${activeTab === id ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-blue-700 hover:bg-blue-50'}`}
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+              title="Borrar búsqueda"
+              aria-label="Borrar búsqueda"
             >
-              <Icon className="w-4 h-4"/> {label}
+              <X className="w-4 h-4"/>
             </button>
-          ))}
+          )}
         </div>
-
-        {activeTab === 'byArea' ? (
-          // ---------------- Por área ----------------
-          // Recorremos las áreas de la clínica (si hay una sola, se muestra igual).
-          <div className="space-y-6">
-            {clinic.areas.map((area) => {
-              const doctorsInArea = staff.filter((p) => p.type === 'doctor' && p.area === area);
-              const secretariesInArea = staff.filter((p) => p.type === 'secretary' && p.area === area);
-              return (
-                <section key={area} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                  <h2 className="bg-gray-50 border-b border-gray-100 px-6 py-4 font-bold text-gray-800 flex items-center justify-between">
-                    {area}
-                    <span className="text-xs font-bold text-gray-400 uppercase">
-                      {doctorsInArea.length + secretariesInArea.length} persona(s)
-                    </span>
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                    {[
-                      { title: 'Médicos', Icon: Stethoscope, people: doctorsInArea, empty: 'Sin médicos en esta área.' },
-                      { title: 'Secretarias', Icon: UserRound, people: secretariesInArea, empty: 'Sin secretarias en esta área.' },
-                    ].map(({ title, Icon, people, empty }) => (
-                      <div key={title} className="p-6">
-                        <p className="text-xs font-bold text-gray-500 uppercase mb-3 flex items-center gap-1">
-                          <Icon className="w-4 h-4"/> {title}
-                        </p>
-                        {people.length === 0 ? (
-                          <p className="text-sm text-gray-400">{empty}</p>
-                        ) : (
-                          <ul className="space-y-3">
-                            {people.map((person) => (
-                              <li key={person.id}>
-                                <p className="font-bold text-gray-900">{person.name}</p>
-                                <p className="text-xs text-gray-500">{person.detail}</p>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        ) : (
-          // ---------------- Todo el personal ----------------
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Nombre</th>
-                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Tipo</th>
-                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Área</th>
-                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Detalle</th>
-                  <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {staff.map((person) => (
-                  <tr key={person.id} className="hover:bg-blue-50/50 transition">
-                    <td className="p-5 font-bold text-gray-900">{person.name}</td>
-                    <td className="p-5"><TypeBadge type={person.type} /></td>
-                    <td className="p-5 text-gray-600">{person.area}</td>
-                    <td className="p-5 text-sm text-gray-500">{person.detail}</td>
-                    <td className="p-5 text-right">{actions(person)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {staff.length === 0 && (
-              <div className="p-10 text-center text-gray-400">La clínica todavía no tiene personal.</div>
-            )}
-          </div>
+        {isSearching && (
+          <p className="text-sm text-gray-500 mb-3 ml-1" aria-live="polite">
+            {visibleStaff.length} resultado(s) para “{search.trim()}”
+          </p>
         )}
+
+        {/* Todo el personal en una sola tabla, organizada por área o sector */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Nombre</th>
+                <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Tipo</th>
+                <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Detalle</th>
+                <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
+              </tr>
+            </thead>
+            {/* Un <tbody> por área o sector: su primera fila es el título del grupo */}
+            {groups.map(({ unit, people }) => (
+              <tbody key={unit} className="divide-y divide-gray-50 border-t border-gray-100">
+                <tr className="bg-blue-50/60">
+                  <th colSpan={4} scope="rowgroup" className="px-5 py-3 text-left">
+                    <span className="font-bold text-gray-800">{unit}</span>
+                    <span className="ml-2 text-xs font-bold text-gray-400 uppercase">{people.length} persona(s)</span>
+                  </th>
+                </tr>
+                {people.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-5 py-4 text-sm text-gray-400">Sin personal en {terms.thisUnit}.</td>
+                  </tr>
+                ) : (
+                  people.map((person) => (
+                    <tr key={person.id} className="hover:bg-blue-50/50 transition">
+                      <td className="p-5 font-bold text-gray-900">{person.name}</td>
+                      <td className="p-5"><TypeBadge type={person.type} /></td>
+                      <td className="p-5 text-sm text-gray-500">{person.detail}</td>
+                      <td className="p-5 text-right">{actions(person)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            ))}
+          </table>
+          {staff.length === 0 && (
+            <div className="p-10 text-center text-gray-400">{terms.placeCap} todavía no tiene personal.</div>
+          )}
+          {staff.length > 0 && isSearching && visibleStaff.length === 0 && (
+            <div className="p-10 text-center">
+              <p className="text-gray-500 font-medium">No encontramos personal con “{search.trim()}”.</p>
+              <button onClick={() => setSearch('')} className="mt-3 text-blue-600 font-bold hover:text-blue-800 transition">
+                Ver todo el personal
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
