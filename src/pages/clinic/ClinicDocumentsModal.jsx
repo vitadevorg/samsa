@@ -3,6 +3,7 @@ import { EditConfirmModal, SuccessModal } from './ClinicModals';
 import { useTimeouts } from '../../hooks/useTimeouts';
 import { getDocumentStatus, NON_EXPIRING_DOCUMENTS } from '../../data/institutions';
 import { todayISO, formatDate } from './clinicDates';
+import { validateExpiry, addYearsISO, MAX_EXPIRY_YEARS } from './clinicValidation';
 import { FileText, X, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 
 // Cuánto tiempo (en milisegundos) queda visible la ventana verde de éxito.
@@ -41,12 +42,9 @@ const ClinicDocumentsModal = ({ doctorName, assignment, onUpdate, onClose }) => 
 
   // "Guardar": validamos la fecha y pedimos confirmación (ventana naranja).
   const handleSave = () => {
-    if (needsExpiry(editingType) && !newExpiry) {
-      setError('Indicá la fecha de vencimiento.');
-      return;
-    }
-    if (needsExpiry(editingType) && newExpiry <= today) {
-      setError('La fecha de vencimiento tiene que ser posterior a hoy.');
+    const expiryError = needsExpiry(editingType) ? validateExpiry(newExpiry, today) : '';
+    if (expiryError) {
+      setError(expiryError);
       return;
     }
     setIsConfirming(true);
@@ -121,6 +119,7 @@ const ClinicDocumentsModal = ({ doctorName, assignment, onUpdate, onClose }) => 
                             id={`${fieldId}-vence`}
                             type="date"
                             min={today}
+                            max={addYearsISO(today, MAX_EXPIRY_YEARS)}
                             value={newExpiry}
                             onChange={(e) => { setNewExpiry(e.target.value); setError(''); }}
                             className="p-2.5 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none bg-white"

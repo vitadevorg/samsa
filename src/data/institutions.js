@@ -81,6 +81,16 @@ export const getInstitutionById = (id) =>
 export const getInstitutionType = (id) =>
   HOSPITALS.some((hospital) => hospital.id === id) ? 'Hospital' : 'Clínica';
 
+// Unidades internas de una institución: áreas (clínica) o sectores (hospital).
+export const getInstitutionUnits = (institution) => institution?.areas ?? institution?.sectors ?? [];
+
+// Textos que cambian según el tipo de institución, para que las mismas pantallas
+// digan "Área"/"la clínica" o "Sector"/"el hospital" sin escribirlos fijos.
+export const getInstitutionTerms = (institution) =>
+  getInstitutionType(institution?.id) === 'Hospital'
+    ? { unit: 'Sector', unitLower: 'sector', thisUnit: 'este sector', place: 'el hospital', placeCap: 'El hospital', fromPlace: 'del hospital', thisPlace: 'este hospital' }
+    : { unit: 'Área', unitLower: 'área', thisUnit: 'esta área', place: 'la clínica', placeCap: 'La clínica', fromPlace: 'de la clínica', thisPlace: 'esta clínica' };
+
 // Todas las vinculaciones de médicos (de todas las instituciones), cada una con su documentación.
 export const getAllDoctorAssignments = () =>
   DOCTOR_ASSIGNMENTS.map((assignment) => ({ ...assignment, documents: getAssignmentDocuments(assignment.id) }));
@@ -259,6 +269,17 @@ export const SCHEDULE_REQUESTS = [
     date: '2026-07-15',
     status: 'rechazada',
     resolvedAt: '2026-07-18',
+  },
+  {
+    // Solicitud de ejemplo del hospital (para probar la pantalla con el admin de hospital).
+    id: 'sol-6',
+    doctorId: 'sofia-bermudez',
+    institutionId: 'hospital-central',
+    currentSchedule: { days: ['Lun', 'Mar', 'Mié'], startTime: '08:00', endTime: '14:00' },
+    requestedSchedule: { days: ['Lun', 'Mar', 'Mié', 'Jue'], startTime: '08:00', endTime: '14:00' },
+    reason: 'La demanda de Pediatría subió y puedo sumar los jueves.',
+    date: '2026-09-27',
+    status: 'pendiente',
   },
 ];
 

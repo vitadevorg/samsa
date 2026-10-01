@@ -88,7 +88,7 @@ export class InvalidCredentialsError extends Error {
 // Error para cuentas dadas de baja. Su `message` es el texto que ve el usuario.
 export class AccountDeactivatedError extends Error {
   constructor() {
-    super('Tu cuenta fue dada de baja. Contactá a la administración de tu clínica.');
+    super('Tu cuenta fue dada de baja. Contactá a la administración de tu clínica u hospital.');
     this.name = 'AccountDeactivatedError';
   }
 }

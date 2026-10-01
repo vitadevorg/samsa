@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { createId } from '../../utils/ids';
 import { deactivateAccount } from '../../services/authService';
+import { INSTITUTION_ADMIN_PATHS } from '../../constants/roles';
 import {
   getInstitutionById, getAllDoctorAssignments, SECRETARIES, SCHEDULE_REQUESTS,
+  getInstitutionUnits, getInstitutionTerms,
   pendingDocuments, getDoctorEmail,
 } from '../../data/institutions';
 import { ClinicDataContext } from './clinicDataContext';
@@ -20,7 +22,12 @@ const ClinicDataProvider = ({ children }) => {
   // Institución del administrador logueado (su `institutionId`). Es undefined si
   // no hay sesión o si el usuario no administra una institución.
   const { user } = useAuth();
+  // Se llama `clinic` por historia, pero puede ser una clínica o un hospital.
   const clinic = getInstitutionById(user?.institutionId);
+  // Áreas (clínica) o sectores (hospital), textos según el tipo y ruta base de sus pantallas.
+  const units = getInstitutionUnits(clinic);
+  const terms = getInstitutionTerms(clinic);
+  const basePath = INSTITUTION_ADMIN_PATHS[user?.role];
 
   // Estado de TODAS las instituciones. useState con una función: los datos
   // iniciales se calculan una sola vez, al montar.
@@ -160,7 +167,7 @@ const ClinicDataProvider = ({ children }) => {
   // - Resto de la app: `allAssignments`, `allRequests`, `addRequest` (perfil del médico,
   //   reserva de turnos, listado de profesionales) y `allSecretaries` (panel de la secretaria).
   const value = {
-    clinic,
+    clinic, units, terms, basePath,
     allAssignments, allRequests, addRequest, allSecretaries,
     assignments, addAssignment, updateAssignment, removeAssignment, updateDocument,
     secretaries, addSecretary, updateSecretary, removeSecretary,
