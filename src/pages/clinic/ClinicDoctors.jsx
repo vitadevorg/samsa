@@ -7,8 +7,9 @@ import ClinicDocumentsModal from './ClinicDocumentsModal';
 import { todayISO } from './clinicDates';
 import { useClinicData } from './clinicDataContext';
 import { useTimeouts } from '../../hooks/useTimeouts';
+import { validateOffice, validateRequired, validateSchedule, findOfficeConflict, errorBorder } from './clinicValidation';
 import { doctorsData } from '../../data/doctors';
-import { getInstitutionById, findScheduleConflict, formatSchedule, getDocumentStatus } from '../../data/institutions';
+import { schedulesOverlap, formatSchedule, getDocumentStatus } from '../../data/institutions';
 import { WEEK_DAYS } from '../../constants/catalog';
 import { Trash2, Edit2, UserPlus, Stethoscope, Save, X, MapPin, Clock, AlertTriangle, FileText } from 'lucide-react';
 
@@ -28,38 +29,44 @@ const toForm = (assignment) => ({
   endTime: assignment.endTime,
 });
 
-// Valida el formulario. Devuelve un texto con el problema, o '' si está todo bien.
-const validateAssignment = (form, clinicId) => {
-  if (form.days.length === 0) return 'Elegí al menos un día de atención.';
-  if (form.startTime >= form.endTime) return 'La hora de fin tiene que ser posterior a la de inicio.';
-  // Un médico no puede estar en dos instituciones al mismo tiempo.
-  const conflict = findScheduleConflict(form.doctorId, form, clinicId);
-  if (conflict) {
-    const otherPlace = getInstitutionById(conflict.institutionId)?.name;
-    return `${findDoctor(form.doctorId)?.name} ya atiende en ${otherPlace} (${formatSchedule(conflict)}). Elegí otro día u horario.`;
+// Valida el horario. Devuelve un texto con el problema, o '' si está todo bien.
+// Solo se controla dentro de ESTA institución: si el horario del médico choca con
+// el de otra clínica u hospital, lo resuelve él con la administración.
+// `assignments`: las vinculaciones de esta institución.
+const validateAssignment = (form, clinicId, assignments) => {
+  const scheduleError = validateSchedule(form);
+  if (scheduleError) return scheduleError;
+  // Dos médicos no pueden usar el mismo consultorio al mismo tiempo.
+  const officeTaken = findOfficeConflict(
+    { doctorId: form.doctorId, institutionId: clinicId, office: form.office, schedule: form },
+    assignments,
+    schedulesOverlap
+  );
+  if (officeTaken) {
+    return `${officeTaken.office} ya lo usa ${findDoctor(officeTaken.doctorId)?.name} (${formatSchedule(officeTaken)}). Elegí otro consultorio u horario.`;
   }
   return '';
 };
 
-// Pantalla del administrador de clínica: médicos vinculados a SU clínica,
-// con el área, el consultorio y el horario en el que atienden en ella.
+// Pantalla del administrador de institución (clínica u hospital): médicos vinculados
+// a SU institución, con el área o sector, el consultorio y el horario en que atienden.
 // Plantilla visual: src/pages/admin/AdminDoctors.jsx.
 const ClinicDoctors = () => {
   // useId genera un prefijo único para los id de los inputs (para los <label htmlFor>).
   const fieldId = useId();
 
   // Datos compartidos con la pantalla de Secretarias (ver ClinicDataProvider.jsx).
-  const { clinic, assignments, secretaries, addAssignment, updateAssignment, removeAssignment, updateDocument } = useClinicData();
+  const { clinic, units, terms, assignments, secretaries, addAssignment, updateAssignment, removeAssignment, updateDocument } = useClinicData();
 
   // Si venimos de la pantalla Personal con "Editar", llega el id a editar en
   // location.state (ver ClinicStaff.jsx) y abrimos el formulario ya en modo edición.
   const location = useLocation();
   const assignmentToEdit = assignments.find((a) => a.id === location.state?.editId);
 
-  // Formulario vacío. Si la clínica tiene una sola área, la dejamos elegida.
+  // Formulario vacío. Si la institución tiene una sola área o sector, la dejamos elegida.
   const emptyForm = {
     doctorId: '',
-    area: clinic?.areas.length === 1 ? clinic.areas[0] : '',
+    area: units.length === 1 ? units[0] : '',
     office: '',
     days: [],
     startTime: '08:00',
@@ -71,7 +78,8 @@ const ClinicDoctors = () => {
   const [editId, setEditId] = useState(assignmentToEdit?.id ?? null); // id de la vinculación que se edita (null = alta)
   const [documentsId, setDocumentsId] = useState(null); // vinculación cuya documentación se está viendo
   const [deleteId, setDeleteId] = useState(null); // id de la vinculación a quitar (null = ventana cerrada)
-  const [formError, setFormError] = useState('');
+  const [formError, setFormError] = useState('');   // error del horario (se muestra debajo del formulario)
+  const [errors, setErrors] = useState({});           // errores por campo: médico, área/sector, consultorio
   const [isConfirmingEdit, setIsConfirmingEdit] = useState(false);
   const [success, setSuccess] = useState(null);   // null = cerrada; { title, message } = abierta
   const { schedule } = useTimeouts();
@@ -90,6 +98,17 @@ const ClinicDoctors = () => {
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setFormError('');
+    setErrors((prev) => ({ ...prev, [field]: '' }));
+  };
+
+  // Revisa los campos del formulario. Devuelve solo los que tienen error: { campo: mensaje }.
+  const validateFields = () => {
+    const found = {
+      doctorId: validateRequired(form.doctorId, 'Elegí el médico que querés vincular.'),
+      area: validateRequired(form.area, `Elegí ${terms.unit === 'Sector' ? 'el sector' : 'el área'}.`),
+      office: validateOffice(form.office),
+    };
+    return Object.fromEntries(Object.entries(found).filter(([, message]) => message));
   };
 
   // Marca o desmarca un día, manteniendo el orden de la semana (Lun, Mar, ...).
@@ -105,6 +124,7 @@ const ClinicDoctors = () => {
     setEditId(assignment.id);
     setForm(toForm(assignment));
     setFormError('');
+    setErrors({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -112,12 +132,16 @@ const ClinicDoctors = () => {
     setEditId(null);
     setForm(emptyForm);
     setFormError('');
+    setErrors({});
   };
 
   // Al enviar: validamos; si es edición pedimos confirmación (naranja), si es alta guardamos.
   const handleSubmit = (e) => {
     e.preventDefault(); // evita que el navegador recargue la página al enviar el form
-    const error = validateAssignment(form, clinic.id);
+    const found = validateFields();
+    setErrors(found);
+    if (Object.keys(found).length > 0) return; // hay campos con error: no se guarda
+    const error = validateAssignment(form, clinic.id, assignments);
     if (error) {
       setFormError(error);
       return;
@@ -126,14 +150,14 @@ const ClinicDoctors = () => {
       setIsConfirmingEdit(true);
       return;
     }
-    addAssignment(form);
+    addAssignment({ ...form, office: form.office.trim().replace(/\s+/g, ' ') });
     showSuccess('¡Médico vinculado!', `${findDoctor(form.doctorId)?.name} ahora forma parte de ${clinic.name}.`);
     setForm(emptyForm);
   };
 
   // El usuario confirmó la edición en la ventana naranja.
   const handleConfirmEdit = () => {
-    updateAssignment(editId, form);
+    updateAssignment(editId, { ...form, office: form.office.trim().replace(/\s+/g, ' ') });
     setIsConfirmingEdit(false);
     cancelEdit();
     showSuccess('¡Cambios guardados!', 'Los datos del médico fueron actualizados.');
@@ -151,7 +175,7 @@ const ClinicDoctors = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
-          Tu usuario no tiene una clínica asignada.
+          Tu usuario no tiene una institución asignada.
         </div>
       </div>
     );
@@ -188,7 +212,7 @@ const ClinicDoctors = () => {
       <EditConfirmModal
         isOpen={isConfirmingEdit}
         title="¿Modificar médico?"
-        message={`Vas a actualizar el área, el consultorio y el horario de ${editingDoctorName}. ¿Guardar los cambios?`}
+        message={`Vas a actualizar el ${terms.unitLower}, el consultorio y el horario de ${editingDoctorName}. ¿Guardar los cambios?`}
         onCancel={() => setIsConfirmingEdit(false)}
         onConfirm={handleConfirmEdit}
       />
@@ -227,30 +251,34 @@ const ClinicDoctors = () => {
               </button>
             )}
           </div>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* noValidate: usamos nuestros propios mensajes en lugar de los del navegador */}
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {/* Fila 1: quién, en qué área y dónde */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label htmlFor={`${fieldId}-medico`} className={labelClass}>Médico</label>
                 {/* Al editar no se puede cambiar el médico: solo su área, consultorio y horario */}
-                <select id={`${fieldId}-medico`} required disabled={isEditing} className={`${inputClass} appearance-none disabled:text-gray-500 disabled:cursor-not-allowed`} value={form.doctorId} onChange={e => updateField('doctorId', e.target.value)}>
+                <select id={`${fieldId}-medico`} disabled={isEditing} aria-invalid={Boolean(errors.doctorId)} aria-describedby={`${fieldId}-medico-error`} className={`${inputClass} appearance-none disabled:text-gray-500 disabled:cursor-not-allowed ${errorBorder(errors.doctorId)}`} value={form.doctorId} onChange={e => updateField('doctorId', e.target.value)}>
                   <option value="">Seleccionar...</option>
                   {isEditing && <option value={form.doctorId}>{editingDoctorName}</option>}
                   {availableDoctors.map(doctor => (
                     <option key={doctor.id} value={doctor.id}>{doctor.name} — {doctor.specialty}</option>
                   ))}
                 </select>
+                {errors.doctorId && <p id={`${fieldId}-medico-error`} role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{errors.doctorId}</p>}
               </div>
               <div>
-                <label htmlFor={`${fieldId}-area`} className={labelClass}>Área</label>
-                <select id={`${fieldId}-area`} required className={`${inputClass} appearance-none`} value={form.area} onChange={e => updateField('area', e.target.value)}>
+                <label htmlFor={`${fieldId}-area`} className={labelClass}>{terms.unit}</label>
+                <select id={`${fieldId}-area`} aria-invalid={Boolean(errors.area)} aria-describedby={`${fieldId}-area-error`} className={`${inputClass} appearance-none ${errorBorder(errors.area)}`} value={form.area} onChange={e => updateField('area', e.target.value)}>
                   <option value="">Seleccionar...</option>
-                  {clinic.areas.map(area => <option key={area} value={area}>{area}</option>)}
+                  {units.map(area => <option key={area} value={area}>{area}</option>)}
                 </select>
+                {errors.area && <p id={`${fieldId}-area-error`} role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{errors.area}</p>}
               </div>
               <div>
                 <label htmlFor={`${fieldId}-consultorio`} className={labelClass}>Consultorio</label>
-                <input id={`${fieldId}-consultorio`} required placeholder="Ej: Consultorio 3" className={inputClass} value={form.office} onChange={e => updateField('office', e.target.value)} />
+                <input id={`${fieldId}-consultorio`} maxLength={40} aria-invalid={Boolean(errors.office)} aria-describedby={`${fieldId}-consultorio-error`} placeholder="Ej: Consultorio 3" className={`${inputClass} ${errorBorder(errors.office)}`} value={form.office} onChange={e => updateField('office', e.target.value)} />
+                {errors.office && <p id={`${fieldId}-consultorio-error`} role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{errors.office}</p>}
               </div>
             </div>
 
@@ -292,7 +320,7 @@ const ClinicDoctors = () => {
               </div>
             </div>
 
-            {/* Error de validación (por ejemplo, un horario que se superpone con otra institución) */}
+            {/* Error de validación (por ejemplo, un consultorio ocupado en ese horario) */}
             {formError && (
               <div role="alert" className="flex items-start gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-xl border border-red-100 font-medium">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5"/>
@@ -308,7 +336,7 @@ const ClinicDoctors = () => {
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Profesional</th>
-                <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Área</th>
+                <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">{terms.unit}</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Consultorio</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Horario</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
@@ -363,7 +391,7 @@ const ClinicDoctors = () => {
                         <button
                           onClick={() => setDeleteId(assignment.id)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Quitar de la clínica"
+                          title={`Quitar ${terms.fromPlace}`}
                         >
                           <Trash2 className="w-5 h-5"/>
                         </button>
@@ -375,7 +403,7 @@ const ClinicDoctors = () => {
             </tbody>
           </table>
           {assignments.length === 0 && (
-            <div className="p-10 text-center text-gray-400">Todavía no hay médicos vinculados a esta clínica.</div>
+            <div className="p-10 text-center text-gray-400">Todavía no hay médicos vinculados a {terms.thisPlace}.</div>
           )}
         </div>
       </div>

@@ -4,7 +4,8 @@ import { EditConfirmModal, SuccessModal, RejectConfirmModal } from './ClinicModa
 import { useClinicData } from './clinicDataContext';
 import { useTimeouts } from '../../hooks/useTimeouts';
 import { doctorsData } from '../../data/doctors';
-import { getInstitutionById, findScheduleConflict, formatSchedule } from '../../data/institutions';
+import { schedulesOverlap, formatSchedule } from '../../data/institutions';
+import { findOfficeConflict } from './clinicValidation';
 import { WEEK_DAYS } from '../../constants/catalog';
 import { formatDate } from './clinicDates';
 import { Inbox, ArrowRight, Clock, Check, X, AlertTriangle, MapPin, History } from 'lucide-react';
@@ -44,10 +45,10 @@ const ScheduleView = ({ label, schedule, highlight = false }) => (
   </div>
 );
 
-// Pantalla del administrador de clínica: pedidos de cambio de horario de sus médicos.
+// Pantalla del administrador de institución (clínica u hospital): pedidos de cambio de horario de sus médicos.
 // Arriba las solicitudes pendientes (para aceptar o rechazar) y abajo el historial.
 const ClinicRequests = () => {
-  const { clinic, assignments, requests, acceptRequest, rejectRequest } = useClinicData();
+  const { clinic, terms, assignments, requests, acceptRequest, rejectRequest } = useClinicData();
 
   // Qué solicitud se está confirmando y en qué ventana (naranja = aceptar, roja = rechazar).
   const [acceptingId, setAcceptingId] = useState(null);
@@ -65,7 +66,7 @@ const ClinicRequests = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
-          Tu usuario no tiene una clínica asignada.
+          Tu usuario no tiene una institución asignada.
         </div>
       </div>
     );
@@ -144,13 +145,18 @@ const ClinicRequests = () => {
           {pending.map((request) => {
             const doctor = findDoctor(request.doctorId);
             const assignment = findAssignment(request.doctorId);
-            // No se puede aceptar si el médico ya no está en la clínica, o si el horario
-            // pedido se cruza con el que tiene en otra institución.
-            const conflict = findScheduleConflict(request.doctorId, request.requestedSchedule, clinic.id);
+            // No se puede aceptar si el médico ya no está en la clínica, o si en el
+            // horario pedido su consultorio lo usa otro médico. (Si choca con otra
+            // institución, lo coordina el médico con la administración.)
+            const officeTaken = assignment && findOfficeConflict(
+              { doctorId: request.doctorId, institutionId: clinic.id, office: assignment.office, schedule: request.requestedSchedule },
+              assignments,
+              schedulesOverlap
+            );
             const blockReason = !assignment
-              ? 'El médico ya no está vinculado a la clínica.'
-              : conflict
-                ? `El horario pedido se superpone con el que tiene en ${getInstitutionById(conflict.institutionId)?.name} (${formatSchedule(conflict)}).`
+              ? `El médico ya no está vinculado a ${terms.place}.`
+              : officeTaken
+                ? `En ese horario ${officeTaken.office} lo usa ${findDoctor(officeTaken.doctorId)?.name} (${formatSchedule(officeTaken)}). Cambiale el consultorio desde Médicos o rechazá la solicitud.`
                 : '';
 
             return (
