@@ -15,8 +15,15 @@ export const ROLE_HOME = Object.freeze({
   [ROLES.SECRETARY]: '/secretary/dashboard',
   [ROLES.ADMIN]: '/admin/doctors',
   [ROLES.CLINIC_ADMIN]: '/clinic/doctors',
-  [ROLES.HOSPITAL_ADMIN]: '/hospital/dashboard',
+  [ROLES.HOSPITAL_ADMIN]: '/hospital/doctors',
   [ROLES.VITADEV_ADMIN]: '/vitadev/dashboard',
 });
 
 export const getHomeForRole = (role) => ROLE_HOME[role] ?? '/';
+
+// Clínica y hospital usan las mismas pantallas de administración (src/pages/clinic/);
+// solo cambia la ruta base: /clinic/... o /hospital/...
+export const INSTITUTION_ADMIN_PATHS = Object.freeze({
+  [ROLES.CLINIC_ADMIN]: '/clinic',
+  [ROLES.HOSPITAL_ADMIN]: '/hospital',
+});
