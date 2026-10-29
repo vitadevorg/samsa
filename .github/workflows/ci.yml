@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, development]
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: frontend-build-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type Check & Build
+        run: npm run build
+
+  branch-name:
+    name: branch-name
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [[ "$HEAD_REF" == "development" ]]; then exit 0; fi
+          if ! [[ "$HEAD_REF" =~ ^(feature|fix|docs|chore)/[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "Invalid branch name '$HEAD_REF'. Use feature/US-XX-name, fix/US-XX-name, docs/name or chore/name (ver docs/workflow.md)."
+            exit 1
+          fi
+
+  secrets-scan:
+    name: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
