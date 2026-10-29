@@ -46,8 +46,9 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
         run: |
           if [[ "$HEAD_REF" == "development" ]]; then exit 0; fi
-          if ! [[ "$HEAD_REF" =~ ^(feature|fix|docs|chore)/[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
-            echo "Invalid branch name '$HEAD_REF'. Use feature/US-XX-name, fix/US-XX-name, docs/name or chore/name (ver docs/workflow.md)."
+          if ! [[ "$HEAD_REF" =~ ^(feature|hotfix|bugfix|style|docs|chore)/[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "Invalid branch name '$HEAD_REF'."
+            echo "Use feature/nombre, hotfix/nombre, bugfix/nombre, style/nombre, docs/nombre o chore/nombre."
             exit 1
           fi
 
@@ -58,6 +59,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Gitleaks
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          VERSION=${LATEST_TAG#v}
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/${LATEST_TAG}/gitleaks_${VERSION}_linux_x64.tar.gz
+          tar -xzf gitleaks_${VERSION}_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+      - name: Run Gitleaks CLI
+        run: |
+          gitleaks git --log-opts="--not origin/development" --verbose --redact

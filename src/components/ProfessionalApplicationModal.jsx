@@ -4,7 +4,6 @@ import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as Im
 import { SPECIALTIES } from '../constants/catalog';
 import { generateTransactionId } from '../utils/ids';
 import { formatCuil, isValidCuil, dniFromCuil, formatDni } from '../utils/cuil';
-import { useTimeouts } from '../hooks/useTimeouts';
 
 const EMPTY_APPLICATION = {
     firstName: '', lastName: '', cuit: '', email: '', phone: '',
@@ -15,7 +14,6 @@ const EMPTY_APPLICATION = {
 // Se monta solo mientras está abierto, así cada apertura arranca con el formulario vacío.
 const ProfessionalApplicationModal = ({ onClose }) => {
     const fieldId = useId();
-    const { schedule } = useTimeouts();
     const [step, setStep] = useState(1);
     const progress = (step - 1) * 50;
     const [isSubmitting, setIsSubmitting] = useState(false);
