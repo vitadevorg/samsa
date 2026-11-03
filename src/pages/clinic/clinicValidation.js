@@ -111,6 +111,63 @@ export const validateExpiry = (value, today) => {
   return '';
 };
 
+// --- Administración de VitaDev -------------------------------------------
+
+// Nombre de una clínica u hospital: letras, números, espacios y . , & ' - (ej. "Clínica del Norte").
+const INSTITUTION_NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9.,&' -]+$/;
+
+export const validateInstitutionName = (value) => {
+  const name = value.trim();
+  if (!name) return 'Ingresá el nombre.';
+  if (name.length < 3) return 'El nombre tiene que tener al menos 3 caracteres.';
+  if (name.length > 80) return 'El nombre no puede superar los 80 caracteres.';
+  if (!INSTITUTION_NAME_PATTERN.test(name)) return 'El nombre solo puede tener letras, números, espacios y . , & - apóstrofos.';
+  return '';
+};
+
+export const validateAddress = (value) => {
+  const address = value.trim();
+  if (!address) return 'Ingresá la dirección.';
+  if (address.length < 5) return 'La dirección tiene que tener al menos 5 caracteres.';
+  if (address.length > 100) return 'La dirección no puede superar los 100 caracteres.';
+  return '';
+};
+
+// Texto para comparar nombres sin importar mayúsculas ni tildes ("Pediatria" = "Pediatría").
+const normalizeUnit = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().replace(/\s+/g, ' ').toLowerCase();
+
+const UNIT_NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$/;
+const UNIT_NAME_MAX_LENGTH = 40;
+
+// Nombre de un área (clínica) o sector (hospital) nuevo. `existing`: las que ya tiene la institución.
+export const validateUnitName = (value, existing = [], unitLabel = 'área') => {
+  const name = value.trim();
+  if (!name) return `Ingresá el nombre ${unitLabel === 'sector' ? 'del sector' : 'del área'}.`;
+  if (name.length < 3) return 'El nombre tiene que tener al menos 3 letras.';
+  if (name.length > UNIT_NAME_MAX_LENGTH) return `El nombre no puede superar los ${UNIT_NAME_MAX_LENGTH} caracteres.`;
+  if (!UNIT_NAME_PATTERN.test(name)) return 'El nombre solo puede tener letras, espacios y guiones.';
+  if (existing.some((unit) => normalizeUnit(unit) === normalizeUnit(name))) return `Ya existe ${unitLabel === 'sector' ? 'un sector' : 'un área'} con ese nombre.`;
+  return '';
+};
+
+// Contraseña nueva: mínimo 8 caracteres, con letras y números, distinta de la temporal.
+export const MIN_PASSWORD_LENGTH = 8;
+
+export const validateNewPassword = (value, temporaryPassword = '') => {
+  if (!value) return 'Ingresá la nueva contraseña.';
+  if (value.length < MIN_PASSWORD_LENGTH) return `Tiene que tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  if (value.length > 64) return 'No puede superar los 64 caracteres.';
+  if (!/[A-Za-z]/.test(value) || !/\d/.test(value)) return 'Tiene que combinar letras y números.';
+  if (value === temporaryPassword) return 'Tiene que ser distinta de la contraseña temporal.';
+  return '';
+};
+
+export const validatePasswordConfirmation = (value, password) => {
+  if (!value) return 'Repetí la nueva contraseña.';
+  if (value !== password) return 'Las contraseñas no coinciden.';
+  return '';
+};
+
 // Campo obligatorio genérico (por ejemplo, un desplegable sin elegir).
 export const validateRequired = (value, message) => (String(value ?? '').trim() ? '' : message);
 

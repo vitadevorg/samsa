@@ -2,11 +2,12 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   HeartPulse, LogOut, ChevronDown, Menu, X,
-  Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
+  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
+import { getDoctorLabel } from '../utils/doctorName';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -99,9 +100,23 @@ const Navbar = () => {
                 </Link>
               </>
             ) : isVitadevAdmin ? (
-              <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
-                <Shield className="w-4 h-4"/> Panel VitaDev
-              </Link>
+              <>
+                <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
+                  <Shield className="w-4 h-4"/> Resumen
+                </Link>
+                <Link to="/vitadev/doctors" className={getLinkClass('/vitadev/doctors')}>
+                  <Stethoscope className="w-4 h-4"/> Médicos
+                </Link>
+                <Link to="/vitadev/clinics" className={getLinkClass('/vitadev/clinics')}>
+                  <Building2 className="w-4 h-4"/> Clínicas
+                </Link>
+                <Link to="/vitadev/hospitals" className={getLinkClass('/vitadev/hospitals')}>
+                  <Hospital className="w-4 h-4"/> Hospitales
+                </Link>
+                <Link to="/vitadev/users" className={getLinkClass('/vitadev/users')}>
+                  <UserCog className="w-4 h-4"/> Usuarios
+                </Link>
+              </>
             ) : isDoctor ? (
               <>
                 <Link to="/doctor/turns" className={getLinkClass('/doctor/turns')}>
@@ -146,7 +161,7 @@ const Navbar = () => {
                     {!user.img && userInitial}
                   </div>
                   <span className="text-sm font-bold px-1 tracking-wide">
-                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? `Dr. ${displayName}` : isSecretary ? `Sec. ${displayName}` : displayName}
+                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
@@ -160,6 +175,15 @@ const Navbar = () => {
                        <>
                          <Link to="/admin/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                            <Shield className="w-4 h-4" /> Mi Perfil
+                         </Link>
+                         <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
+                            Modo Gestión
+                         </div>
+                       </>
+                    ) : isVitadevAdmin ? (
+                       <>
+                         <Link to="/vitadev/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <KeyRound className="w-4 h-4" /> Mi cuenta
                          </Link>
                          <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
                             Modo Gestión
@@ -243,7 +267,14 @@ const Navbar = () => {
               </Link>
             </>
           ) : isVitadevAdmin ? (
-            <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Panel VitaDev</Link>
+            <>
+              <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Resumen</Link>
+              <Link to="/vitadev/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
+              <Link to="/vitadev/clinics" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
+              <Link to="/vitadev/hospitals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
+              <Link to="/vitadev/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
+              <Link to="/vitadev/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+            </>
           ) : isDoctor ? (
             <>
               <Link to="/doctor/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>

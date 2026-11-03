@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useId } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { login as authenticate, InvalidCredentialsError, AccountDeactivatedError } from '../services/authService';
+import { login as authenticate, changePassword, InvalidCredentialsError, AccountDeactivatedError, AccountDisabledError } from '../services/authService';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 import { getHomeForRole } from '../constants/roles';
 import { useTimeouts } from '../hooks/useTimeouts';
 import { Eye, EyeOff, Lock, Mail, Check, X, Activity, ChevronRight, ArrowLeft, AlertTriangle } from 'lucide-react';
@@ -121,6 +122,8 @@ const Login = () => {
   // Estado del envío: 'idle' | 'processing' | 'success' | 'error'.
   const [loginState, setLoginState] = useState('idle'); 
   const [activeField, setActiveField] = useState(null);
+  // Usuario que entró con una contraseña temporal: hasta que elija una nueva no se inicia sesión.
+  const [pendingUser, setPendingUser] = useState(null);
   // La pose del avatar se deriva: el envío tiene prioridad; si no, depende del campo con foco.
   const getAvatarState = () => {
       if (loginState !== 'idle') return loginState;
@@ -150,6 +153,28 @@ const Login = () => {
       setErrors(newErrors);
       return !hasError;
   };
+  // Credenciales y contraseña en regla: mostramos el éxito y entramos.
+  const completeLogin = (userData) => {
+    setLoginState('success');
+    schedule(() => {
+        login(userData);
+        const from = location.state?.from?.pathname;
+        navigate(from || getHomeForRole(userData.role), { replace: true });
+    }, 800);
+  };
+  // El usuario eligió su contraseña nueva: se guarda y recién ahí se inicia sesión.
+  const handleChangePassword = async (newPassword) => {
+    await changePassword(pendingUser.email, newPassword);
+    if (!isMountedRef.current) return;
+    const userData = { ...pendingUser };
+    delete userData.mustChangePassword;
+    setPendingUser(null);
+    completeLogin(userData);
+  };
+  const cancelChangePassword = () => {
+    setPendingUser(null);
+    setPassword('');
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -163,17 +188,17 @@ const Login = () => {
     try {
         const userData = await authenticate(email, password);
         if (!isMountedRef.current) return;
-        setLoginState('success');
-        schedule(() => {
-            login(userData);
-            const from = location.state?.from?.pathname;
-            navigate(from || getHomeForRole(userData.role), { replace: true });
-        }, 800);
+        if (userData.mustChangePassword) {
+            setPendingUser(userData);
+            setLoginState('idle');
+            return;
+        }
+        completeLogin(userData);
     } catch (err) {
         if (!isMountedRef.current) return;
         setLoginState('error');
         if (err instanceof InvalidCredentialsError) setErrorMsg('Credenciales incorrectas. Intentalo de nuevo.');
-        else if (err instanceof AccountDeactivatedError) setErrorMsg(err.message);
+        else if (err instanceof AccountDeactivatedError || err instanceof AccountDisabledError) setErrorMsg(err.message);
         else setErrorMsg('No se pudo iniciar sesión. Intentalo más tarde.');
         setErrors({ email: true, password: true });
         schedule(() => {
@@ -184,6 +209,13 @@ const Login = () => {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      {pendingUser && (
+        <ChangePasswordModal
+          temporaryPassword={password}
+          onSubmit={handleChangePassword}
+          onCancel={cancelChangePassword}
+        />
+      )}
       <Link to="/" className="absolute top-8 left-8 text-white/70 hover:text-white flex items-center gap-2 font-medium transition-colors z-50">
          <ArrowLeft className="w-5 h-5" /> Volver al inicio
       </Link>

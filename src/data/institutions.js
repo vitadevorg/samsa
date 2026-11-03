@@ -10,6 +10,8 @@ export const CLINICS = [
     id: 'clinica-del-norte',
     name: 'Clínica del Norte',
     address: 'Av. Aconquija 1200, Yerba Buena, Tucumán',
+    phone: '381 425-1200',
+    email: 'contacto@clinicadelnorte.samsa.med',
     areas: ['Cardiología', 'Clínica Médica', 'Nutrición', 'Pediatría'],
   },
   {
@@ -17,6 +19,8 @@ export const CLINICS = [
     id: 'centro-dermatologico',
     name: 'Centro Dermatológico del Jardín',
     address: 'Calle 25 de Mayo 850, San Miguel de Tucumán',
+    phone: '381 431-0850',
+    email: 'contacto@dermatologico.samsa.med',
     areas: ['Dermatología'],
   },
 ];
@@ -29,6 +33,8 @@ export const HOSPITALS = [
     id: 'hospital-central',
     name: 'Hospital Central SAMSA',
     address: 'Av. Mate de Luna 2500, San Miguel de Tucumán',
+    phone: '381 424-2500',
+    email: 'contacto@hospitalcentral.samsa.med',
     sectors: ['Pediatría', 'Cardiología', 'Medicina General'],
   },
 ];
@@ -66,7 +72,36 @@ export const SECRETARIES = [
   { id: 'sec-4', name: 'Rodrigo Paz', email: 'rodrigo.paz@samsa.med', phone: '381 400-1004', institutionId: 'hospital-central', area: 'Pediatría', doctorIds: ['sofia-bermudez'] },
   // La secretaria de prueba original (usuario secretaria@samsa.med).
   { id: 'sec-5', name: 'María González', email: 'secretaria@samsa.med', phone: '381 400-1005', institutionId: 'clinica-del-norte', area: 'Clínica Médica', doctorIds: ['juan-perez', 'carlos-rodriguez', 'agustina-vega'] },
+  // Secretarias de médicos particulares (las gestiona el administrador de VitaDev).
+  // `institutionId: null` y sin área: no pertenecen a ninguna clínica ni hospital;
+  // `doctorIds` son ids de PARTICULAR_DOCTORS.
+  { id: 'sec-6', name: 'Noelia Ferreyra', email: 'noelia.ferreyra@samsa.med', phone: '381 400-2001', institutionId: null, area: null, doctorIds: ['luis-coronel'] },
+  { id: 'sec-7', name: 'Tomás Acuña', email: 'tomas.acuna@samsa.med', phone: '381 400-2002', institutionId: null, area: null, doctorIds: ['priscila-gomez', 'augusto-fernandez'] },
 ];
+
+// ---------------------------------------------------------------------------
+// Médicos particulares: los que no pertenecen a ninguna clínica ni hospital.
+// Los gestiona directamente el administrador de VitaDev. Sus ids coinciden con
+// los de doctors.js; el resto son datos de contacto y de atención (ficticios).
+// Son solo datos de administración: nada clínico.
+// ---------------------------------------------------------------------------
+export const PARTICULAR_DOCTORS = [
+  { id: 'luis-coronel', name: 'Dr. Luis Coronel', specialty: 'Neurología', email: 'luis.coronel@samsa.med', phone: '381 450-3001', address: 'Av. Sarmiento 450, San Miguel de Tucumán' },
+  { id: 'priscila-gomez', name: 'Dra. Priscila Gómez', specialty: 'Ginecología', email: 'priscila.gomez@samsa.med', phone: '381 450-3002', address: 'Calle Laprida 780, San Miguel de Tucumán' },
+  { id: 'augusto-fernandez', name: 'Dr. Augusto Fernández', specialty: 'Traumatología', email: 'augusto.fernandez@samsa.med', phone: '381 450-3003', address: 'Av. Belgrano 1320, Yerba Buena, Tucumán' },
+];
+
+// ---------------------------------------------------------------------------
+// Administradores de clínica y de hospital (datos de prueba). Los ve el
+// administrador de VitaDev para darlos de baja o resetear su contraseña.
+// `institutionId` es la clínica u hospital que administran.
+// ---------------------------------------------------------------------------
+export const INSTITUTION_ADMINS = [
+  { id: 'adm-1', name: 'Carolina Medina', email: 'admin.clinica@samsa.med', phone: '381 400-3001', institutionId: 'clinica-del-norte' },
+  { id: 'adm-2', name: 'Sergio Acosta', email: 'admin.dermato@samsa.med', phone: '381 400-3002', institutionId: 'centro-dermatologico' },
+  { id: 'adm-3', name: 'Gustavo Ibáñez', email: 'admin.hospital@samsa.med', phone: '381 400-3003', institutionId: 'hospital-central' },
+];
+
 
 // ---------------------------------------------------------------------------
 // Funciones de consulta. Devuelven copias filtradas: quien las usa puede
@@ -87,7 +122,7 @@ export const getInstitutionUnits = (institution) => institution?.areas ?? instit
 // Textos que cambian según el tipo de institución, para que las mismas pantallas
 // digan "Área"/"la clínica" o "Sector"/"el hospital" sin escribirlos fijos.
 export const getInstitutionTerms = (institution) =>
-  getInstitutionType(institution?.id) === 'Hospital'
+  institution?.sectors // solo los hospitales tienen sectores
     ? { unit: 'Sector', unitLower: 'sector', thisUnit: 'este sector', place: 'el hospital', placeCap: 'El hospital', fromPlace: 'del hospital', thisPlace: 'este hospital' }
     : { unit: 'Área', unitLower: 'área', thisUnit: 'esta área', place: 'la clínica', placeCap: 'La clínica', fromPlace: 'de la clínica', thisPlace: 'esta clínica' };
 

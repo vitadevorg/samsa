@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
-const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmLabel = 'Sí, Eliminar' }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity animate-fadeIn">
@@ -22,7 +22,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
         </div>
         <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-100">
           <button onClick={onClose} className="px-4 py-2 text-gray-700 font-bold hover:bg-gray-200 rounded-lg transition">Cancelar</button>
-          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-lg transition">Sí, Eliminar</button>
+          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-lg transition">{confirmLabel}</button>
         </div>
       </div>
     </div>

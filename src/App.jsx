@@ -12,6 +12,7 @@ import FAQ from './pages/FAQ';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Studies from './pages/Studies';
 import MyTurns from './pages/MyTurns';
 import DoctorProfile from './pages/DoctorProfile';
@@ -41,6 +42,10 @@ import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
 import ClinicStaff from './pages/clinic/ClinicStaff';
 import VitadevDashboard from './pages/vitadev/VitadevDashboard';
+import VitadevDoctors from './pages/vitadev/VitadevDoctors';
+import VitadevInstitutions from './pages/vitadev/VitadevInstitutions';
+import VitadevUsers from './pages/vitadev/VitadevUsers';
+import VitadevAccount from './pages/vitadev/VitadevAccount';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -71,6 +76,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/professionals/:id" element={<DoctorProfile />} />
           <Route path="/book-appointment/:id" element={<BookAppointment />} />
@@ -125,6 +131,12 @@ function App() {
 
           <Route element={<ProtectedRoute roles={[ROLES.VITADEV_ADMIN]} />}>
             <Route path="/vitadev/dashboard" element={<VitadevDashboard />} />
+            <Route path="/vitadev/doctors" element={<VitadevDoctors />} />
+            {/* key distinta: es el mismo componente en dos rutas y, sin ella, React conservaría el formulario abierto al cambiar de una a otra */}
+            <Route path="/vitadev/clinics" element={<VitadevInstitutions key="clinic" kind="clinic" />} />
+            <Route path="/vitadev/hospitals" element={<VitadevInstitutions key="hospital" kind="hospital" />} />
+            <Route path="/vitadev/users" element={<VitadevUsers />} />
+            <Route path="/vitadev/account" element={<VitadevAccount />} />
           </Route>
         </Routes>
         </ClinicDataProvider>

@@ -6,7 +6,7 @@ export const ROLES = Object.freeze({
   // Roles de administración por institución
   CLINIC_ADMIN: 'clinic_admin',     // administra una clínica
   HOSPITAL_ADMIN: 'hospital_admin', // administra un hospital (base preparada)
-  VITADEV_ADMIN: 'vitadev_admin',   // administración general de VitaDev (base preparada)
+  VITADEV_ADMIN: 'vitadev_admin',   // administración general de VitaDev (ver src/pages/vitadev/)
 });
 
 export const ROLE_HOME = Object.freeze({
