@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { useTimeouts } from '../../hooks/useTimeouts';
 import { useFileAttachments } from '../../hooks/useFileAttachments';
+import { useAuth } from '../../context/useAuth';
+import { getDoctorLabel } from '../../utils/doctorName';
 const getToday = () => new Date().toISOString().split('T')[0];
 const getFutureDate = (days) => {
     const date = new Date();
@@ -248,6 +250,7 @@ const MedicalReportModal = ({ isOpen, onClose, appointment, onSave }) => {
   );
 };
 export default function DoctorTurns() {
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState(initialAppointments);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -286,7 +289,7 @@ export default function DoctorTurns() {
             <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div className="text-white">
                     <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3">
-                        Bienvenido, Dr. Zelarayan
+                        Bienvenido, {getDoctorLabel(user)}
                     </h1>
                     <p className="text-blue-200 text-lg max-w-xl">
                         Acá tenés un resumen rápido de tu agenda médica de hoy.

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Check, X, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useTimeouts } from '../hooks/useTimeouts';
+import { requestPasswordReset } from '../services/authService';
 
 const customStyles = `
   @keyframes scan {
@@ -100,6 +101,13 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [animState, setAnimState] = useState('idle'); 
   const [errorMessage, setErrorMessage] = useState('');
+  // Resultado de la solicitud: { sentTo, token } (token solo si la cuenta existe; ver requestPasswordReset).
+  const [result, setResult] = useState(null);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const handleEmailFocus = () => {
     if (animState !== 'success' && animState !== 'processing') {
@@ -113,7 +121,7 @@ const ForgotPassword = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email) {
@@ -126,15 +134,20 @@ const ForgotPassword = () => {
     setAnimState('processing');
     setErrorMessage('');
 
-    schedule(() => {
-      if (email.includes('@')) {
-        setAnimState('success');
-      } else {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+      schedule(() => {
         setAnimState('error');
         setErrorMessage('El formato del correo es inválido.');
         schedule(() => setAnimState('idle'), 3000);
-      }
-    }, 2000);
+      }, 1000);
+      return;
+    }
+
+    const found = await requestPasswordReset(email);
+    if (!isMountedRef.current) return;
+    // Se responde igual exista o no la cuenta; solo cambia si hay "enlace" para mostrar.
+    setResult({ sentTo: found?.sentTo ?? email.trim(), token: found?.token ?? null });
+    setAnimState('success');
   };
 
   return (
@@ -163,7 +176,16 @@ const ForgotPassword = () => {
             {animState === 'success' ? (
               <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center animate-fadeIn">
                 <h3 className="text-xl font-bold text-green-800 mb-2">¡Correo enviado!</h3>
-                <p className="text-green-600 font-medium mb-6">Revisá tu bandeja de entrada (y la carpeta de spam). Te enviamos las instrucciones a <strong>{email}</strong>.</p>
+                <p className="text-green-600 font-medium mb-6">Revisá tu bandeja de entrada (y la carpeta de spam). Si existe una cuenta con ese correo, te enviamos las instrucciones a <strong>{result?.sentTo}</strong>. El enlace vence en 30 minutos.</p>
+                {result?.token && (
+                  <div className="bg-white/70 border border-green-200 rounded-xl p-4 mb-6 text-left">
+                    <p className="text-xs font-bold text-green-700 uppercase mb-1">Demostración</p>
+                    <p className="text-sm text-green-700 mb-3">Esta maqueta no envía correos reales. Este es el enlace que llegaría a tu casilla:</p>
+                    <Link to={`/reset-password?token=${result.token}`} className="inline-flex w-full justify-center py-2.5 px-4 rounded-lg text-sm font-bold text-green-700 border border-green-300 hover:bg-green-100 transition-all">
+                      Abrir enlace de recuperación
+                    </Link>
+                  </div>
+                )}
                 <Link to="/login" className="inline-flex w-full justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all">
                   Volver al inicio de sesión
                 </Link>
