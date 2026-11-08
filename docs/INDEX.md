@@ -1,10 +1,10 @@
-# 📚 Índice General de Documentación — SAMSA
+# Índice General de Documentación — SAMSA
 
 Punto de entrada a toda la documentación técnica, estándares de diseño, flujo de trabajo e historial de implementaciones por Pull Request del repositorio **SAMSA**.
 
 ---
 
-## 🧭 1. Guías Base del Equipo (Lectura Obligatoria)
+## 1. Guías Base del Equipo (Lectura Obligatoria)
 
 | Documento | Descripción |
 |-----------|-------------|
@@ -15,7 +15,7 @@ Punto de entrada a toda la documentación técnica, estándares de diseño, fluj
 
 ---
 
-## 📦 2. Documentación de Entregas y Pull Requests
+## 2. Documentación de Entregas y Pull Requests
 
 Cada Pull Request que incorpora una funcionalidad, módulo o rediseño relevante documenta acá qué se implementó, qué archivos se tocaron y cómo se validó:
 
