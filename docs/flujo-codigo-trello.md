@@ -5,7 +5,7 @@ Guía oficial obligatoria para todos los integrantes del equipo.
 
 ---
 
-## 📌 Reglas Duras (No Negociables)
+## Reglas No Negociables
 
 1. **PROHIBIDO commitear directo en `main` o `development`.**
    * GitHub rechazará automáticamente cualquier `git push` directo a estas ramas. Todo cambio entra exclusivamente por **Pull Request (PR)**.
