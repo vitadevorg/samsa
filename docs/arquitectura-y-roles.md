@@ -1,4 +1,4 @@
-# 🏗️ Arquitectura, Roles y Mapa de Rutas — SAMSA
+# Arquitectura, Roles y Mapa de Rutas — SAMSA
 
 Documentación técnica de la estructura del frontend de **SAMSA**, sus roles de usuario, rutas protegidas, contextos compartidos y organización de módulos.
 
@@ -32,7 +32,7 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 
 ## 3. Mapa de Rutas (`src/App.jsx`)
 
-### 🌐 Rutas Públicas y Portal Paciente
+### Rutas Públicas y Portal Paciente
 * `/` → `Home.jsx` (Landing principal con intro cinematográfica, especialidades y sección B2B `ProfessionalB2BSection`)
 * `/about` → `AboutUs.jsx` (Acerca de Nosotros: propuesta de valor, métricas y `CareFlowSection` interactivo)
 * `/turns` → `Turns.jsx` (Buscador y solicitud de turnos)
@@ -43,7 +43,7 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 * `/faq` → `FAQ.jsx` (Preguntas frecuentes)
 * `/login`, `/register`, `/forgot-password`, `/reset-password` → Flujo completo de autenticación y recuperación de cuenta
 
-### 🔒 Rutas Protegidas por Rol (`ProtectedRoute`)
+### Rutas Protegidas por Rol (`ProtectedRoute`)
 * **Cualquier usuario autenticado:**
   * `/user-profile` → `UserProfile.jsx`
 * **Paciente (`ROLES.PATIENT`):**
