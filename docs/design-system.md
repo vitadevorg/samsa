@@ -1,4 +1,4 @@
-# 🎨 Design System y Estándares UI/UX — SAMSA
+# Design System y Estándares UI/UX — SAMSA
 
 Documento oficial de estilo visual, componentes, animaciones y criterios responsive del sistema **SAMSA**. Todo desarrollo o mejora en el frontend debe respetar estos lineamientos para mantener coherencia en toda la aplicación.
 
