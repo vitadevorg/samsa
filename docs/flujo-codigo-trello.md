@@ -1,6 +1,6 @@
-# 🚀 Flujo de Trabajo y Estándar de Código — VitaDev / SAMSA
+# Flujo de Trabajo y Estándar de Código — VitaDev / SAMSA
 
-Guía oficial obligatoria para todos los integrantes del equipo (desarrolladores y asistentes de IA).
+Guía oficial obligatoria para todos los integrantes del equipo.
 **Una tarjeta de Trello = Una rama = Un Pull Request hacia `development` = Su documentación en `docs/`.**
 
 ---
@@ -44,7 +44,7 @@ Guía oficial obligatoria para todos los integrantes del equipo (desarrolladores
 
 ---
 
-## 📋 Convención de Tarjetas en Trello
+## Convención de Tarjetas en Trello
 
 Cada tarjeta de Trello sigue la estructura:
 ```text
@@ -72,7 +72,7 @@ Cada tarjeta de Trello sigue la estructura:
 
 ---
 
-## 🏷️ Convención de Ramas en Git
+## Convención de Ramas en Git
 
 El CI de GitHub Actions (`branch-name`) valida automáticamente el nombre de tu rama al abrir un PR:
 
@@ -89,7 +89,7 @@ El CI de GitHub Actions (`branch-name`) valida automáticamente el nombre de tu 
 
 ---
 
-## 💬 Mensajes de Commit (Conventional Commits)
+## Mensajes de Commit (Conventional Commits)
 
 Los commits deben reflejar el tipo de cambio y describir qué se hizo:
 
@@ -102,7 +102,7 @@ Los commits deben reflejar el tipo de cambio y describir qué se hizo:
 
 ---
 
-## 🔄 El Ciclo de Desarrollo Paso a Paso (Checklist Operativo)
+## El Ciclo de Desarrollo Paso a Paso (Checklist Operativo)
 
 ```text
 1. Tomar la tarjeta en Trello (o ficha en docs/tareas/INDEX.md) y moverla a "En Progreso"
@@ -132,7 +132,7 @@ Los commits deben reflejar el tipo de cambio y describir qué se hizo:
 
 ---
 
-## ✅ Criterios de Calidad antes del PR (Frontend React + Vite + Tailwind)
+## Criterios de Calidad antes del PR (Frontend React + Vite + Tailwind)
 
 - [ ] `npm run lint` sin errores ni warnings nuevos.
 - [ ] `npm run build` compila limpio.
@@ -145,7 +145,7 @@ Los commits deben reflejar el tipo de cambio y describir qué se hizo:
 
 ---
 
-## 🧰 Skills Recomendadas del Equipo
+## Skills Recomendadas del Equipo
 
 Cuando trabajes con asistentes de IA en el repositorio, estas skills potencian la calidad del frontend y del diseño:
 
