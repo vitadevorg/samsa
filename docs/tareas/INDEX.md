@@ -1,4 +1,4 @@
-# 📋 Índice de Tareas e Historias de Usuario — SAMSA
+# Índice de Tareas e Historias de Usuario — SAMSA
 
 Registro centralizado de tareas, historias de usuario y mejoras visuales del proyecto **SAMSA**, vinculadas con su rama, Pull Request y documento técnico en `docs/`.
 
