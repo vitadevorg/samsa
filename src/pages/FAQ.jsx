@@ -24,7 +24,7 @@ const FAQ = () => {
     {
       id: "02",
       question: "¿Qué datos se solicitan para el registro del paciente?",
-      answer: "Para registrarte debés completar un formulario con: Nombre, Apellido, CUIL, Fecha de nacimiento, Correo electrónico y una contraseña segura."
+      answer: "Para registrarte debés completar un formulario con: Nombre, Apellido, DNI, CUIL (opcional), Fecha de nacimiento, Teléfono, Obra Social, Correo electrónico y una contraseña segura."
     },
     {
       id: "03",

@@ -11,8 +11,8 @@
 
 ### A. Corrección de Textos y Redundancias en el Panel de Preguntas Frecuentes
 * **Pregunta `02` (`¿Qué datos se solicitan para el registro del paciente?`):**
-  * Se eliminaron las aclaraciones redundantes `"(confirmándolo dos veces)"` y `"(con al menos una mayúscula y un carácter especial)"`.
-  * **Texto final:** *"Para registrarte debés completar un formulario con: Nombre, Apellido, CUIL, Fecha de nacimiento, Correo electrónico y una contraseña segura."*
+  * Se eliminaron las aclaraciones redundantes `"(confirmándolo dos veces)"` y `"(con al menos una mayúscula y un carácter especial)"` y se alinearon los campos con el formulario real de registro (`Register.jsx`).
+  * **Texto final:** *"Para registrarte debés completar un formulario con: Nombre, Apellido, DNI, CUIL (opcional), Fecha de nacimiento, Teléfono, Obra Social, Correo electrónico y una contraseña segura."*
 * **Pregunta `03` (`¿Cómo es el proceso de recuperación de contraseña?`):**
   * Se actualizó la respuesta para reflejar el flujo real de recuperación por correo electrónico (`ForgotPassword.jsx` / `ResetPassword.jsx`).
   * **Texto final:** *"Si olvidaste tu contraseña, debés usar la opción de recuperar. Recibirás un mail con instrucciones para restablecer la contraseña y recuperar el acceso a tu cuenta."*
