@@ -91,6 +91,19 @@ Para correr el entorno de desarrollo localmente:
 
 ---
 
+## 📚 Documentación del Proyecto y Flujo de Trabajo (`docs/`)
+
+Toda la documentación técnica, reglas de contribución, estándares de diseño e historial de entregas por Pull Request se encuentra en la carpeta [`docs/`](./docs/INDEX.md):
+
+* **[Índice General de Documentación (`docs/INDEX.md`)](./docs/INDEX.md)**
+* **[Flujo de Trabajo, Ramas y Trello (`docs/flujo-codigo-trello.md`)](./docs/flujo-codigo-trello.md)**
+* **[Design System y Reglas Responsive (`docs/design-system.md`)](./docs/design-system.md)**
+* **[Arquitectura, Roles y Mapa de Rutas (`docs/arquitectura-y-roles.md`)](./docs/arquitectura-y-roles.md)**
+* **[Índice de Tareas y Entregas por PR (`docs/tareas/INDEX.md`)](./docs/tareas/INDEX.md)**
+* **[Reglas para Agentes de IA (`AGENTS.md`)](./AGENTS.md)**
+
+---
+
 <div align="center">
   <small>© 2026 SAMSA. Todos los derechos reservados. Desarrollado con excelencia by VitaDev.</small>
 </div>
