@@ -17,7 +17,8 @@ Registro centralizado de tareas, historias de usuario y mejoras visuales del pro
 |-----------|-----------------------|------|----|--------|---------------|
 | `chore` | Configuración de flujo de trabajo, CI pipelines y reglas de ramas | `chore/fix-ci-and-lint` | [#5](https://github.com/vitadevorg/samsa/pull/5) | ✅ Mergeado | [`docs/flujo-codigo-trello.md`](../flujo-codigo-trello.md) |
 | `US-00` (`feature`) | Módulo administrador VitaDev (red neuronal, instituciones, médicos particulares, usuarios y seguridad) | `feature/US-00-modulo-admin-vitadev` | [#6](https://github.com/vitadevorg/samsa/pull/6) | ✅ Mergeado | [`docs/modulo-admin-vitadev.md`](../modulo-admin-vitadev.md) |
-| `style` | Rediseño de "Flujo de atención simplificado", animaciones y mejoras responsive en `AboutUs` | `style/flujo-atencion-y-responsive-about` | [#7](https://github.com/vitadevorg/samsa/pull/7) | 🔍 En Revisión (QA) | [`docs/flujo-atencion-pacientes.md`](../flujo-atencion-pacientes.md) |
+| `style` | Rediseño de "Flujo de atención simplificado", animaciones y mejoras responsive en `AboutUs` | `style/flujo-atencion-y-responsive-about` | [#7](https://github.com/vitadevorg/samsa/pull/7) | ✅ Mergeado | [`docs/flujo-atencion-pacientes.md`](../flujo-atencion-pacientes.md) |
+| `style` (`#55`) | Corrección de redundancia y datos de registro en Preguntas Frecuentes + responsive en `FAQ` y `Navbar` | `style/redundancia-panel-preguntas-frecuentes` | [#8](https://github.com/vitadevorg/samsa/pull/8) | 🔍 En Revisión (QA) | [`docs/redundancia-preguntas-frecuentes.md`](../redundancia-preguntas-frecuentes.md) |
 
 ---
 
