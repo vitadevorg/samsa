@@ -310,7 +310,7 @@ const Professionals = () => {
                         </span>
                     </div>
                 </FadeIn>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredDoctors.length > 0 ? (
                         filteredDoctors.map((doc, index) => (
                             <FadeIn key={doc.id} delay={index * 100}>
