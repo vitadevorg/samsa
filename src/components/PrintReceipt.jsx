@@ -4,7 +4,7 @@ import { HeartPulse } from 'lucide-react';
 // Comprobante imprimible de un turno. `transactionId` debe generarse una sola vez
 // (al crear o imprimir el turno) para que no cambie entre renders.
 const PrintReceipt = ({ appointmentData }) => {
-    const { doctorName, patientName, dni, insurance, date, time, email, location, bookingDate, transactionId } = appointmentData;
+    const { doctorName, patientName, dni, insurance, affiliation, date, time, email, location, bookingDate, transactionId } = appointmentData;
     return (
         <div id="print-area" className="hidden print:flex flex-col p-8 font-serif text-slate-900 bg-white w-full max-w-none box-border absolute top-0 left-0 right-0 z-[99999] min-h-[100vh]">
             <div className="border-b-[3px] border-slate-900 pb-6 mb-10 flex justify-between items-end">
@@ -37,7 +37,7 @@ const PrintReceipt = ({ appointmentData }) => {
                     <div className="grid grid-cols-2 gap-y-6 text-lg font-sans">
                         <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Nombre Completo</span> <span className="font-medium text-slate-800">{patientName}</span></p>
                         <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Documento (DNI)</span> <span className="font-medium text-slate-800">{dni}</span></p>
-                        <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Cobertura Médica</span> <span className="font-medium text-slate-800 capitalize">{insurance || 'Atención Particular'}</span></p>
+                        <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Cobertura Médica</span> <span className="font-medium text-slate-800 capitalize">{insurance || 'Atención Particular'}</span>{affiliation?.affiliateNumber && <span className="block text-sm text-slate-600">Afiliado Nº {affiliation.affiliateNumber}{affiliation.holderType === 'adherente' ? ` · Adherente de ${affiliation.holderName}` : ' · Titular'}</span>}</p>
                         <p><span className="text-slate-400 uppercase text-xs font-bold tracking-wider block mb-1">Correo Electrónico</span> <span className="font-medium text-slate-800">{email}</span></p>
                     </div>
                 </div>

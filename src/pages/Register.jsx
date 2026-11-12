@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import { useTimeouts } from '../hooks/useTimeouts';
+import AffiliationFields from '../components/AffiliationFields';
+import { emptyAffiliation, validateAffiliation } from '../utils/insuranceValidation';
 const SuccessModal = ({ isOpen, onNavigate }) => {
     if (!isOpen) return null;
     return (
@@ -113,6 +115,7 @@ const Register = () => {
       email: '', phone: '', insurance: '', 
       password: '', confirmPassword: ''
   });
+  const [affiliation, setAffiliation] = useState(emptyAffiliation);
   const [errors, setErrors] = useState({});
   const [avatarState, setAvatarState] = useState('idle');
   const [showPassword, setShowPassword] = useState(false);
@@ -129,11 +132,7 @@ const Register = () => {
           number: /\d/.test(pass)
       });
   };
-  const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({ ...prev, [name]: value }));
-      if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
-      if (name === 'password') checkPassword(value);
+  const showWritingAvatar = () => {
       if (avatarState !== 'processing' && !showSuccess) {
           setAvatarState('writing');
           clear(writingTimeoutRef.current);
@@ -141,6 +140,18 @@ const Register = () => {
               setAvatarState('idle');
           }, 600);
       }
+  };
+  const handleAffiliationChange = (name, value) => {
+      setAffiliation(prev => ({ ...prev, [name]: value }));
+      if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+      showWritingAvatar();
+  };
+  const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+      if (name === 'password') checkPassword(value);
+      showWritingAvatar();
   };
   const validateForm = () => {
       const newErrors = {};
@@ -153,6 +164,7 @@ const Register = () => {
       const passRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
       if (!passRegex.test(formData.password)) newErrors.password = "Contraseña insegura";
       if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "No coinciden";
+      Object.assign(newErrors, validateAffiliation({ insurance: formData.insurance, ...affiliation, patientDni: formData.dni }));
       return newErrors;
   };
   const handleSubmit = async (e) => {
@@ -236,6 +248,13 @@ const Register = () => {
                       </select>
                       {errors.insurance && <p className="text-red-500 text-xs mt-1 ml-1">{errors.insurance}</p>}
                   </div>
+                  <AffiliationFields
+                      insurance={formData.insurance}
+                      value={affiliation}
+                      onChange={handleAffiliationChange}
+                      errors={errors}
+                      patientDni={formData.dni}
+                  />
                   <div className="border-t border-slate-100 my-4"></div>
                   <div className="bg-blue-50 rounded-xl p-3 mb-2 border border-blue-100">
                       <p className="text-xs font-bold text-blue-700 uppercase mb-2">Seguridad de la contraseña</p>
