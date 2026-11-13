@@ -16,7 +16,7 @@ import {
 import { useTimeouts } from '../hooks/useTimeouts';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import AffiliationFields from '../components/AffiliationFields';
-import { HOLDER_TYPES, pickAffiliation, requiresAffiliation, validateAffiliation } from '../utils/insuranceValidation';
+import { HOLDER_TYPES, emptyAffiliation, pickAffiliation, requiresAffiliation, validateAffiliation } from '../utils/insuranceValidation';
 const buildInitialForm = (user) => ({
     name: user ? `${user.name || ''} ${user.lastname || ''}`.trim() : '',
     dni: user?.dni || '',
@@ -91,7 +91,16 @@ const BookAppointment = () => {
         setSelectedDate(dayObj);
         setSelectedTime(null);
     };
-    const handleInputChange = (e) => { setFormData(prev => ({ ...prev, [e.target.name]: e.target.value })); };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        // Otra obra social implica otra credencial: se descartan los datos de la anterior.
+        if (name === 'insurance' && value !== formData.insurance) {
+            setAffiliation(emptyAffiliation());
+            setAffiliationErrors({});
+            setAcceptedDeclaration(false);
+        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
     const handleDniChange = (e) => { if (/^\d*$/.test(e.target.value)) setFormData(prev => ({ ...prev, dni: e.target.value })); };
     const handleAffiliationChange = (name, value) => {
         setAffiliation(prev => ({ ...prev, [name]: value }));

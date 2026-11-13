@@ -86,6 +86,8 @@ const UserProfile = () => {
   };
   const handleCancelEdit = () => {
     setIsEditing(false);
+    // Se restauran juntas la obra social y su credencial guardadas.
+    setFormData(prev => ({ ...prev, insurance: user?.insurance || 'Ninguna' }));
     setAffiliation(pickAffiliation(user));
     setAffiliationErrors({});
   };
@@ -98,6 +100,11 @@ const UserProfile = () => {
   const ThemeIcon = currentTheme.icon;
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // Otra obra social implica otra credencial: se descartan los datos de la anterior.
+    if (name === 'insurance' && value !== formData.insurance) {
+      setAffiliation(emptyAffiliation());
+      setAffiliationErrors({});
+    }
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
   const handleNotificationChange = (e) => {

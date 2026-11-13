@@ -151,6 +151,11 @@ const Register = () => {
       setFormData(prev => ({ ...prev, [name]: value }));
       if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
       if (name === 'password') checkPassword(value);
+      // Otra obra social implica otra credencial: se descartan los datos de la anterior.
+      if (name === 'insurance' && value !== formData.insurance) {
+          setAffiliation(emptyAffiliation());
+          setErrors(prev => ({ ...prev, affiliateNumber: null, holderName: null, holderDni: null }));
+      }
       showWritingAvatar();
   };
   const validateForm = () => {

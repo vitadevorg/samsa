@@ -41,6 +41,10 @@ La validación es **solo de formato y en frontend**. La verificación real (cred
 - **`UserProfile.jsx`:** se pueden editar los datos de afiliación. Se validan al tocar *Guardar*. *Cancelar* restaura los valores guardados. Si se elige "Ninguna", se limpian los datos de afiliación anteriores.
 - **`PrintReceipt.jsx`:** muestra el Nº de afiliado y la condición (titular o adherente) debajo de la cobertura.
 
+### Cambio de obra social
+- Al elegir **otra** obra social en registro, reserva de turno o perfil, se **limpian** los datos de la credencial anterior (nº de afiliado, plan, titular/adherente y datos del titular), junto con sus errores. En el turno también se destilda la declaración jurada.
+- En el perfil, *Cancelar* restaura juntas la obra social guardada y su credencial.
+
 ### Fuera de alcance (tarjetas siguientes)
 - Estado de verificación del turno (pendiente / verificado / rechazado) y acciones de la secretaria.
 - Insignias en el panel de secretaría y aviso en *Mis turnos*.
@@ -82,6 +86,7 @@ Verificar en **Mobile (360–414px)**, **Tablet (712–768px)** y **Desktop (128
    - Escribir `123` en Nº de afiliado: aparece en el momento el aviso "Número de afiliado inválido: debe tener entre 6 y 15 dígitos". Las letras no se pueden escribir.
    - Elegir "Soy adherente": aparecen nombre y DNI del titular. Poner el mismo DNI que el del paciente muestra un error.
    - Enviar con campos vacíos marca los obligatorios y el avatar muestra "Revisar datos".
+   - Cargar los datos con OSDE y cambiar a "Swiss Medical": los campos de afiliación quedan vacíos. Lo mismo pasa en el paso 2 del turno y en el perfil.
 2. **Turno como invitado** — `http://localhost:5173/professionals` → un profesional → *Solicitar turno*
    - Paso 2: con obra social y afiliación inválida no deja continuar.
    - Paso 3: muestra el resumen de cobertura. *Confirmar Turno* queda deshabilitado hasta tildar la declaración jurada.
