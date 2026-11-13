@@ -20,7 +20,7 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 
 | Constante | Valor | Ruta Home (`ROLE_HOME`) | Descripción |
 |-----------|-------|-------------------------|-------------|
-| `ROLES.PATIENT` | `'patient'` | `/` | Paciente: solicita turnos, consulta estudios, reseñas y perfil |
+| `ROLES.PATIENT` | `'patient'` | `/turns` | Paciente: solicita turnos, consulta estudios, reseñas y perfil |
 | `ROLES.DOCTOR` | `'doctor'` | `/doctor/turns` | Profesional médico: gestiona su agenda, pacientes, protocolos y soporte |
 | `ROLES.SECRETARY` | `'secretary'` | `/secretary/dashboard` | Secretaria: administra turnos y directorio de pacientes |
 | `ROLES.ADMIN` | `'admin'` | `/admin/doctors` | Administrador general de consultorios, médicos, especialidades y obras sociales |
@@ -33,7 +33,7 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 ## 3. Mapa de Rutas (`src/App.jsx`)
 
 ### Rutas Públicas y Portal Paciente
-* `/` → `Home.jsx` (Landing principal con intro cinematográfica, especialidades y sección B2B `ProfessionalB2BSection`)
+* `/` → `HomeRoute.jsx` → `Home.jsx` (Landing principal con intro cinematográfica, especialidades y sección B2B `ProfessionalB2BSection`). Un paciente con sesión iniciada es redirigido a `/turns`
 * `/about` → `AboutUs.jsx` (Acerca de Nosotros: propuesta de valor, métricas y `CareFlowSection` interactivo)
 * `/turns` → `Turns.jsx` (Buscador y solicitud de turnos)
 * `/professionals` → `Professionals.jsx` (Cartilla de especialistas)

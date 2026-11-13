@@ -10,7 +10,7 @@ export const ROLES = Object.freeze({
 });
 
 export const ROLE_HOME = Object.freeze({
-  [ROLES.PATIENT]: '/',
+  [ROLES.PATIENT]: '/turns',
   [ROLES.DOCTOR]: '/doctor/turns',
   [ROLES.SECRETARY]: '/secretary/dashboard',
   [ROLES.ADMIN]: '/admin/doctors',
