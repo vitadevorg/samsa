@@ -9,6 +9,7 @@ import AboutUs from './pages/AboutUs';
 import Turns from './pages/Turns';
 import Professionals from './pages/Professionals';
 import FAQ from './pages/FAQ';
+import LegalDocument from './pages/LegalDocument';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -73,6 +74,7 @@ function App() {
           <Route path="/news" element={<NewsForum />} />
           <Route path="/professionals" element={<Professionals />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/terms/:slug" element={<LegalDocument />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

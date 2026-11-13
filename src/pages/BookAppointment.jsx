@@ -16,6 +16,8 @@ import {
 import { useTimeouts } from '../hooks/useTimeouts';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import AffiliationFields from '../components/AffiliationFields';
+import TermsCheckbox from '../components/TermsCheckbox';
+import { LEGAL_CONTACT_EMAIL } from '../data/legalTexts';
 import { HOLDER_TYPES, emptyAffiliation, pickAffiliation, requiresAffiliation, validateAffiliation } from '../utils/insuranceValidation';
 const buildInitialForm = (user) => ({
     name: user ? `${user.name || ''} ${user.lastname || ''}`.trim() : '',
@@ -44,6 +46,8 @@ const BookAppointment = () => {
     const [affiliation, setAffiliation] = useState(() => pickAffiliation(user));
     const [affiliationErrors, setAffiliationErrors] = useState({});
     const [acceptedDeclaration, setAcceptedDeclaration] = useState(false);
+    // Solo el invitado carga datos personales en el paso 2, por eso es quien debe aceptar los términos.
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
     const hasCoverage = requiresAffiliation(formData.insurance);
     const currentAffiliationErrors = validateAffiliation({ insurance: formData.insurance, ...affiliation, patientDni: formData.dni });
     const isAffiliationValid = Object.keys(currentAffiliationErrors).length === 0;
@@ -108,6 +112,7 @@ const BookAppointment = () => {
     };
     const handlePatientDataSubmit = (e) => {
         e.preventDefault();
+        if (!acceptedTerms) return;
         if (!isAffiliationValid) {
             setAffiliationErrors(currentAffiliationErrors);
             return;
@@ -274,10 +279,12 @@ const BookAppointment = () => {
                             patientDni={formData.dni}
                         />
                         <div className="space-y-1"><label htmlFor={`${fieldId}-correo-electronico`} className="text-sm font-bold text-gray-700 ml-1">Correo Electrónico <span className="text-red-500">*</span></label><div className="relative group"><Mail className="absolute left-3 top-3.5 text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition" /><input id={`${fieldId}-correo-electronico`} required type="email" name="email" value={formData.email || ''} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white" placeholder="jesuszelarayan@ejemplo.com" /></div></div>
+                        <TermsCheckbox doc="turno-invitado" checked={acceptedTerms} onChange={setAcceptedTerms} />
                         <div className="pt-6 flex gap-4 border-t border-gray-100 mt-4">
                             <button type="button" onClick={() => setStep(1)} className="w-1/3 py-3 rounded-xl font-bold text-gray-600 bg-white border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition">Atrás</button>
-                            <button type="submit" className="w-2/3 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5">Continuar</button>
+                            <button type="submit" disabled={!acceptedTerms} className="w-2/3 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 disabled:bg-gray-300 disabled:shadow-none disabled:translate-y-0 disabled:cursor-not-allowed">Continuar</button>
                         </div>
+                        <p className="text-xs text-gray-500 text-center leading-relaxed">Tus datos se usan únicamente para gestionar este turno. No creamos una cuenta. Podés pedir su eliminación en {LEGAL_CONTACT_EMAIL}.</p>
                     </form>
                 </div>
             )}
