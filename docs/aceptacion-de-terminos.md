@@ -41,6 +41,11 @@ Rama: `feature/aceptacion-de-terminos`
 * `src/pages/Register.jsx`
 * `src/pages/BookAppointment.jsx`
 * `src/components/ProfessionalApplicationModal.jsx`
+* `vercel.json` (nuevo)
+
+## Corrección: "la página no existe" al abrir el link
+
+El link de la casilla abre `/terms/:slug` en una pestaña nueva, es decir, una carga directa de la URL. Sin una regla de reescritura, Vercel buscaba un archivo con esa ruta y devolvía 404, porque la app es una SPA y solo existe `index.html`. Se agregó `vercel.json` con un rewrite de todas las rutas a `/index.html`, excluyendo `/api/*` (funciones serverless). En desarrollo local no pasaba porque Vite ya hace ese fallback.
 
 ## Validación
 
