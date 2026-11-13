@@ -4,6 +4,7 @@ import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as Im
 import { SPECIALTIES } from '../constants/catalog';
 import { generateTransactionId } from '../utils/ids';
 import { formatCuil, isValidCuil, dniFromCuil, formatDni } from '../utils/cuil';
+import TermsCheckbox from './TermsCheckbox';
 
 const EMPTY_APPLICATION = {
     firstName: '', lastName: '', cuit: '', email: '', phone: '',
@@ -26,7 +27,8 @@ const ProfessionalApplicationModal = ({ onClose }) => {
     const cuitError = formData.cuit && !isValidCuil(formData.cuit)
         ? 'CUIL/CUIT inválido: revisá los 11 dígitos.'
         : '';
-    const canContinue = step !== 1 || !cuitError;
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const canContinue = step !== 1 || (!cuitError && acceptedTerms);
 
     // Bloquea el scroll de fondo mientras el modal está montado y lo restaura al cerrarse.
     useEffect(() => {
@@ -319,6 +321,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                                     <label htmlFor={`${fieldId}-telefono-celular`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Teléfono Celular</label>
                                     <input id={`${fieldId}-telefono-celular`} type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Código de área + número" />
                                 </div>
+                                <TermsCheckbox doc="profesional" dark checked={acceptedTerms} onChange={setAcceptedTerms} className="sm:col-span-2" />
                             </div>
                         </div>
                     )}
@@ -421,9 +424,10 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                     </button>
 
                     {step < 3 ? (
-                        <button 
-                            onClick={() => { setCuitTouched(true); if (canContinue) handleNext(); }} 
-                            className={`px-6 py-3 bg-white text-slate-900 hover:bg-slate-200 rounded-xl font-black flex items-center gap-2 shadow-lg transition-all ${canContinue ? '' : 'opacity-50 cursor-not-allowed'}`}
+                        <button
+                            disabled={step === 1 && !acceptedTerms}
+                            onClick={() => { setCuitTouched(true); if (canContinue) handleNext(); }}
+                            className={`px-6 py-3 bg-white text-slate-900 hover:bg-slate-200 rounded-xl font-black flex items-center gap-2 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${canContinue ? '' : 'opacity-50 cursor-not-allowed'}`}
                         >
                             Siguiente <ChevronRight className="w-4 h-4" />
                         </button>

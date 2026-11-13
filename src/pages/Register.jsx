@@ -9,6 +9,7 @@ import {
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import { useTimeouts } from '../hooks/useTimeouts';
 import AffiliationFields from '../components/AffiliationFields';
+import TermsCheckbox from '../components/TermsCheckbox';
 import { emptyAffiliation, validateAffiliation } from '../utils/insuranceValidation';
 const SuccessModal = ({ isOpen, onNavigate }) => {
     if (!isOpen) return null;
@@ -121,6 +122,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const writingTimeoutRef = useRef(null);
   const [passValidations, setPassValidations] = useState({
       length: false, uppercase: false, number: false
@@ -174,6 +176,7 @@ const Register = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!acceptedTerms) return;
     clear(writingTimeoutRef.current);
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
@@ -293,7 +296,8 @@ const Register = () => {
                      </div>
                   </div>
                   {(errors.password || errors.confirmPassword) && (<div className="bg-red-50 border border-red-100 text-red-600 text-xs p-2 rounded-lg flex gap-2 items-start"><AlertTriangle className="w-3 h-3 mt-0.5 shrink-0"/><p>{errors.password || errors.confirmPassword}</p></div>)}
-                  <button type="submit" disabled={avatarState === 'processing' || avatarState === 'success'} className={`w-full flex items-center justify-center py-4 px-4 rounded-xl text-white font-bold text-sm shadow-lg transition-all transform duration-200 mt-6 ${avatarState === 'success' ? 'bg-green-500 hover:bg-green-600 scale-105' : avatarState === 'error' ? 'bg-red-500 hover:bg-red-600 shake' : 'bg-blue-600 hover:bg-blue-700 hover:-translate-y-1 shadow-blue-500/30'} disabled:opacity-70 disabled:cursor-not-allowed`}>
+                  <TermsCheckbox doc="registro" checked={acceptedTerms} onChange={setAcceptedTerms} className="mt-2" />
+                  <button type="submit" disabled={!acceptedTerms || avatarState === 'processing' || avatarState === 'success'} className={`w-full flex items-center justify-center py-4 px-4 rounded-xl text-white font-bold text-sm shadow-lg transition-all transform duration-200 mt-6 ${avatarState === 'success' ? 'bg-green-500 hover:bg-green-600 scale-105' : avatarState === 'error' ? 'bg-red-500 hover:bg-red-600 shake' : 'bg-blue-600 hover:bg-blue-700 hover:-translate-y-1 shadow-blue-500/30'} disabled:opacity-70 disabled:cursor-not-allowed`}>
                     {avatarState === 'processing' ? (<span className="flex items-center gap-2"><Activity className="w-4 h-4 animate-spin"/> Procesando...</span>) : avatarState === 'success' ? (<span className="flex items-center gap-2"><CheckCircle className="w-4 h-4"/> ¡Registro Exitoso!</span>) : (<span className="flex items-center gap-2">Crear Cuenta <ChevronRight className="w-4 h-4"/></span>)}
                   </button>
                 </form>
