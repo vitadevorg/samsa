@@ -1,109 +1,158 @@
 <div align="center">
-  
-# SAMSA
-### Sistema de Adhesión Médica y Salud Integral
-
-*Una plataforma premium de gestión médica diseñada para modernizar, conectar y optimizar todo el ecosistema de salud.*
-
+  <img src="public/favicon.svg" alt="Logotipo de S.A.M.S.A." width="84">
+  <h1>S.A.M.S.A.</h1>
+  <p><strong>Sistema de Atención Médica y Salud Argentina</strong></p>
+  <p>Turnos, agendas profesionales y gestión institucional en una plataforma de VitaDev.</p>
+  <p>
+    <a href="#galería-de-módulos">Galería de módulos</a> ·
+    <a href="#arquitectura">Arquitectura</a> ·
+    <a href="#ejecución-local">Ejecución local</a> ·
+    <a href="docs/INDEX.md">Documentación</a>
+  </p>
 </div>
 
----
+[![Portal público de SAMSA](docs/assets/readme/portal-publico.webp)](docs/assets/readme/portal-publico.webp)
 
-## 📖 Descripción General
+[Portal en móvil](docs/assets/readme/portal-movil.webp) · [Portal en tableta](docs/assets/readme/portal-tablet.webp)
 
-**SAMSA** es una solución tecnológica integral de vanguardia concebida para revolucionar la gestión hospitalaria, clínica y de consultorios privados. Con un fuerte enfoque en el diseño UX/UI premium (Glassmorphism, interfaces modernas y fluidas) y la usabilidad, SAMSA conecta a todos los actores del ecosistema médico en una única plataforma centralizada.
+## Galería de módulos
 
-Elimina la dependencia del papel, reduce drásticamente el ausentismo y agiliza la reserva de turnos, brindando a las instituciones el control total sobre sus métricas, y a los pacientes, la comodidad que exigen en la era digital.
+Las capturas se realizaron en el entorno local con cuentas de demostración. Cada imagen se puede abrir a tamaño completo.
 
----
+| Módulo | Vista principal | Operaciones |
+| --- | --- | --- |
+| [Pacientes](#pacientes) | `/turns` | Buscar especialistas, solicitar turnos y consultar estudios y reservas. |
+| [Médicos](#médicos) | `/doctor/turns` | Gestionar la agenda, consultar pacientes y acceder a protocolos. |
+| [Secretaría](#secretaría) | `/secretary/dashboard` | Coordinar agendas, registrar turnos manuales y consultar pacientes. |
+| [Administración general](#administración-general) | `/admin/doctors` | Gestionar médicos, especialidades, consultorios, pacientes y obras sociales. |
+| [Administración de clínica](#administración-de-clínica) | `/clinic/doctors` | Administrar el equipo de la clínica y sus solicitudes. |
+| [Administración de hospital](#administración-de-hospital) | `/hospital/doctors` | Gestionar médicos, secretarías, personal y solicitudes del hospital. |
+| [Administración VitaDev](#administración-vitadev) | `/vitadev/dashboard` | Visualizar la red institucional y gestionar instituciones, profesionales y usuarios. |
 
-## 🎯 Funcionalidades Principales por Actor
+### Pacientes
 
-### 🧑‍⚕️ Para Especialistas Médicos
-* **Autonomía Total:** Gestión de agenda 100% autónoma y personalizable.
-* **Mayor Visibilidad:** Conexión directa con nuevos pacientes, eliminando la dependencia exclusiva de derivaciones de terceros.
-* **Visor de Protocolos Médicos:** Acceso a la base de protocolos de urgencia institucionales con opción de impresión directa sin corromper la interfaz.
-* **Reducción de Ausentismo:** Sistema inteligente de recordatorios automáticos (WhatsApp/Email) que minimiza los turnos perdidos.
-* **Portal de Adhesión y Soporte:** Formularios de registro con certificados imprimibles y un sistema de tickets interno para soporte técnico.
+La pantalla de turnos permite buscar atención por profesional y acceder a la reserva. Las áreas privadas reúnen los turnos, estudios y reseñas del paciente.
 
-### 💖 Para Pacientes
-* **Disponibilidad 24/7:** Reserva de turnos en cualquier momento y lugar (tiempo promedio de reserva reducido de 4 minutos a solo 30 segundos).
-* **Historial Unificado:** Acceso centralizado a su historia clínica, estudios médicos e indicaciones.
-* **Sistema de Reseñas y Calificaciones:** Interfaz para que el paciente gestione su historial de calificaciones, evaluando la calidad de atención de cada especialista.
-* **Foro de Salud Preventiva:** Espacio interactivo y elegante con artículos científicos, médicos y preventivos avalados por la institución.
-* **Notificaciones Inteligentes y Personalizables:** Selección del canal de contacto preferido (Email, SMS, WhatsApp) para recibir avisos y recordatorios automáticos.
-* **Adiós a la sala de espera telefónica:** Todo desde una interfaz móvil o web extremadamente intuitiva.
+[![Pantalla de solicitud de turnos para pacientes](docs/assets/readme/paciente-turnos.webp)](docs/assets/readme/paciente-turnos.webp)
 
-### 🏢 Para Personal Administrativo y Recepción
-* **Ecosistema Paperless:** Eliminación definitiva de las agendas de papel y la desorganización física.
-* **Centralización:** Unificación absoluta de turnos online, presenciales y telefónicos en un solo dashboard.
-* **Optimización del Tiempo:** Reducción drástica del volumen de llamadas y confirmaciones manuales, liberando tiempo para brindar una atención presencial de calidad humana.
+[Mis turnos](docs/assets/readme/paciente-mis-turnos.webp) · [Estudios](docs/assets/readme/paciente-estudios.webp)
 
-### 📊 Para Directores Médicos y Clínicas
-* **Métricas en Tiempo Real:** Control total del desempeño institucional a través de dashboards gerenciales.
-* **Ocupación de Consultorios (Heatmaps):** Monitoreo visual de la tasa de ocupación física de los consultorios para maximizar la rentabilidad (alcanzando tasas de ocupación óptimas del >90%).
-* **Reportes y Facturación:** Centralización de la facturación y reportes detallados de productividad por especialista.
+### Médicos
 
----
+El panel profesional reúne la agenda, el directorio de pacientes y los protocolos institucionales.
 
-## 💻 Arquitectura y Tecnologías (Tech Stack)
+[![Agenda del médico](docs/assets/readme/medico-agenda.webp)](docs/assets/readme/medico-agenda.webp)
 
-El frontend de SAMSA ha sido desarrollado utilizando las tecnologías más modernas para garantizar un rendimiento óptimo, animaciones fluidas y una mantenibilidad excepcional:
+[Protocolos](docs/assets/readme/medico-protocolos.webp)
 
-* **Framework Core:** [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
-* **Estilos y UI:** [Tailwind CSS](https://tailwindcss.com/) (con clases arbitrarias avanzadas para Glassmorphism y utilidades a medida)
-* **Animaciones y Micro-interacciones:** 
-  * CSS Keyframes nativos súper-optimizados (Circle Reveals, Scale Bounces).
-  * Componentes SVG interactivos a medida (Escudo Médico para recuperación de contraseñas, Avatares dinámicos en login).
-  * [Framer Motion](https://www.framer.com/motion/) & [GSAP](https://gsap.com/) para transiciones complejas de interfaz y scroll.
-* **Iconografía:** [Lucide React](https://lucide.dev/) (Iconos elegantes y ligeros).
-* **Renderizado de Impresión:** Motores de React Portals y aislamiento CSS dedicados para la generación de comprobantes PDF legales e inmaculados directamente desde el navegador (sin renderizado basura ni hojas en blanco).
-* **Componentes Avanzados:** Radix UI y Lenis Scroll para suavizado de desplazamiento.
+### Secretaría
 
----
+La agenda de recepción permite revisar las citas por médico y registrar turnos manuales con los campos de afiliación a la obra social.
 
-## 🚀 Instalación y Ejecución Local
+[![Agenda de secretaría](docs/assets/readme/secretaria-agenda.webp)](docs/assets/readme/secretaria-agenda.webp)
 
-Para correr el entorno de desarrollo localmente:
+[Formulario de turno manual](docs/assets/readme/secretaria-turno-manual.webp) · [Directorio de pacientes](docs/assets/readme/secretaria-pacientes.webp)
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone <url-del-repositorio>
-   cd samsa-frontend
-   ```
+### Administración general
 
-2. **Instalar dependencias:**
-   Recomendamos usar `npm`:
-   ```bash
-   npm install
-   ```
+El panel operativo centraliza el mantenimiento de profesionales, especialidades, consultorios, pacientes y obras sociales.
 
-3. **Ejecutar el servidor de desarrollo (Vite):**
-   ```bash
-   npm run dev
-   ```
-   *El servidor iniciará típicamente en `http://localhost:5173/` con Hot Module Replacement (HMR).*
+[![Administración general de médicos](docs/assets/readme/administracion-medicos.webp)](docs/assets/readme/administracion-medicos.webp)
 
-4. **Construir para Producción:**
-   ```bash
-   npm run build
-   ```
+[Consultorios](docs/assets/readme/administracion-consultorios.webp)
 
----
+### Administración de clínica
 
-## 📚 Documentación del Proyecto y Flujo de Trabajo (`docs/`)
+La administración de la clínica dispone de vistas para médicos, secretarías, personal y solicitudes de su institución.
 
-Toda la documentación técnica, reglas de contribución, estándares de diseño e historial de entregas por Pull Request se encuentra en la carpeta [`docs/`](./docs/INDEX.md):
+[![Directorio de médicos de una clínica](docs/assets/readme/clinica-medicos.webp)](docs/assets/readme/clinica-medicos.webp)
 
-* **[Índice General de Documentación (`docs/INDEX.md`)](./docs/INDEX.md)**
-* **[Flujo de Trabajo, Ramas y Trello (`docs/flujo-codigo-trello.md`)](./docs/flujo-codigo-trello.md)**
-* **[Design System y Reglas Responsive (`docs/design-system.md`)](./docs/design-system.md)**
-* **[Arquitectura, Roles y Mapa de Rutas (`docs/arquitectura-y-roles.md`)](./docs/arquitectura-y-roles.md)**
-* **[Índice de Tareas y Entregas por PR (`docs/tareas/INDEX.md`)](./docs/tareas/INDEX.md)**
-* **[Reglas para Agentes de IA (`AGENTS.md`)](./AGENTS.md)**
+[Solicitudes de la clínica](docs/assets/readme/clinica-solicitudes.webp)
 
----
+### Administración de hospital
 
-<div align="center">
-  <small>© 2026 SAMSA. Todos los derechos reservados. Desarrollado con excelencia by VitaDev.</small>
-</div>
+El hospital utiliza las mismas pantallas institucionales con sus propios datos y rutas. La vista de personal permite consultar su equipo.
+
+[![Personal del hospital](docs/assets/readme/hospital-personal.webp)](docs/assets/readme/hospital-personal.webp)
+
+[Médicos del hospital](docs/assets/readme/hospital-medicos.webp)
+
+### Administración VitaDev
+
+El panel muestra la red de instituciones y profesionales. El directorio concentra las operaciones de gestión de usuarios.
+
+[![Panel VitaDev con el mapa de la red institucional](docs/assets/readme/vitadev-panel.webp)](docs/assets/readme/vitadev-panel.webp)
+
+[Directorio de usuarios](docs/assets/readme/vitadev-usuarios.webp)
+
+## Arquitectura
+
+La aplicación utiliza **React 19**, **Vite 7**, **React Router 7** y **Tailwind CSS 3.4**. La sesión de demostración se guarda en `sessionStorage`. Las rutas protegidas verifican el rol en el cliente y los proveedores comparten la sesión y los datos mock entre las pantallas.
+
+### Enrutamiento y estado compartido
+
+```mermaid
+flowchart TD
+    Entry["main.jsx · Punto de entrada"] --> App["App.jsx"]
+    App --> Auth["AuthProvider · Sesión"]
+    Auth --> Router["BrowserRouter"]
+    Router --> Clinic["ClinicDataProvider · Estado institucional"]
+    Clinic --> Routes["Routes"]
+    Routes --> Public["Portal público · Turnos y cartilla"]
+    Routes --> Guard["ProtectedRoute · Sesión y rol"]
+    Guard --> Care["Paciente · Médico · Secretaría"]
+    Guard --> Admin["Administración general · Clínica · Hospital · VitaDev"]
+    Auth --> Service["authService.js · Cuentas demo"]
+    Auth --> Storage["sessionStorage · samsa_user"]
+    Clinic --> Fixtures["institutions.js · Datos iniciales"]
+```
+
+### Validación de datos de afiliación
+
+```mermaid
+flowchart LR
+    Register["Registro"] --> Fields["AffiliationFields"]
+    Booking["Reserva de turno"] --> Fields
+    Profile["Perfil de paciente"] --> Fields
+    Secretary["Turno manual de secretaría"] --> Fields
+    Fields --> Rules["insuranceValidation.js · Reglas por obra social"]
+    Register & Booking & Profile & Secretary --> Rules
+```
+
+| Ruta en el repositorio | Responsabilidad |
+| --- | --- |
+| [`src/App.jsx`](src/App.jsx) y [`src/constants/roles.js`](src/constants/roles.js) | Mapa de rutas, permisos y destinos iniciales por rol. |
+| [`src/pages/`](src/pages/) y [`src/components/`](src/components/) | Pantallas por módulo y componentes reutilizables. |
+| [`src/context/`](src/context/) y [`src/services/`](src/services/) | Sesión y operaciones de autenticación de demostración. |
+| [`src/data/`](src/data/) y [`src/utils/`](src/utils/) | Datos iniciales, reglas de validación y utilidades. |
+| [`api/submit-form.js`](api/submit-form.js) | Envío del formulario de adhesión profesional mediante Resend cuando el entorno está configurado. |
+
+## Ejecución local
+
+La integración continua utiliza Node.js 20. Para Vite 7, use Node.js 20.19 o posterior dentro de esa versión, o Node.js 22.12 o posterior.
+
+```bash
+git clone https://github.com/vitadevorg/samsa.git
+cd samsa
+git checkout development
+npm ci
+npm run dev
+```
+
+Abra [el entorno local](http://localhost:5173/). Para recorrer las vistas protegidas, inicie sesión en `/login` con una de las cuentas de demostración definidas en [`authService.js`](src/services/authService.js).
+
+```bash
+npm run lint
+npm run build
+npm run preview
+```
+
+El entorno Vite permite navegar por el frontend y sus datos de demostración. El envío de la solicitud de adhesión requiere ejecutar el endpoint `/api/submit-form` en un entorno compatible y configurar `RESEND_API_KEY` en el servidor.
+
+## Documentación y contribuciones
+
+- [Índice de documentación](docs/INDEX.md)
+- [Arquitectura, roles y mapa de rutas](docs/arquitectura-y-roles.md)
+- [Sistema de diseño y criterios responsive](docs/design-system.md)
+- [Flujo de trabajo con Git, Pull Requests y Trello](docs/flujo-codigo-trello.md)
+- [Historial de tareas y entregas](docs/tareas/INDEX.md)
