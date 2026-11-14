@@ -53,14 +53,16 @@ const SecretaryDashboard = () => {
   // Si el médico elegido ya no está asignado, se muestra el primero de la lista.
   const currentDoctor = doctors.find(d => d.id === selectedDoctorId) ?? doctors[0];
   const currentAppointments = filterAgenda(appointments[currentDoctor?.id], selectedDate, searchTerm);
-  const findSchedule = (doctorId) => doctors.find(d => d.id === doctorId)?.schedule;
+  const findDoctor = (doctorId) => doctors.find(d => d.id === doctorId);
+  const findSchedule = (doctorId) => findDoctor(doctorId)?.schedule;
 
   const notify = (message, options = {}) => setNotification({ message, ...options });
   const closeNotification = useCallback(() => setNotification(null), []);
 
   const openNewTurn = (doctorId = currentDoctor?.id, initialData = {}, fromSuspendedId = null) => {
     setSelectedDoctorId(doctorId);
-    setNewTurnDraft({ doctorId, initialData: { date: selectedDate, ...initialData }, fromSuspendedId });
+    // `key` nuevo en cada apertura: "Cargar otro turno" monta un formulario limpio.
+    setNewTurnDraft({ key: createId(), doctorId, initialData: { date: selectedDate, ...initialData }, fromSuspendedId });
   };
 
   const handleCreateTurn = (data) => {
@@ -73,9 +75,10 @@ const SecretaryDashboard = () => {
       phone: data.phone,
       status: 'pending',
       type: data.type,
-      motivoConsulta: data.motivoConsulta,
+      obraSocial: data.obraSocial,
+      affiliation: data.affiliation,
     }, fromSuspendedId);
-    setNewTurnDraft(null);
+    // El modal queda abierto mostrando la pantalla de salida; se cierra con "Listo".
   };
 
   const handleAction = (type, doctorId, appointment) => {
@@ -139,11 +142,11 @@ const SecretaryDashboard = () => {
   // Sin médicos asignados no hay agenda que mostrar.
   if (doctors.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans text-slate-800 overflow-x-hidden">
         <Navbar />
         <main className="flex-grow max-w-3xl mx-auto w-full px-4 py-20 text-center">
-          <h1 className="text-2xl font-black text-slate-800 mb-2">Todavía no tenés agendas asignadas</h1>
-          <p className="text-slate-500">Pedile a la administración de tu clínica que te asigne los médicos cuyas agendas vas a manejar.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Todavía no tenés agendas asignadas</h1>
+          <p className="text-gray-500">Pedile a la administración de tu clínica que te asigne los médicos cuyas agendas vas a manejar.</p>
         </main>
         <Footer />
       </div>
@@ -151,10 +154,10 @@ const SecretaryDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
       <Navbar />
 
-      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:pt-12">
         <AgendaHeader
           doctors={doctors}
           selectedDoctorId={currentDoctor.id}
@@ -195,10 +198,13 @@ const SecretaryDashboard = () => {
 
       {newTurnDraft && (
         <NewTurnModal
+          key={newTurnDraft.key}
+          doctor={findDoctor(newTurnDraft.doctorId)}
           doctorAppointments={appointments[newTurnDraft.doctorId] || []}
           doctorSchedule={findSchedule(newTurnDraft.doctorId)}
           initialData={newTurnDraft.initialData}
           onSubmit={handleCreateTurn}
+          onCreateAnother={() => openNewTurn(newTurnDraft.doctorId)}
           onClose={() => setNewTurnDraft(null)}
         />
       )}
@@ -213,6 +219,7 @@ const SecretaryDashboard = () => {
 
       {rescheduleTarget && (
         <RescheduleModal
+          doctor={findDoctor(rescheduleTarget.doctorId)}
           doctorAppointments={appointments[rescheduleTarget.doctorId] || []}
           doctorSchedule={findSchedule(rescheduleTarget.doctorId)}
           appointmentId={rescheduleTarget.appointment.id}

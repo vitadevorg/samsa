@@ -45,18 +45,21 @@ export const isValidDni = (dni) => /^\d{7,8}$/.test(String(dni ?? ''));
  * - requireFilled = false: solo marca formato inválido en campos ya escritos
  *   (para avisar mientras la persona tipea).
  * - requireFilled = true: además marca los obligatorios vacíos (al enviar).
+ * - audience = 'patient' (el paciente carga sus datos) o 'staff' (la secretaria
+ *   carga los datos de otra persona): solo cambia la redacción de los mensajes.
  */
 export const validateAffiliation = (
   { insurance, affiliateNumber, holderType, holderName, holderDni, patientDni },
-  { requireFilled = true } = {}
+  { requireFilled = true, audience = 'patient' } = {}
 ) => {
   const errors = {};
+  const isStaff = audience === 'staff';
   if (!requiresAffiliation(insurance)) return errors;
 
   const number = String(affiliateNumber ?? '').trim();
   const rule = getAffiliateRule(insurance);
   if (!number) {
-    if (requireFilled) errors.affiliateNumber = 'Ingresá tu número de afiliado';
+    if (requireFilled) errors.affiliateNumber = isStaff ? 'Ingresá el número de afiliado' : 'Ingresá tu número de afiliado';
   } else if (!/^\d+$/.test(number) || number.length < rule.min || number.length > rule.max) {
     errors.affiliateNumber = `Número de afiliado inválido: debe tener ${describeRule(rule)}`;
   }
@@ -71,7 +74,9 @@ export const validateAffiliation = (
     } else if (!isValidDni(dni)) {
       errors.holderDni = 'DNI del titular inválido: debe tener 7 u 8 dígitos';
     } else if (patientDni && dni === String(patientDni).trim()) {
-      errors.holderDni = 'El DNI del titular no puede ser el tuyo. Si sos el titular, elegí "Soy el titular"';
+      errors.holderDni = isStaff
+        ? 'El DNI del titular no puede ser el del paciente. Si el paciente es el titular, elegí "Es el titular"'
+        : 'El DNI del titular no puede ser el tuyo. Si sos el titular, elegí "Soy el titular"';
     }
   }
 
