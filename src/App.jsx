@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ROLES } from './constants/roles';
 
-import Home from './pages/Home';
+import HomeRoute from './components/HomeRoute';
 import AboutUs from './pages/AboutUs';
 import Turns from './pages/Turns';
 import Professionals from './pages/Professionals';
@@ -67,7 +67,7 @@ function App() {
         <ClinicDataProvider>
         <Routes>
 
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/turns" element={<Turns />} />
           <Route path="/news" element={<NewsForum />} />
