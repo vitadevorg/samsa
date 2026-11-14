@@ -151,7 +151,7 @@ const Navbar = () => {
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin || isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
                 >
                   <div 
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-pink-500 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
                     style={{
                       backgroundImage: user.img ? `url(${user.img})` : 'none',
                       backgroundSize: 'cover',
@@ -201,7 +201,7 @@ const Navbar = () => {
                       </>
                     ) : isSecretary ? (
                       <>
-                         <div className="px-4 py-2 text-xs text-center text-pink-600 italic bg-pink-50 mx-2 rounded mt-1 font-bold">
+                         <div className="px-4 py-2 text-xs text-center text-blue-700 italic bg-blue-50 mx-2 rounded mt-1 font-bold">
                             Modo Operativo
                          </div>
                       </>
