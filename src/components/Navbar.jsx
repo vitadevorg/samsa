@@ -201,6 +201,9 @@ const Navbar = () => {
                       </>
                     ) : isSecretary ? (
                       <>
+                         <Link to="/secretary/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <User className="w-4 h-4" /> Mi cuenta
+                         </Link>
                          <div className="px-4 py-2 text-xs text-center text-blue-700 italic bg-blue-50 mx-2 rounded mt-1 font-bold">
                             Modo Operativo
                          </div>
@@ -285,6 +288,7 @@ const Navbar = () => {
             <>
               <Link to="/secretary/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Agenda Diaria</Link>
               <Link to="/secretary/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Directorio Pacientes</Link>
+              <Link to="/secretary/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
             </>
           ) : (
             <>
