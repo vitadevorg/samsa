@@ -8,6 +8,9 @@ import {
 } from 'lucide-react';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import { useTimeouts } from '../hooks/useTimeouts';
+import AffiliationFields from '../components/AffiliationFields';
+import TermsCheckbox from '../components/TermsCheckbox';
+import { emptyAffiliation, validateAffiliation } from '../utils/insuranceValidation';
 const SuccessModal = ({ isOpen, onNavigate }) => {
     if (!isOpen) return null;
     return (
@@ -113,11 +116,13 @@ const Register = () => {
       email: '', phone: '', insurance: '', 
       password: '', confirmPassword: ''
   });
+  const [affiliation, setAffiliation] = useState(emptyAffiliation);
   const [errors, setErrors] = useState({});
   const [avatarState, setAvatarState] = useState('idle');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const writingTimeoutRef = useRef(null);
   const [passValidations, setPassValidations] = useState({
       length: false, uppercase: false, number: false
@@ -129,11 +134,7 @@ const Register = () => {
           number: /\d/.test(pass)
       });
   };
-  const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({ ...prev, [name]: value }));
-      if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
-      if (name === 'password') checkPassword(value);
+  const showWritingAvatar = () => {
       if (avatarState !== 'processing' && !showSuccess) {
           setAvatarState('writing');
           clear(writingTimeoutRef.current);
@@ -141,6 +142,23 @@ const Register = () => {
               setAvatarState('idle');
           }, 600);
       }
+  };
+  const handleAffiliationChange = (name, value) => {
+      setAffiliation(prev => ({ ...prev, [name]: value }));
+      if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+      showWritingAvatar();
+  };
+  const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+      if (name === 'password') checkPassword(value);
+      // Otra obra social implica otra credencial: se descartan los datos de la anterior.
+      if (name === 'insurance' && value !== formData.insurance) {
+          setAffiliation(emptyAffiliation());
+          setErrors(prev => ({ ...prev, affiliateNumber: null, holderName: null, holderDni: null }));
+      }
+      showWritingAvatar();
   };
   const validateForm = () => {
       const newErrors = {};
@@ -153,10 +171,12 @@ const Register = () => {
       const passRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
       if (!passRegex.test(formData.password)) newErrors.password = "Contraseña insegura";
       if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "No coinciden";
+      Object.assign(newErrors, validateAffiliation({ insurance: formData.insurance, ...affiliation, patientDni: formData.dni }));
       return newErrors;
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!acceptedTerms) return;
     clear(writingTimeoutRef.current);
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
@@ -236,6 +256,13 @@ const Register = () => {
                       </select>
                       {errors.insurance && <p className="text-red-500 text-xs mt-1 ml-1">{errors.insurance}</p>}
                   </div>
+                  <AffiliationFields
+                      insurance={formData.insurance}
+                      value={affiliation}
+                      onChange={handleAffiliationChange}
+                      errors={errors}
+                      patientDni={formData.dni}
+                  />
                   <div className="border-t border-slate-100 my-4"></div>
                   <div className="bg-blue-50 rounded-xl p-3 mb-2 border border-blue-100">
                       <p className="text-xs font-bold text-blue-700 uppercase mb-2">Seguridad de la contraseña</p>
@@ -269,7 +296,8 @@ const Register = () => {
                      </div>
                   </div>
                   {(errors.password || errors.confirmPassword) && (<div className="bg-red-50 border border-red-100 text-red-600 text-xs p-2 rounded-lg flex gap-2 items-start"><AlertTriangle className="w-3 h-3 mt-0.5 shrink-0"/><p>{errors.password || errors.confirmPassword}</p></div>)}
-                  <button type="submit" disabled={avatarState === 'processing' || avatarState === 'success'} className={`w-full flex items-center justify-center py-4 px-4 rounded-xl text-white font-bold text-sm shadow-lg transition-all transform duration-200 mt-6 ${avatarState === 'success' ? 'bg-green-500 hover:bg-green-600 scale-105' : avatarState === 'error' ? 'bg-red-500 hover:bg-red-600 shake' : 'bg-blue-600 hover:bg-blue-700 hover:-translate-y-1 shadow-blue-500/30'} disabled:opacity-70 disabled:cursor-not-allowed`}>
+                  <TermsCheckbox doc="registro" checked={acceptedTerms} onChange={setAcceptedTerms} className="mt-2" />
+                  <button type="submit" disabled={!acceptedTerms || avatarState === 'processing' || avatarState === 'success'} className={`w-full flex items-center justify-center py-4 px-4 rounded-xl text-white font-bold text-sm shadow-lg transition-all transform duration-200 mt-6 ${avatarState === 'success' ? 'bg-green-500 hover:bg-green-600 scale-105' : avatarState === 'error' ? 'bg-red-500 hover:bg-red-600 shake' : 'bg-blue-600 hover:bg-blue-700 hover:-translate-y-1 shadow-blue-500/30'} disabled:opacity-70 disabled:cursor-not-allowed`}>
                     {avatarState === 'processing' ? (<span className="flex items-center gap-2"><Activity className="w-4 h-4 animate-spin"/> Procesando...</span>) : avatarState === 'success' ? (<span className="flex items-center gap-2"><CheckCircle className="w-4 h-4"/> ¡Registro Exitoso!</span>) : (<span className="flex items-center gap-2">Crear Cuenta <ChevronRight className="w-4 h-4"/></span>)}
                   </button>
                 </form>

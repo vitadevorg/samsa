@@ -2,11 +2,12 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   HeartPulse, LogOut, ChevronDown, Menu, X,
-  Building, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
+  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
+import { getDoctorLabel } from '../utils/doctorName';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -20,8 +21,8 @@ const Navbar = () => {
   const getLinkClass = (path) => {
     const isActive = location.pathname === path;
     return isActive 
-      ? "text-blue-700 font-bold flex items-center gap-1 bg-blue-50/80 px-4 py-2 rounded-xl transition-colors" 
-      : "text-slate-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:bg-slate-50 px-4 py-2 rounded-xl transition-all";
+      ? "text-blue-700 font-bold flex items-center gap-1 whitespace-nowrap bg-blue-50/80 px-3 xl:px-4 py-2 rounded-xl transition-colors text-sm xl:text-base" 
+      : "text-slate-600 hover:text-blue-700 font-medium flex items-center gap-1 whitespace-nowrap hover:bg-slate-50 px-3 xl:px-4 py-2 rounded-xl transition-all text-sm xl:text-base";
   };
   const getFirstName = (fullName) => {
     if (!fullName) return '';
@@ -51,7 +52,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
-          <div className="flex items-center">
+          <div className="flex items-center shrink-0">
             <Link to={getHomeForRole(user?.role)} className="flex items-center gap-2 group">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-2.5 rounded-xl group-hover:shadow-md group-hover:shadow-blue-500/20 transition-all duration-300 border border-blue-100">
                 <HeartPulse className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />
@@ -59,7 +60,7 @@ const Navbar = () => {
               <span className="text-2xl font-black text-slate-800 tracking-tight group-hover:text-blue-700 transition-colors">S.A.M.S.A</span>
             </Link>
           </div>
-          <div className="hidden md:flex space-x-8 items-center">
+          <div className="hidden lg:flex space-x-2 xl:space-x-6 items-center">
             {isAdmin ? (
               <>
                 <Link to="/admin/offices" className={getLinkClass('/admin/offices')}>
@@ -99,9 +100,23 @@ const Navbar = () => {
                 </Link>
               </>
             ) : isVitadevAdmin ? (
-              <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
-                <Shield className="w-4 h-4"/> Panel VitaDev
-              </Link>
+              <>
+                <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
+                  <Shield className="w-4 h-4"/> Resumen
+                </Link>
+                <Link to="/vitadev/doctors" className={getLinkClass('/vitadev/doctors')}>
+                  <Stethoscope className="w-4 h-4"/> Médicos
+                </Link>
+                <Link to="/vitadev/clinics" className={getLinkClass('/vitadev/clinics')}>
+                  <Building2 className="w-4 h-4"/> Clínicas
+                </Link>
+                <Link to="/vitadev/hospitals" className={getLinkClass('/vitadev/hospitals')}>
+                  <Hospital className="w-4 h-4"/> Hospitales
+                </Link>
+                <Link to="/vitadev/users" className={getLinkClass('/vitadev/users')}>
+                  <UserCog className="w-4 h-4"/> Usuarios
+                </Link>
+              </>
             ) : isDoctor ? (
               <>
                 <Link to="/doctor/turns" className={getLinkClass('/doctor/turns')}>
@@ -130,7 +145,7 @@ const Navbar = () => {
               </>
             )}
             {user ? (
-              <div className="relative ml-4">
+              <div className="relative ml-2 xl:ml-4 shrink-0">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin || isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
@@ -145,8 +160,8 @@ const Navbar = () => {
                   >
                     {!user.img && userInitial}
                   </div>
-                  <span className="text-sm font-bold px-1 tracking-wide">
-                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? `Dr. ${displayName}` : isSecretary ? `Sec. ${displayName}` : displayName}
+                  <span className="text-sm font-bold px-1 tracking-wide whitespace-nowrap">
+                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
@@ -160,6 +175,15 @@ const Navbar = () => {
                        <>
                          <Link to="/admin/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                            <Shield className="w-4 h-4" /> Mi Perfil
+                         </Link>
+                         <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
+                            Modo Gestión
+                         </div>
+                       </>
+                    ) : isVitadevAdmin ? (
+                       <>
+                         <Link to="/vitadev/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <KeyRound className="w-4 h-4" /> Mi cuenta
                          </Link>
                          <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
                             Modo Gestión
@@ -206,8 +230,8 @@ const Navbar = () => {
                 {isDropdownOpen && <div className="fixed inset-0 z-30 cursor-default" onClick={() => setIsDropdownOpen(false)}></div>}
               </div>
             ) : (
-              <Link to="/login" className="ml-4">
-                <button className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-7 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 group flex items-center gap-2">
+              <Link to="/login" className="ml-2 xl:ml-4 shrink-0">
+                <button className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 xl:px-7 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 group flex items-center gap-2 whitespace-nowrap">
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
                   <User className="w-4 h-4 relative z-10 opacity-90 group-hover:scale-110 transition-transform" />
                   <span className="relative z-10">Iniciar Sesión</span>
@@ -215,7 +239,7 @@ const Navbar = () => {
               </Link>
             )}
           </div>
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-blue-600 p-2">
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -223,7 +247,7 @@ const Navbar = () => {
         </div>
       </div>
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
+        <div className="lg:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
           {isAdmin ? (
             <>
               <Link to="/admin/offices" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Consultorios</Link>
@@ -243,7 +267,14 @@ const Navbar = () => {
               </Link>
             </>
           ) : isVitadevAdmin ? (
-            <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Panel VitaDev</Link>
+            <>
+              <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Resumen</Link>
+              <Link to="/vitadev/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
+              <Link to="/vitadev/clinics" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
+              <Link to="/vitadev/hospitals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
+              <Link to="/vitadev/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
+              <Link to="/vitadev/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+            </>
           ) : isDoctor ? (
             <>
               <Link to="/doctor/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>

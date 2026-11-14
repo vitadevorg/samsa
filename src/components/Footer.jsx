@@ -1,7 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Phone, Calendar } from 'lucide-react';
+import { Heart, Phone, Calendar, Mail } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
+
+const CONTACT_EMAIL = 'vitadev.org@gmail.com';
+const INSTAGRAM_URL = 'https://www.instagram.com/vitadev.ar?utm_source=ig_web_button_share_sheet&psln=ZDNlZDc0MzIxNw==';
+
+const InstagramIcon = ({className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+    </svg>
+);
 
 const ChevronRight = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -72,6 +83,14 @@ const Footer = ({ theme = 'dark' }) => {
               <ul className={`space-y-4 ${textMutedClass} text-sm`}>
                   <li className="flex items-center group">
                       <div className={`p-2 ${iconBgClass} rounded-lg mr-3 ${iconHoverClass} transition`}>
+                          <Mail className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-blue-500 transition-colors break-all">
+                          {CONTACT_EMAIL}
+                      </a>
+                  </li>
+                  <li className="flex items-center group">
+                      <div className={`p-2 ${iconBgClass} rounded-lg mr-3 ${iconHoverClass} transition`}>
                           <Phone className="w-4 h-4 text-blue-500" />
                       </div>
                       0800-SAMSA-SALUD
@@ -89,11 +108,15 @@ const Footer = ({ theme = 'dark' }) => {
               <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>Síguenos</h4>
               <div className="flex space-x-4">
 
-                 {['fb', 'tw', 'ig'].map((social) => (
-                     <div key={social} className={`w-10 h-10 ${iconBgClass} rounded-xl flex items-center justify-center hover:bg-blue-600 hover:-translate-y-1 transition-all cursor-pointer shadow-lg border ${isLight ? 'border-blue-50' : 'border-slate-800'}`}>
-                         <div className={`w-4 h-4 ${isLight ? 'bg-blue-300' : 'bg-slate-400'} rounded-sm`}></div>
-                     </div>
-                 ))}
+                 <a
+                     href={INSTAGRAM_URL}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     aria-label="Instagram de VitaDev"
+                     className={`w-10 h-10 ${iconBgClass} ${isLight ? 'text-blue-600' : 'text-slate-300'} rounded-xl flex items-center justify-center hover:bg-blue-600 hover:text-white hover:-translate-y-1 transition-all shadow-lg border ${isLight ? 'border-blue-50' : 'border-slate-800'}`}
+                 >
+                     <InstagramIcon className="w-5 h-5" />
+                 </a>
               </div>
           </div>
       </div>

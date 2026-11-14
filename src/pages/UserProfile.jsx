@@ -9,6 +9,8 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/useAuth';
 import { INSURANCE_OPTIONS } from '../constants/catalog';
 import { useTimeouts } from '../hooks/useTimeouts';
+import AffiliationFields from '../components/AffiliationFields';
+import { emptyAffiliation, pickAffiliation, requiresAffiliation, validateAffiliation } from '../utils/insuranceValidation';
 const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, disabled, required = false, themeColor }) => {
   const id = useId();
   return (
@@ -66,7 +68,29 @@ const UserProfile = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [affiliation, setAffiliation] = useState(() => pickAffiliation(user));
+  const [affiliationErrors, setAffiliationErrors] = useState({});
   const [previewImg, setPreviewImg] = useState(user?.img || null);
+  const handleAffiliationChange = (name, value) => {
+    setAffiliation(prev => ({ ...prev, [name]: value }));
+    setAffiliationErrors(prev => ({ ...prev, [name]: null }));
+  };
+  const handleRequestSave = () => {
+    const errors = validateAffiliation({ insurance: formData.insurance, ...affiliation, patientDni: formData.dni });
+    if (Object.keys(errors).length > 0) {
+      setAffiliationErrors(errors);
+      return;
+    }
+    setAffiliationErrors({});
+    setShowSaveModal(true);
+  };
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // Se restauran juntas la obra social y su credencial guardadas.
+    setFormData(prev => ({ ...prev, insurance: user?.insurance || 'Ninguna' }));
+    setAffiliation(pickAffiliation(user));
+    setAffiliationErrors({});
+  };
   const roleTheme = {
     admin: { color: 'slate', icon: Shield, label: 'Administrador' },
     doctor: { color: 'indigo', icon: Stethoscope, label: 'Profesional de Salud' },
@@ -76,6 +100,11 @@ const UserProfile = () => {
   const ThemeIcon = currentTheme.icon;
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // Otra obra social implica otra credencial: se descartan los datos de la anterior.
+    if (name === 'insurance' && value !== formData.insurance) {
+      setAffiliation(emptyAffiliation());
+      setAffiliationErrors({});
+    }
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
   const handleNotificationChange = (e) => {
@@ -118,7 +147,9 @@ const UserProfile = () => {
       phone: formData.phone,
       dni: formData.dni,
       cuil: formData.cuil,
-      insurance: formData.insurance
+      insurance: formData.insurance,
+      // Sin obra social no se guardan datos de afiliación viejos.
+      ...(requiresAffiliation(formData.insurance) ? affiliation : emptyAffiliation()),
     });
     setIsEditing(false);
     setShowSaveModal(false);
@@ -224,10 +255,10 @@ const UserProfile = () => {
                   </button>
                 ) : (
                   <div className="flex gap-2">
-                    <button onClick={() => setIsEditing(false)} className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-semibold transition-colors">
+                    <button onClick={handleCancelEdit} className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-semibold transition-colors">
                       <X className="w-4 h-4"/> Cancelar
                     </button>
-                    <button type="button" onClick={() => setShowSaveModal(true)} className={`flex items-center gap-2 px-5 py-2.5 bg-${currentTheme.color}-600 text-white rounded-xl hover:bg-${currentTheme.color}-700 font-bold transition-colors shadow-md hover:shadow-lg`}>
+                    <button type="button" onClick={handleRequestSave} className={`flex items-center gap-2 px-5 py-2.5 bg-${currentTheme.color}-600 text-white rounded-xl hover:bg-${currentTheme.color}-700 font-bold transition-colors shadow-md hover:shadow-lg`}>
                       <Save className="w-4 h-4"/> Guardar
                     </button>
                   </div>
@@ -331,6 +362,16 @@ const UserProfile = () => {
                         <option key={ins} value={ins}>{ins}</option>
                       ))}
                     </select>
+                </div>
+                <div className="col-span-1 md:col-span-2">
+                  <AffiliationFields
+                    insurance={formData.insurance}
+                    value={affiliation}
+                    onChange={handleAffiliationChange}
+                    errors={affiliationErrors}
+                    patientDni={formData.dni}
+                    disabled={!isEditing}
+                  />
                 </div>
               </form>
               {isEditing && (
