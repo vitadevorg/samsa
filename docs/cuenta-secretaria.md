@@ -60,3 +60,13 @@ Responsive (sin scroll horizontal en ninguno):
 | 1440 px (desktop) | Datos personales y médicos (2/3) y Seguridad (1/3) lado a lado. |
 
 Pendiente de la persona responsable: prueba manual propia antes de abrir el PR (en particular la subida de una foto real, que no se probó con un archivo).
+
+## Correcciones de revisión del PR
+
+Comentario de revisión de `lglucasgabriel` en el PR #18, resuelto en la misma rama:
+
+- **Espacio en blanco en pantallas grandes:** *Información personal* y *Médicos de tu agenda* eran hijas directas del grid `lg:grid-cols-3` en filas distintas, así que al abrir "Cambiar contraseña" la columna Seguridad estiraba la fila 1 y empujaba hacia abajo a Médicos. Ahora ambas tarjetas están dentro de un mismo contenedor `lg:col-span-2 space-y-6 sm:space-y-8` (igual que `UserProfile.jsx`); con el formulario de contraseña abierto la separación queda en 32 px a 1440 px.
+- **Mensaje al cambiar el correo:** distingue entre contraseña vacía ("Ingresá tu contraseña actual para cambiar el correo.") y contraseña incorrecta ("La contraseña actual no es correcta."), como en Seguridad.
+- **Menú mobile (`Navbar.jsx`):** los tres enlaces de secretaria (Agenda Diaria, Directorio Pacientes y Mi cuenta) cierran el menú hamburguesa al navegar.
+
+Verificado con `npm run lint`, `npm run build` y prueba local a 1440 px (separación entre tarjetas con el formulario abierto y ambos mensajes de contraseña), 375 px (el menú se cierra al navegar) y 768 px, sin scroll horizontal.

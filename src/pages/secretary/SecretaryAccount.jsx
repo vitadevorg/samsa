@@ -86,8 +86,9 @@ const SecretaryAccount = () => {
       phone: validatePhone(profileForm.phone),
       email: validateSecretaryEmail(),
       // Cambiar el correo cambia el usuario con el que inicia sesión: se pide la contraseña actual.
-      currentPassword: emailChanged && !(profileForm.currentPassword && verifyPassword(user.email, profileForm.currentPassword))
-        ? 'Ingresá tu contraseña actual para cambiar el correo.' : '',
+      currentPassword: !emailChanged ? ''
+        : !profileForm.currentPassword ? 'Ingresá tu contraseña actual para cambiar el correo.'
+        : verifyPassword(user.email, profileForm.currentPassword) ? '' : 'La contraseña actual no es correcta.',
     });
     setProfileErrors(found);
     if (Object.keys(found).length === 0) setConfirming('profile');
@@ -241,7 +242,9 @@ const SecretaryAccount = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          <section className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8 relative overflow-hidden self-start">
+          {/* Columna izquierda en un solo contenedor: la separación entre tarjetas no depende de la altura de Seguridad. */}
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -283,7 +286,7 @@ const SecretaryAccount = () => {
             {isEditing && <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-400 animate-pulse"></div>}
           </section>
 
-          <section className="lg:col-span-2 lg:row-start-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8 self-start">
+          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8">
             <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
               <Stethoscope className="w-5 h-5 text-blue-600" /> Médicos de tu agenda
             </h2>
@@ -309,6 +312,7 @@ const SecretaryAccount = () => {
               </ul>
             )}
           </section>
+          </div>
 
           <div className="space-y-6 sm:space-y-8">
             <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8">

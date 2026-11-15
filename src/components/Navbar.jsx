@@ -286,9 +286,9 @@ const Navbar = () => {
             </>
           ) : isSecretary ? (
             <>
-              <Link to="/secretary/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Agenda Diaria</Link>
-              <Link to="/secretary/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Directorio Pacientes</Link>
-              <Link to="/secretary/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/secretary/dashboard" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Agenda Diaria</Link>
+              <Link to="/secretary/patients" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Directorio Pacientes</Link>
+              <Link to="/secretary/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
             </>
           ) : (
             <>
