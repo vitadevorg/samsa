@@ -33,6 +33,7 @@ const DEMO_ACCOUNTS = [
     password: '12345',
     user: {
       name: 'María González',
+      dni: '31456789',
       role: ROLES.SECRETARY,
       img: 'https://placehold.co/100x100/ec4899/FFFFFF?text=MG',
     },
@@ -61,6 +62,7 @@ const DEMO_ACCOUNTS = [
     password: '12345',
     user: {
       name: 'Ana Paula Díaz',
+      dni: '35987654',
       role: ROLES.SECRETARY,
       img: 'https://placehold.co/100x100/ec4899/FFFFFF?text=AD',
     },

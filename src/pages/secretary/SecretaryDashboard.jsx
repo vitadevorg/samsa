@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { createId } from '../../utils/ids';
@@ -7,7 +7,8 @@ import { useClinicData } from '../clinic/clinicDataContext';
 import { useAgenda } from './dashboard/useAgenda';
 import { buildSecretaryDoctors, findPatientByName } from './dashboard/mockData';
 import { filterAgenda } from './dashboard/agenda';
-import { buildDateCarousel, formatDateToLocale, getToday } from './dashboard/dates';
+import { buildDateCarousel, formatDateToLocale } from './dashboard/dates';
+import { useToday } from './dashboard/useToday';
 import AgendaHeader from './dashboard/AgendaHeader';
 import DateStrip from './dashboard/DateStrip';
 import AgendaTable from './dashboard/AgendaTable';
@@ -36,8 +37,16 @@ const SecretaryDashboard = () => {
   } = useAgenda(doctors);
 
   const [selectedDoctorId, setSelectedDoctorId] = useState(() => doctors[0]?.id ?? null);
-  const [selectedDate, setSelectedDate] = useState(getToday);
-  const [dateCarousel] = useState(buildDateCarousel);
+  // "Hoy" se actualiza solo a medianoche; la tira de fechas se rearma con él y, si la
+  // secretaria estaba mirando el día que terminó de ser hoy, la vista pasa al nuevo hoy.
+  const today = useToday();
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [lastToday, setLastToday] = useState(today);
+  if (today !== lastToday) {
+    setLastToday(today);
+    if (selectedDate === lastToday) setSelectedDate(today);
+  }
+  const dateCarousel = useMemo(() => buildDateCarousel(today), [today]);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('single');
 
