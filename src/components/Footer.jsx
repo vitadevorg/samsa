@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Phone, Calendar, Mail } from 'lucide-react';
+import { Phone, Calendar, Mail } from 'lucide-react';
+import SamsaLogo from './SamsaLogo';
 import { useAuth } from '../context/useAuth';
 
 const CONTACT_EMAIL = 'vitadev.org@gmail.com';
@@ -39,9 +40,10 @@ const Footer = ({ theme = 'dark' }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
 
           <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                  <div className="bg-blue-600 p-2 rounded-lg">
-                      <Heart className="w-5 h-5 text-white fill-white"/>
+              <div className="flex items-center gap-2.5">
+                  {/* En el footer oscuro el símbolo va sobre una placa blanca para mantener el contraste. */}
+                  <div className={isLight ? '' : 'bg-white p-1.5 rounded-lg'}>
+                      <SamsaLogo className="h-8 w-auto" />
                   </div>
                   <span className={`text-2xl font-bold tracking-tighter ${textTitleClass}`}>S.A.M.S.A</span>
               </div>

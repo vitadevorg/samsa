@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { BookOpen, ShieldAlert, FileText, Download, Search, AlertCircle, X, Printer, HeartPulse } from 'lucide-react';
+import { BookOpen, ShieldAlert, FileText, Download, Search, AlertCircle, X, Printer } from 'lucide-react';
+import SamsaLogo from '../../components/SamsaLogo';
 
 const protocolsData = [
   {
@@ -292,7 +293,7 @@ const DoctorProtocols = () => {
 
                     <div className="px-8 py-6 border-b flex justify-between items-center bg-slate-50 shrink-0">
                         <div className="flex items-center gap-3">
-                            <HeartPulse className="w-8 h-8 text-blue-600" />
+                            <SamsaLogo className="h-7 w-auto shrink-0" />
                             <div>
                                 <h3 className="font-black tracking-widest uppercase text-slate-800 text-sm">Biblioteca Médica SAMSA</h3>
                                 <p className="text-xs font-bold text-slate-400">Documento Oficial</p>
@@ -323,7 +324,7 @@ const DoctorProtocols = () => {
             <div className="hidden print:flex flex-col p-8 font-serif text-slate-900 bg-white w-full">
                 <div className="flex justify-between items-end mb-8 border-b-2 border-slate-900 pb-6">
                     <div className="flex items-center gap-4">
-                        <HeartPulse className="w-14 h-14 text-slate-900" strokeWidth={1.2} />
+                        <SamsaLogo variant="mono" className="h-12 w-auto text-slate-900" />
                         <div>
                             <h1 className="text-4xl tracking-[0.3em] font-medium text-slate-900 ml-1">SAMSA</h1>
                             <p className="text-xs text-slate-500 tracking-[0.2em] uppercase mt-1">Sistema de Salud Integral</p>

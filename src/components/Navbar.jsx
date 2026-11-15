@@ -1,13 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  HeartPulse, LogOut, ChevronDown, Menu, X,
+  LogOut, ChevronDown, Menu, X,
   Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
 import { getDoctorLabel } from '../utils/doctorName';
+import SamsaLogo from './SamsaLogo';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -53,10 +54,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center shrink-0">
-            <Link to={getHomeForRole(user?.role)} className="flex items-center gap-2 group">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-2.5 rounded-xl group-hover:shadow-md group-hover:shadow-blue-500/20 transition-all duration-300 border border-blue-100">
-                <HeartPulse className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />
-              </div>
+            <Link to={getHomeForRole(user?.role)} className="flex items-center gap-2.5 group">
+              <SamsaLogo className="h-9 w-auto shrink-0 drop-shadow-sm group-hover:scale-110 transition-transform duration-300" />
               <span className="text-2xl font-black text-slate-800 tracking-tight group-hover:text-blue-700 transition-colors">S.A.M.S.A</span>
             </Link>
           </div>
