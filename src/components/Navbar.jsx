@@ -125,6 +125,9 @@ const Navbar = () => {
                 <Link to="/doctor/patients" className={getLinkClass('/doctor/patients')}>
                   Pacientes
                 </Link>
+                <Link to="/news" className={getLinkClass('/news')}>
+                  Foro
+                </Link>
               </>
             ) : isSecretary ? (
               <>
@@ -280,9 +283,10 @@ const Navbar = () => {
             </>
           ) : isDoctor ? (
             <>
-              <Link to="/doctor/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>
-              <Link to="/doctor/turns" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos Asignados</Link>
-              <Link to="/doctor/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
+              <Link to="/doctor/profile" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>
+              <Link to="/doctor/turns" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos Asignados</Link>
+              <Link to="/doctor/patients" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
             </>
           ) : isSecretary ? (
             <>

@@ -38,6 +38,7 @@ import AdminInsurances from './pages/admin/AdminInsurances';
 import AdminProfile from './pages/admin/AdminProfile';
 
 import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
+import { ForumProvider } from './context/ForumContext';
 import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
@@ -66,6 +67,7 @@ function App() {
         {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
             (pantallas de clínica, Navbar, perfil del médico...) */}
         <ClinicDataProvider>
+        <ForumProvider>
         <Routes>
 
           <Route path="/" element={<HomeRoute />} />
@@ -141,6 +143,7 @@ function App() {
             <Route path="/vitadev/account" element={<VitadevAccount />} />
           </Route>
         </Routes>
+        </ForumProvider>
         </ClinicDataProvider>
       </Router>
     </AuthProvider>
