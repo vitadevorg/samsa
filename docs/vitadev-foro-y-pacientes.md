@@ -1,6 +1,6 @@
 # VitaDev: foro con moderación, gestión de usuarios y panel general (`feature/moderar-foro-pacientes-instituciones-medicos`)
 
-Nuevas funciones para el administrador de VitaDev (`vitadev@samsa.med`): publicar y moderar el foro, gestionar y editar todas las cuentas (pacientes incluidos) y ver cantidades de secretarias y pacientes en el panel general.
+Nuevas funciones para el administrador de VitaDev (`admin.samsa@samsa.med`): publicar y moderar el foro, gestionar y editar todas las cuentas (pacientes incluidos) y ver cantidades de secretarias y pacientes en el panel general.
 
 ## Qué se implementó
 
@@ -157,7 +157,7 @@ Automática:
 
 Manual local (`npm run dev`):
 
-1. **VitaDev** (`vitadev@samsa.med`): la cabecera muestra Médicos, Clínicas, Hospitales, Usuarios y Foro, sin Resumen ni Pacientes.
+1. **VitaDev** (`admin.samsa@samsa.med`): la cabecera muestra Médicos, Clínicas, Hospitales, Usuarios y Foro, sin Resumen ni Pacientes.
 2. **Usuarios:** aparece "Pacientes (3)" (Lucía Fernández, Martín Gómez, Sofía Luna) sin la columna Institución. Inhabilitar a un paciente cambia su estado y muestra Habilitar/Dar de baja.
 3. **Filtro Atención:** con Médicos se ve Todos (11), Particulares (3) y De institución (8); con Secretarias, 2 particulares. Al cambiar de tipo vuelve a "Todos".
 4. **Acciones** centrada sobre los botones, con y sin la columna Institución.
@@ -191,3 +191,17 @@ No probado en mobile: la ventana de moderación (sí en desktop).
 - Clínicas: la tarjeta ya no tiene el formulario de áreas; en Editar se agrega Urología y el contador pasa de 4 a 5. Particulares: ningún botón de Documentación muestra el aviso rojo.
 - Revisión general VitaDev (Panel general, Particulares, Clínicas, Hospitales, Gestión de Usuarios, Mi cuenta y Foro) a 375, 768 y 1280 px: sin scroll horizontal ni elementos desbordados. "Mi cuenta" se alineó al resto: `PageHeader` con aparición suave, fondo `bg-slate-50`, tarjetas `rounded-3xl` y padding responsive.
 - Documentación de particulares: toda recibida y vigente, salvo el Seguro de mala praxis del Dr. Luis Coronel, que vence el 05/12/2026. Nuevo estado calculado **Por vencer** (vence dentro de 30 días): badge ámbar con ícono de peligro en la ventana y aviso ámbar "!" en el botón Documentación (no cuenta como faltante; el botón de la fila pasa a "Actualizar vencimiento").
+
+## Correcciones de revisión del PR
+
+1. **Particulares:** al tocar "Agregar secretaria" ya no se recarga la sección de médicos. El panel que estaba abierto cierra su formulario con `closeToken`, sin volver a montarse ni repetir la animación (`VitadevDoctors.jsx`, `ParticularDoctorsPanel.jsx`, `ParticularSecretariesPanel.jsx`).
+2. Se quitó el ícono de estrellas (✨) de los títulos "Asociar clínica / hospital / médico".
+3. El check de ARCA dice: "Es necesario que la institución se encuentre inscripta al ARCA."
+4. Los formularios de alta y edición se cierran con una **X** en la esquina (mismo formato que el resto de SAMSA), en lugar del botón "Cancelar".
+5. En las ventanas de confirmación, el botón "Revisar" ahora dice **"Cancelar"** (`ClinicModals.jsx`, compartido con clínica y hospital).
+6. El usuario del administrador pasa a ser **`admin.samsa@samsa.med`** (contraseña `12345`), y se eliminó la cuenta vieja `admin@samsa.med`, que no estaba en uso.
+
+Validación: `npm run lint` y `npm run build` sin errores. En el navegador:
+- `vitadev@samsa.med` ya no entra y `admin.samsa@samsa.med` sí.
+- En Particulares, abrir "Asociar médico" y después "Agregar secretaria" cierra el primer formulario sin recargar la tabla de médicos.
+- La confirmación de edición de una clínica muestra "Cancelar / Sí, Modificar".

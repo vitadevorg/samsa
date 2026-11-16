@@ -10,17 +10,17 @@ import PageHeader from '../../components/PageHeader';
 // Gestión de Usuarios y en cada institución. Solo datos de identidad, contacto y atención.
 const VitadevDoctors = () => {
   // Solo puede haber un formulario abierto: al abrir uno (alta o edición) se cierra el de la otra
-  // sección. Cambiar la `key` de un panel lo vuelve a montar con el formulario cerrado.
-  const [doctorsKey, setDoctorsKey] = useState(0);
-  const [secretariesKey, setSecretariesKey] = useState(0);
+  // sección, avisándole con `closeToken` (sin volver a montar el panel).
+  const [closeDoctors, setCloseDoctors] = useState(0);
+  const [closeSecretaries, setCloseSecretaries] = useState(0);
 
   return (
   <div className="min-h-screen bg-slate-50 overflow-x-hidden">
     <Navbar />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <PageHeader icon={UserRound} eyebrow="Administración SAMSA" title="Particulares" />
-      <ParticularDoctorsPanel key={`doctors-${doctorsKey}`} onOpen={() => setSecretariesKey((n) => n + 1)} />
-      <ParticularSecretariesPanel key={`secretaries-${secretariesKey}`} onOpen={() => setDoctorsKey((n) => n + 1)} />
+      <ParticularDoctorsPanel closeToken={closeDoctors} onOpen={() => setCloseSecretaries((n) => n + 1)} />
+      <ParticularSecretariesPanel closeToken={closeSecretaries} onOpen={() => setCloseDoctors((n) => n + 1)} />
     </div>
   </div>
   );

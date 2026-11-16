@@ -24,11 +24,6 @@ const DEMO_ACCOUNTS = [
     user: { name: 'Jesús Zelarayan', title: 'Dr.', role: ROLES.DOCTOR, img: '/img/UTN-Jesus.jpg' },
   },
   {
-    email: 'admin@samsa.med',
-    password: 'admin',
-    user: { name: 'Administrador', role: ROLES.ADMIN },
-  },
-  {
     email: 'secretaria@samsa.med',
     password: '12345',
     user: {
@@ -51,7 +46,7 @@ const DEMO_ACCOUNTS = [
     user: { name: 'Gustavo Ibáñez', role: ROLES.HOSPITAL_ADMIN, institutionId: 'hospital-central' },
   },
   {
-    email: 'vitadev@samsa.med',
+    email: 'admin.samsa@samsa.med',
     password: '12345',
     // Contacto de recuperación de la cuenta (lo edita el propio administrador en Mi cuenta).
     user: { name: 'VitaDev', role: ROLES.VITADEV_ADMIN, recoveryEmail: 'recuperacion.vitadev@samsa.med', recoveryPhone: '381 400-9000' },

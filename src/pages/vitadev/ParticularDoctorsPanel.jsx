@@ -72,7 +72,8 @@ const cleanForm = (values) => ({
 // Médicos particulares (los que no pertenecen a ninguna clínica ni hospital): alta, edición y baja.
 // Solo datos de contacto y de atención; VitaDev no ve nada clínico.
 // `onOpen` avisa a la pantalla que se abrió un formulario acá, para que cierre el de la otra sección.
-const ParticularDoctorsPanel = ({ onOpen }) => {
+// Cuando cambia `closeToken`, este panel cierra su formulario (sin volver a montarse ni repetir la animación).
+const ParticularDoctorsPanel = ({ onOpen, closeToken = 0 }) => {
   const fieldId = useId();
   const data = useClinicData();
   const {
@@ -139,6 +140,11 @@ const ParticularDoctorsPanel = ({ onOpen }) => {
     setDocErrors({});
     setShowInsurances(false);
   };
+  const [seenCloseToken, setSeenCloseToken] = useState(closeToken);
+  if (closeToken !== seenCloseToken) {
+    setSeenCloseToken(closeToken);
+    cancelEdit();
+  }
 
   // Días en el orden de la semana; obras sociales en el orden del catálogo.
   const toggleInList = (field, value, order) => {
@@ -263,11 +269,9 @@ const ParticularDoctorsPanel = ({ onOpen }) => {
       <div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-8 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
-            {isEditing ? '✏️ Editando Médico' : '✨ Asociar Médico'}
+            {isEditing ? '✏️ Editando Médico' : 'Asociar Médico'}
           </h3>
-          <button onClick={cancelEdit} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
-            <X className="w-3 h-3"/> {isEditing ? 'Cancelar Edición' : 'Cancelar'}
-          </button>
+          <button type="button" onClick={cancelEdit} aria-label="Cerrar formulario" className="p-2 -mr-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition shrink-0"><X className="w-5 h-5"/></button>
         </div>
         {/* noValidate: usamos nuestros propios mensajes en lugar de los del navegador */}
         <form onSubmit={handleSubmit} noValidate className="space-y-5">

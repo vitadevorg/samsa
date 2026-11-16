@@ -399,9 +399,7 @@ const VitadevInstitutions = ({ kind }) => {
           <div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-10 border border-orange-200 ring-4 ring-orange-50 transition-all duration-300">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-xl text-orange-600">✏️ Editando administrador</h3>
-              <button onClick={cancelEditAdmin} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
-                <X className="w-3 h-3"/> Cancelar Edición
-              </button>
+              <button type="button" onClick={cancelEditAdmin} aria-label="Cerrar formulario" className="p-2 -mr-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition shrink-0"><X className="w-5 h-5"/></button>
             </div>
             <form onSubmit={handleSubmitAdmin} noValidate className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -444,11 +442,9 @@ const VitadevInstitutions = ({ kind }) => {
         <div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
           <div className="flex justify-between items-center mb-6">
             <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
-              {isEditing ? `✏️ Editando ${editingInstitution?.name}` : `✨ Asociar ${single === 'clínica' ? 'Clínica' : 'Hospital'}`}
+              {isEditing ? `✏️ Editando ${editingInstitution?.name}` : `Asociar ${single === 'clínica' ? 'Clínica' : 'Hospital'}`}
             </h3>
-            <button onClick={cancelEdit} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
-              <X className="w-3 h-3"/> {isEditing ? 'Cancelar Edición' : 'Cancelar'}
-            </button>
+            <button type="button" onClick={cancelEdit} aria-label="Cerrar formulario" className="p-2 -mr-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition shrink-0"><X className="w-5 h-5"/></button>
           </div>
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -459,7 +455,7 @@ const VitadevInstitutions = ({ kind }) => {
               <div className="md:col-span-2">
                 <label htmlFor={`${fieldId}-arca`} className={`flex items-start gap-3 min-h-[44px] p-3 rounded-xl border cursor-pointer transition ${form.arcaVerified ? 'bg-emerald-50 border-emerald-200' : errors.arcaVerified ? 'border-red-300 bg-red-50/40' : 'border-gray-200 hover:bg-gray-50'}`}>
                   <input id={`${fieldId}-arca`} type="checkbox" checked={form.arcaVerified} onChange={(e) => updateField('arcaVerified', e.target.checked)} aria-invalid={Boolean(errors.arcaVerified)} aria-describedby={`${fieldId}-arca-error`} className="mt-0.5 w-5 h-5 accent-blue-600 shrink-0" />
-                  <span className="text-sm text-gray-700">Verifiqué en <span className="font-bold">ARCA</span> que el CUIT está inscripto y corresponde a la razón social.</span>
+                  <span className="text-sm text-gray-700">Es necesario que la institución se encuentre inscripta al <span className="font-bold">ARCA</span>.</span>
                 </label>
                 {errors.arcaVerified && <p id={`${fieldId}-arca-error`} role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{errors.arcaVerified}</p>}
               </div>
