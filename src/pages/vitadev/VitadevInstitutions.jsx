@@ -398,7 +398,7 @@ const VitadevInstitutions = ({ kind }) => {
         {editingAdmin && (
           <div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-10 border border-orange-200 ring-4 ring-orange-50 transition-all duration-300">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-xl text-orange-600">✏️ Editando administrador</h3>
+              <h3 className="font-bold text-xl text-orange-600">Editando administrador</h3>
               <button type="button" onClick={cancelEditAdmin} aria-label="Cerrar formulario" className="p-2 -mr-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition shrink-0"><X className="w-5 h-5"/></button>
             </div>
             <form onSubmit={handleSubmitAdmin} noValidate className="space-y-5">
@@ -442,7 +442,7 @@ const VitadevInstitutions = ({ kind }) => {
         <div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
           <div className="flex justify-between items-center mb-6">
             <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
-              {isEditing ? `✏️ Editando ${editingInstitution?.name}` : `Asociar ${single === 'clínica' ? 'Clínica' : 'Hospital'}`}
+              {isEditing ? `Editando ${editingInstitution?.name}` : `Asociar ${single === 'clínica' ? 'Clínica' : 'Hospital'}`}
             </h3>
             <button type="button" onClick={cancelEdit} aria-label="Cerrar formulario" className="p-2 -mr-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition shrink-0"><X className="w-5 h-5"/></button>
           </div>

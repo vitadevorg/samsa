@@ -205,3 +205,12 @@ Validación: `npm run lint` y `npm run build` sin errores. En el navegador:
 - `vitadev@samsa.med` ya no entra y `admin.samsa@samsa.med` sí.
 - En Particulares, abrir "Asociar médico" y después "Agregar secretaria" cierra el primer formulario sin recargar la tabla de médicos.
 - La confirmación de edición de una clínica muestra "Cancelar / Sí, Modificar".
+7. **Etiquetas al pasar el mouse (`IconAction.jsx`):**
+   - Nunca se superponen: hay una sola visible a la vez y no queda abierta después de un click.
+   - Se dibujan flotando sobre la página, así no las recorta la tabla ni quedan debajo de otra tarjeta, y se acomodan para no salirse de la pantalla.
+   - Se ocultan al hacer scroll.
+8. Se quitó el emoji ✏️ de los títulos "Editando…" (VitaDev), igual que las estrellas.
+
+Validación adicional:
+- Pantallas de VitaDev y Foro a 375, 768 y 1280 px, también con los formularios abiertos: sin scroll horizontal ni elementos desbordados.
+- En Gestión de Usuarios, la etiqueta de la primera fila se ve completa, y al pasar a otro ícono queda una sola.
