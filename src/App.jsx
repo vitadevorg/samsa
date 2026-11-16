@@ -28,6 +28,7 @@ import DoctorSupport from './pages/doctor/DoctorSupport';
 
 import SecretaryDashboard from './pages/secretary/SecretaryDashboard';
 import SecretaryPatients from './pages/secretary/SecretaryPatients';
+import SecretaryAccount from './pages/secretary/SecretaryAccount';
 
 import AdminDoctors from './pages/admin/AdminDoctors';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
@@ -37,6 +38,7 @@ import AdminInsurances from './pages/admin/AdminInsurances';
 import AdminProfile from './pages/admin/AdminProfile';
 
 import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
+import { ForumProvider } from './context/ForumContext';
 import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
@@ -65,6 +67,7 @@ function App() {
         {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
             (pantallas de clínica, Navbar, perfil del médico...) */}
         <ClinicDataProvider>
+        <ForumProvider>
         <Routes>
 
           <Route path="/" element={<HomeRoute />} />
@@ -102,6 +105,7 @@ function App() {
           <Route element={<ProtectedRoute roles={[ROLES.SECRETARY]} />}>
             <Route path="/secretary/dashboard" element={<SecretaryDashboard />} />
             <Route path="/secretary/patients" element={<SecretaryPatients />} />
+            <Route path="/secretary/account" element={<SecretaryAccount />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
@@ -139,6 +143,7 @@ function App() {
             <Route path="/vitadev/account" element={<VitadevAccount />} />
           </Route>
         </Routes>
+        </ForumProvider>
         </ClinicDataProvider>
       </Router>
     </AuthProvider>

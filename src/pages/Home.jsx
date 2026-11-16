@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, Stethoscope, Activity, User, ShieldCheck, Search, Phone, Calendar, ArrowRight, CheckCircle, HeartPulse } from 'lucide-react';
+import { Heart, Stethoscope, Activity, User, ShieldCheck, Search, Phone, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
+import SamsaLogo from '../components/SamsaLogo';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -62,7 +63,7 @@ const IntroOverlay = ({ onComplete }) => {
       <div className="absolute w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] bg-blue-300/10 rounded-full blur-[60px] lg:blur-[100px] opacity-0 animate-elegant-reveal" style={{ animationDelay: '200ms', animationDuration: '3s' }}></div>
       <div className="relative flex flex-col items-center justify-center">
         <div className="relative">
-          <HeartPulse strokeWidth={1.2} className="w-24 h-24 lg:w-32 lg:h-32 text-blue-700 mb-8 opacity-0 animate-heartbeat-intro" style={{ animationDelay: '200ms' }} />
+          <SamsaLogo className="h-20 w-auto lg:h-28 mb-8 opacity-0 animate-heartbeat-intro" style={{ animationDelay: '200ms' }} />
         </div>
         <h1 className="flex whitespace-nowrap text-4xl lg:text-6xl tracking-[0.3em] lg:tracking-[0.4em] font-serif font-medium text-slate-800 ml-[0.3em] lg:ml-[0.4em]">
           {"SAMSA".split('').map((letter, i) => (

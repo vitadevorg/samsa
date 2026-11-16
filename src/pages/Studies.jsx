@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Download, Eye, Calendar, Search, Activity, FileCheck, AlertCircle, HeartPulse, X, Printer } from 'lucide-react';
+import SamsaLogo from '../components/SamsaLogo';
 import Navbar from '../components/Navbar'; 
 import { useAuth } from '../context/useAuth';
 import { stableCode, stableHash } from '../utils/ids';
@@ -13,7 +14,7 @@ const MedicalReport = ({ study, isPreview, user }) => {
         <div className={`flex flex-col font-serif text-slate-900 bg-white mx-auto ${isPreview ? 'p-10 w-full max-w-4xl shadow-2xl min-h-[800px] my-10 relative z-10' : 'p-12 w-full max-w-none box-border absolute top-0 left-0 right-0 z-[99999] min-h-[100vh] hidden print:flex'}`} id={!isPreview ? 'print-area' : undefined}>
             <div className="flex justify-between items-end mb-8">
                 <div className="flex items-center gap-4">
-                    <HeartPulse className="w-14 h-14 text-slate-900" strokeWidth={1.2} />
+                    <SamsaLogo variant="mono" className="h-12 w-auto text-slate-900" />
                     <div>
                         <h1 className="text-4xl tracking-[0.3em] font-medium text-slate-900 ml-1">SAMSA</h1>
                         <p className="text-xs text-slate-500 tracking-[0.2em] uppercase mt-1">Sistema de Salud Integral</p>

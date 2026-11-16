@@ -16,11 +16,14 @@ export const parseISODate = (dateStr) => new Date(`${dateStr}T12:00:00Z`);
 
 export const formatDateToLocale = (dateStr) =>
   parseISODate(dateStr)
-    .toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
+    .toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })
     .replace(',', '');
 
 // Días visibles en la tira de fechas: dos hacia atrás y una semana hacia adelante.
-export const buildDateCarousel = () => Array.from({ length: 10 }, (_, i) => addDays(i - 2));
+export const buildDateCarousel = (today = getToday()) => {
+  const from = new Date(`${today}T12:00:00`); // mediodía local: sin corrimientos por huso horario
+  return Array.from({ length: 10 }, (_, i) => addDays(i - 2, from));
+};
 
 const LATE_TOLERANCE_MINUTES = 15;
 

@@ -4,10 +4,11 @@ import Footer from '../../components/Footer';
 import { 
   Users, Search, Plus, FileText, Activity, 
   Upload, X, Paperclip, Save, ChevronRight, 
-  Calendar, Phone, Mail, MapPin, Clock, File, Printer, HeartPulse,
+  Calendar, Phone, Mail, MapPin, Clock, File, Printer,
   User, CheckCircle, AlertCircle, ClipboardList
 } from 'lucide-react';
 import { useTimeouts } from '../../hooks/useTimeouts';
+import SamsaLogo from '../../components/SamsaLogo';
 import { useFileAttachments } from '../../hooks/useFileAttachments';
 const initialPatients = [
   { 
@@ -137,7 +138,7 @@ const HistoryModal = ({ isOpen, onClose, patient }) => {
         <div className="hidden print:block absolute top-0 left-0 w-full bg-white z-[9999] text-black px-8 py-10">
             <div className="flex items-center justify-between border-b-2 border-blue-800 pb-6 mb-8 mt-4">
                 <div className="flex items-center gap-3">
-                    <HeartPulse className="w-12 h-12 text-blue-700" />
+                    <SamsaLogo className="h-11 w-auto shrink-0" />
                     <div>
                         <h1 className="text-3xl font-black text-blue-900 tracking-tighter">S.A.M.S.A</h1>
                         <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">Sistema de Administración Médica</p>

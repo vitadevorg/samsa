@@ -35,4 +35,31 @@ export const dniFromCuil = (value) => {
   return String(Number(d.slice(2, 10)));
 };
 
+// ¿Los 8 dígitos del medio del CUIL coinciden con el DNI? Un DNI de 7 dígitos se
+// compara con un 0 adelante (DNI 1234567 -> XX-01234567-X).
+export const cuilMatchesDni = (cuil, dni) => {
+  const d = cuilDigits(cuil ?? '');
+  const doc = String(dni ?? '').replace(/\D/g, '');
+  if (d.length !== 11 || !doc || doc.length > 8) return false;
+  return d.slice(2, 10) === doc.padStart(8, '0');
+};
+
+/**
+ * Valida un CUIL/CUIT opcional contra el DNI de la persona. Devuelve el mensaje de error o null.
+ * - Vacío: válido (el campo es opcional).
+ * - `requireComplete = false`: mientras se escribe solo avisa cuando ya tiene los 11 dígitos.
+ * - `requireComplete = true`: al enviar, además marca el CUIL incompleto.
+ */
+export const validateOptionalCuil = (cuil, dni, { requireComplete = true } = {}) => {
+  const d = cuilDigits(cuil ?? '');
+  if (!d) return null;
+  if (d.length < 11) return requireComplete ? 'El CUIT/CUIL debe tener 11 dígitos (XX-XXXXXXXX-X)' : null;
+  const doc = String(dni ?? '').replace(/\D/g, '');
+  if (doc && !cuilMatchesDni(d, doc)) {
+    return 'Los datos del CUIT/CUIL no coinciden con el DNI';
+  }
+  if (!isValidCuil(d)) return 'CUIT/CUIL inválido: revisá el tipo (primeros 2 dígitos) y el último dígito';
+  return null;
+};
+
 export const formatDni = (dni) => (dni ? Number(dni).toLocaleString('es-AR') : '');

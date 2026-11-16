@@ -31,6 +31,12 @@ const Field = ({ id, label, icon: Icon, error, children }) => (
 
 const onlyDigits = (value) => value.replace(/\D/g, '');
 
+// Textos según quién carga los datos: el propio paciente o la secretaria.
+const HOLDER_COPY = {
+  patient: { legend: '¿Sos el titular de la obra social?', titular: 'Soy el titular', adherente: 'Soy adherente (familiar)' },
+  staff: { legend: '¿El paciente es el titular de la obra social?', titular: 'Es el titular', adherente: 'Es adherente (familiar)' },
+};
+
 /**
  * Campos de afiliación a obra social: número de afiliado, plan y si la persona
  * es titular o adherente (en ese caso, nombre y DNI del titular).
@@ -40,20 +46,23 @@ const onlyDigits = (value) => value.replace(/\D/g, '');
  * - `onChange(campo, valor)`
  * - `errors`: errores calculados al enviar el formulario (incluyen campos vacíos).
  *   Mientras se tipea, el formato inválido se avisa igual aunque no se haya enviado.
+ * - `audience`: 'patient' (el paciente carga sus propios datos) o 'staff'
+ *   (la secretaria los carga por el paciente). Solo cambia los textos.
  */
-const AffiliationFields = ({ insurance, value, onChange, errors = {}, patientDni, disabled = false }) => {
+const AffiliationFields = ({ insurance, value, onChange, errors = {}, patientDni, disabled = false, audience = 'patient' }) => {
   const id = useId();
   if (!requiresAffiliation(insurance)) return null;
 
   const liveErrors = disabled
     ? {}
-    : validateAffiliation({ insurance, ...value, patientDni }, { requireFilled: false });
+    : validateAffiliation({ insurance, ...value, patientDni }, { requireFilled: false, audience });
   const errorFor = (field) => errors[field] || liveErrors[field];
   const isAdherente = value.holderType === HOLDER_TYPES.ADHERENTE;
 
+  const copy = HOLDER_COPY[audience] ?? HOLDER_COPY.patient;
   const holderOptions = [
-    { type: HOLDER_TYPES.TITULAR, label: 'Soy el titular', icon: UserCheck },
-    { type: HOLDER_TYPES.ADHERENTE, label: 'Soy adherente (familiar)', icon: Users },
+    { type: HOLDER_TYPES.TITULAR, label: copy.titular, icon: UserCheck },
+    { type: HOLDER_TYPES.ADHERENTE, label: copy.adherente, icon: Users },
   ];
 
   return (
@@ -89,7 +98,7 @@ const AffiliationFields = ({ insurance, value, onChange, errors = {}, patientDni
       </div>
 
       <fieldset>
-        <legend className="text-sm font-bold text-gray-700 ml-1 mb-2">¿Sos el titular de la obra social?</legend>
+        <legend className="text-sm font-bold text-gray-700 ml-1 mb-2">{copy.legend}</legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {holderOptions.map(({ type, label, icon: Icon }) => {
             const selected = value.holderType === type;

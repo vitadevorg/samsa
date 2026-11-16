@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeartPulse } from 'lucide-react';
+import SamsaLogo from './SamsaLogo';
 
 // Comprobante imprimible de un turno. `transactionId` debe generarse una sola vez
 // (al crear o imprimir el turno) para que no cambie entre renders.
@@ -9,7 +9,7 @@ const PrintReceipt = ({ appointmentData }) => {
         <div id="print-area" className="hidden print:flex flex-col p-8 font-serif text-slate-900 bg-white w-full max-w-none box-border absolute top-0 left-0 right-0 z-[99999] min-h-[100vh]">
             <div className="border-b-[3px] border-slate-900 pb-6 mb-10 flex justify-between items-end">
                 <div className="flex items-center gap-4">
-                    <HeartPulse className="w-14 h-14 text-slate-900" strokeWidth={1.2} />
+                    <SamsaLogo variant="mono" className="h-12 w-auto text-slate-900" />
                     <div>
                         <h1 className="text-4xl tracking-[0.3em] font-medium text-slate-900 ml-1">SAMSA</h1>
                         <p className="text-xs text-slate-500 tracking-[0.2em] uppercase mt-1">Sistema de Salud Integral</p>

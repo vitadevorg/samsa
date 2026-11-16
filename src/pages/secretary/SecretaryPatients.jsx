@@ -1,17 +1,18 @@
 import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { 
-  Users, Search, Plus, Calendar, Phone, Mail, FileText, CheckCircle, AlertCircle, Edit, Save, X
+import {
+  Users, Search, Plus, Calendar, Phone, Mail, FileText, CheckCircle, AlertCircle, Edit, Save, UserPlus
 } from 'lucide-react';
 import { useTimeouts } from '../../hooks/useTimeouts';
+import { SecretaryModalOverlay, SecretaryModalCard, SecretaryModalHeader } from './dashboard/SecretaryModal';
 
 const initialPatients = [
-  { 
-    id: 1, 
-    name: 'Lucas Gabriel Lazarte', 
-    dni: '40.111.222', 
-    age: 24, 
+  {
+    id: 1,
+    name: 'Lucas Gabriel Lazarte',
+    dni: '40.111.222',
+    age: 24,
     lastVisit: '2025-10-20',
     historyId: 'HC-40111',
     phone: '381-0000001',
@@ -19,11 +20,11 @@ const initialPatients = [
     img: '/img/patients/masc4.jpg',
     status: 'active'
   },
-  { 
-    id: 2, 
-    name: 'Priscila Frias', 
-    dni: '32.123.456', 
-    age: 32, 
+  {
+    id: 2,
+    name: 'Priscila Frias',
+    dni: '32.123.456',
+    age: 32,
     lastVisit: '2025-11-01',
     historyId: 'HC-98212',
     phone: '381-5551234',
@@ -31,11 +32,11 @@ const initialPatients = [
     img: '/img/patients/fem1.jpg',
     status: 'active'
   },
-  { 
-    id: 3, 
-    name: 'Garcia Matar', 
-    dni: '20.987.654', 
-    age: 58, 
+  {
+    id: 3,
+    name: 'Garcia Matar',
+    dni: '20.987.654',
+    age: 58,
     lastVisit: '2025-09-15',
     historyId: 'HC-12399',
     phone: '381-4449876',
@@ -44,6 +45,10 @@ const initialPatients = [
     status: 'active'
   },
 ];
+
+// Estilos compartidos de los formularios (mismos que la reserva de turno).
+const labelClass = 'text-sm font-bold text-gray-700 mb-1.5 ml-1 block';
+const inputClass = 'w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-gray-700';
 
 const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const fieldId = useId();
@@ -72,69 +77,63 @@ const AddPatientModal = ({ isOpen, onClose, onAdd }) => {
     const cancelConfirm = () => setShowConfirm(false);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden ring-1 ring-white/10">
-                <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-6 flex items-center gap-3 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
-                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                        <Users className="w-6 h-6 text-white"/>
-                    </div>
-                    <h2 className="text-xl font-black text-white tracking-tight relative z-10">Registrar Paciente</h2>
-                </div>
+        <SecretaryModalOverlay onClose={onClose} labelledBy={`${fieldId}-title`}>
+            <SecretaryModalCard maxWidth="max-w-md">
+                <SecretaryModalHeader icon={UserPlus} title="Registrar Paciente" onClose={onClose} titleId={`${fieldId}-title`} />
 
                 {showSuccess ? (
-                    <div className="p-12 flex flex-col items-center justify-center text-center animate-fadeIn bg-slate-50">
-                        <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6">
-                            <CheckCircle className="w-10 h-10" />
+                    <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center animate-fadeIn">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6">
+                            <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10" />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-800 mb-2">¡Paciente Registrado!</h3>
-                        <p className="text-slate-500 text-sm">El paciente fue añadido al sistema.</p>
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">¡Paciente Registrado!</h3>
+                        <p className="text-gray-500 text-sm">El paciente fue añadido al sistema.</p>
                     </div>
                 ) : showConfirm ? (
-                    <div className="p-12 flex flex-col items-center justify-center text-center animate-fadeIn bg-slate-50">
-                        <div className="w-20 h-20 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-6">
-                            <AlertCircle className="w-10 h-10" />
+                    <div className="p-6 sm:p-12 flex flex-col items-center justify-center text-center animate-fadeIn">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
+                            <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10" />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-800 mb-2">¿Estás seguro?</h3>
-                        <p className="text-slate-500 text-sm mb-8">Vas a registrar un nuevo paciente en la base de datos operativa.</p>
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
+                        <p className="text-gray-500 text-sm mb-8 leading-relaxed">Vas a registrar un nuevo paciente en la base de datos operativa.</p>
 
-                        <div className="flex gap-3 w-full">
-                            <button type="button" onClick={cancelConfirm} className="flex-1 py-3 rounded-xl text-slate-600 font-bold bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 w-full">
+                            <button type="button" onClick={cancelConfirm} className="flex-1 py-3 rounded-xl text-gray-700 font-bold bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
                                 Volver
                             </button>
-                            <button type="button" onClick={confirmSave} className="flex-1 py-3 rounded-xl bg-yellow-500 text-white font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-500/30 transition-all hover:-translate-y-0.5">
+                            <button type="button" onClick={confirmSave} className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5">
                                 Confirmar
                             </button>
                         </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="p-8 space-y-5 bg-slate-50/50">
+                    <form onSubmit={handleSubmit} className="p-5 sm:p-8 space-y-5">
                         <div>
-                            <label htmlFor={`${fieldId}-nombre-completo`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre Completo</label>
-                            <input id={`${fieldId}-nombre-completo`} required placeholder="Ej: Juan Pérez" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
+                            <label htmlFor={`${fieldId}-nombre-completo`} className={labelClass}>Nombre Completo *</label>
+                            <input id={`${fieldId}-nombre-completo`} required placeholder="Ej: Juan Pérez" className={inputClass} value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
                         </div>
                         <div>
-                            <label htmlFor={`${fieldId}-documento`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Documento (DNI)</label>
-                            <input id={`${fieldId}-documento`} required placeholder="Ej: 30.123.456" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.dni} onChange={e => setNewPatient({...newPatient, dni: e.target.value})} />
+                            <label htmlFor={`${fieldId}-documento`} className={labelClass}>Documento (DNI) *</label>
+                            <input id={`${fieldId}-documento`} required placeholder="Ej: 30.123.456" className={inputClass} value={newPatient.dni} onChange={e => setNewPatient({...newPatient, dni: e.target.value})} />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor={`${fieldId}-email`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
-                                <input id={`${fieldId}-email`} type="email" placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
+                                <label htmlFor={`${fieldId}-email`} className={labelClass}>Email</label>
+                                <input id={`${fieldId}-email`} type="email" placeholder="Opcional" className={inputClass} value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
                             </div>
                             <div>
-                                <label htmlFor={`${fieldId}-telefono`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
-                                <input id={`${fieldId}-telefono`} placeholder="Opcional" className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
+                                <label htmlFor={`${fieldId}-telefono`} className={labelClass}>Teléfono</label>
+                                <input id={`${fieldId}-telefono`} placeholder="Opcional" className={inputClass} value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
                             </div>
                         </div>
-                        <div className="flex gap-3 pt-6 border-t border-slate-100">
-                            <button type="button" onClick={onClose} className="flex-1 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">Cancelar</button>
-                            <button type="submit" className="flex-1 py-3 bg-pink-600 text-white font-bold rounded-xl hover:bg-pink-700 shadow-lg shadow-pink-600/30 transition-all hover:-translate-y-0.5">Guardar Paciente</button>
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 border-t border-gray-100">
+                            <button type="button" onClick={onClose} className="flex-1 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Cancelar</button>
+                            <button type="submit" className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5">Guardar Paciente</button>
                         </div>
                     </form>
                 )}
-            </div>
-        </div>
+            </SecretaryModalCard>
+        </SecretaryModalOverlay>
     );
 };
 
@@ -154,44 +153,50 @@ const EditPatientModal = ({ isOpen, onClose, patient, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden ring-1 ring-white/10">
-                <div className="bg-slate-800 p-6 flex justify-between items-center relative overflow-hidden text-white">
-                    <h2 className="text-xl font-black tracking-tight flex items-center gap-2"><Edit className="w-6 h-6 text-pink-400"/> Editar Contacto</h2>
-                    <button onClick={onClose} className="text-white/70 hover:text-white transition-colors"><X className="w-6 h-6"/></button>
-                </div>
+        <SecretaryModalOverlay onClose={onClose} labelledBy={`${fieldId}-title`}>
+            <SecretaryModalCard maxWidth="max-w-md">
+                <SecretaryModalHeader icon={Edit} title="Editar Contacto" onClose={onClose} titleId={`${fieldId}-title`} />
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-5 bg-slate-50/50">
-                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3 text-blue-800 text-sm font-medium mb-4">
+                <form onSubmit={handleSubmit} className="p-5 sm:p-8 space-y-5">
+                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3 text-blue-800 text-sm font-medium">
                         <AlertCircle className="w-5 h-5 shrink-0 text-blue-500" />
                         <p>Por seguridad, los perfiles administrativos solo pueden modificar datos de contacto. Nombre y DNI requieren autorización superior.</p>
                     </div>
 
                     <div>
-                        <label htmlFor={`${fieldId}-nombre-completo`} className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Nombre Completo</label>
-                        <input id={`${fieldId}-nombre-completo`} disabled value={editData.name} className="w-full p-4 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 outline-none cursor-not-allowed" />
+                        <label htmlFor={`${fieldId}-nombre-completo`} className={labelClass}>Nombre Completo</label>
+                        <input id={`${fieldId}-nombre-completo`} disabled value={editData.name} className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-500 outline-none cursor-not-allowed" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor={`${fieldId}-email`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Email</label>
-                            <input id={`${fieldId}-email`} type="email" required className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm font-bold text-slate-700" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} />
+                            <label htmlFor={`${fieldId}-email`} className={labelClass}>Email *</label>
+                            <input id={`${fieldId}-email`} type="email" required className={inputClass} value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} />
                         </div>
                         <div>
-                            <label htmlFor={`${fieldId}-telefono`} className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Teléfono</label>
-                            <input id={`${fieldId}-telefono`} required className="w-full p-4 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm font-bold text-slate-700" value={editData.phone} onChange={e => setEditData({...editData, phone: e.target.value})} />
+                            <label htmlFor={`${fieldId}-telefono`} className={labelClass}>Teléfono *</label>
+                            <input id={`${fieldId}-telefono`} required className={inputClass} value={editData.phone} onChange={e => setEditData({...editData, phone: e.target.value})} />
                         </div>
                     </div>
-                    <div className="flex gap-3 pt-6 border-t border-slate-100">
-                        <button type="submit" className="w-full py-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-800/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <div className="pt-6 border-t border-gray-100">
+                        <button type="submit" className="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
                             <Save className="w-5 h-5" /> Guardar Cambios
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </SecretaryModalCard>
+        </SecretaryModalOverlay>
     );
 };
+
+const InfoItem = ({ icon: Icon, title, children }) => (
+    <div className="flex items-center gap-2 min-w-0 text-gray-600" title={title}>
+        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+            <Icon className="w-3.5 h-3.5 text-blue-500"/>
+        </div>
+        <span className="truncate">{children}</span>
+    </div>
+);
 
 export default function SecretaryPatients() {
   const [patients, setPatients] = useState(initialPatients);
@@ -201,8 +206,8 @@ export default function SecretaryPatients() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const filteredPatients = patients.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredPatients = patients.filter(p =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.dni.includes(searchTerm)
   );
 
@@ -222,7 +227,7 @@ export default function SecretaryPatients() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+    <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden flex flex-col">
       <Navbar />
 
       <AddPatientModal
@@ -238,34 +243,38 @@ export default function SecretaryPatients() {
         onSave={handleEditPatient}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12">
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-pink-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-            <div className="relative z-10 w-full md:w-auto text-center md:text-left">
-                <h1 className="text-3xl md:text-4xl font-black text-slate-800 flex items-center justify-center md:justify-start gap-3 tracking-tight">
-                    <div className="bg-pink-600 p-2.5 rounded-2xl shadow-lg shadow-pink-200">
-                        <Users className="w-7 h-7 text-white"/>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-5 md:gap-6 mb-8 sm:mb-10">
+            <div className="w-full md:w-auto">
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-blue-50 p-2.5 rounded-2xl text-blue-600">
+                        <Users className="w-5 h-5" />
                     </div>
-                    Directorio Pacientes
+                    <span className="font-bold tracking-wider uppercase text-xs text-blue-600">Gestión de Pacientes</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+                    Directorio <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Pacientes</span>
                 </h1>
-                <p className="text-slate-500 mt-2 font-medium">Gestión administrativa de pacientes de S.A.M.S.A.</p>
+                <p className="text-gray-500 text-sm sm:text-base mt-1">Gestión administrativa de pacientes de S.A.M.S.A.</p>
             </div>
 
-            <div className="flex gap-4 w-full md:w-auto relative z-10">
-                <div className="relative flex-1 md:w-96">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input 
-                        type="text" 
-                        placeholder="Buscar por nombre o DNI..." 
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all font-medium text-slate-700"
+            <div className="flex gap-3 w-full md:w-auto">
+                <div className="relative flex-1 md:w-96 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <input
+                        type="text"
+                        aria-label="Buscar por nombre o DNI"
+                        placeholder="Buscar por nombre o DNI..."
+                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 placeholder-gray-400"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button 
+                <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="bg-pink-600 hover:bg-pink-700 text-white px-5 py-3.5 rounded-2xl font-bold shadow-lg shadow-pink-600/30 transition-all flex items-center gap-2 shrink-0 hover:-translate-y-0.5"
+                    aria-label="Nuevo Paciente"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-5 py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-500/30 transition-all flex items-center gap-2 shrink-0 hover:-translate-y-0.5"
                 >
                     <Plus className="w-5 h-5" /> <span className="hidden sm:inline">Nuevo Paciente</span>
                 </button>
@@ -274,57 +283,32 @@ export default function SecretaryPatients() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredPatients.map((patient) => (
-                <div key={patient.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden">
+                <div key={patient.id} className="bg-white p-5 sm:p-6 rounded-[1.5rem] border border-gray-100 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 group relative overflow-hidden flex flex-col">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top"></div>
 
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-50 to-rose-50 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform"></div>
-
-                    <div className="flex items-start gap-5 relative z-10">
+                    <div className="flex items-start gap-4 sm:gap-5">
                         <div className="relative shrink-0">
-                            <img src={patient.img} alt={patient.name} className="w-20 h-20 rounded-2xl object-cover border-4 border-slate-50 shadow-sm group-hover:border-pink-50 transition-colors" />
-                            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-sm" title="Activo"></div>
+                            <img src={patient.img} alt={patient.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-gray-50 shadow-sm" />
+                            <div className="absolute -bottom-1.5 -right-1.5 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full shadow-sm" title="Activo"></div>
                         </div>
 
                         <div className="flex-1 min-w-0 pt-1">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-800 truncate group-hover:text-pink-600 transition-colors">{patient.name}</h3>
-                                    <p className="text-sm text-slate-400 font-mono font-medium mt-0.5 tracking-wide">DNI: {patient.dni}</p>
-                                </div>
-                            </div>
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{patient.name}</h3>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold mt-1 font-mono">DNI {patient.dni}</span>
 
-                            <div className="grid grid-cols-2 gap-y-3 gap-x-4 mt-4 text-sm font-medium">
-                                <div className="flex items-center gap-2 truncate text-slate-600" title="Teléfono">
-                                    <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
-                                        <Phone className="w-3.5 h-3.5 text-green-500"/>
-                                    </div>
-                                    {patient.phone}
-                                </div>
-                                <div className="flex items-center gap-2 truncate text-slate-600" title="Email">
-                                    <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                                        <Mail className="w-3.5 h-3.5 text-orange-500"/>
-                                    </div>
-                                    {patient.email || "-"}
-                                </div>
-                                <div className="flex items-center gap-2 truncate text-slate-600" title="Última visita">
-                                    <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                        <Calendar className="w-3.5 h-3.5 text-blue-500"/>
-                                    </div>
-                                    <span className="font-bold text-slate-700">{patient.lastVisit}</span>
-                                </div>
-                                <div className="flex items-center gap-2 truncate text-slate-600" title="Historia Clínica">
-                                    <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
-                                        <FileText className="w-3.5 h-3.5 text-purple-500"/>
-                                    </div>
-                                    <span className="font-mono text-slate-700">{patient.historyId}</span>
-                                </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 mt-4 text-sm font-medium">
+                                <InfoItem icon={Phone} title="Teléfono">{patient.phone}</InfoItem>
+                                <InfoItem icon={Mail} title="Email">{patient.email || '-'}</InfoItem>
+                                <InfoItem icon={Calendar} title="Última visita"><span className="font-bold text-gray-800">{patient.lastVisit}</span></InfoItem>
+                                <InfoItem icon={FileText} title="Historia Clínica"><span className="font-mono text-gray-800">{patient.historyId}</span></InfoItem>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-6 pt-5 border-t border-slate-100 flex gap-4 relative z-10">
-                        <button 
+                    <div className="mt-6 pt-5 border-t border-gray-100">
+                        <button
                             onClick={() => openEditModal(patient)}
-                            className="flex-1 bg-slate-50 text-slate-700 hover:bg-slate-800 hover:text-white py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-gray-50 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg text-sm"
                         >
                             <Edit className="w-4 h-4"/> Editar Contacto
                         </button>
@@ -335,11 +319,11 @@ export default function SecretaryPatients() {
 
         {filteredPatients.length === 0 && (
             <div className="text-center py-20">
-                <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-10 h-10 text-slate-400" />
+                <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-10 h-10 text-blue-400" />
                 </div>
-                <p className="text-slate-500 font-medium">No se encontraron pacientes.</p>
-                <p className="text-slate-400 text-sm">Probá buscando por otro nombre o DNI.</p>
+                <p className="text-gray-900 font-bold">No se encontraron pacientes.</p>
+                <p className="text-gray-500 text-sm">Probá buscando por otro nombre o DNI.</p>
             </div>
         )}
       </main>

@@ -1,11 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getToday } from './dates';
 import { getScheduleSlots, isWorkingDay } from './agenda';
 
 // `appointments` (opcional): turnos del profesional, para marcar días con turnos o completos.
 // `schedule` (opcional): horario del profesional; deshabilita los días que no atiende.
+// Desplegable (no `inline`): se cierra al hacer click o pasar el foco (Tab) a cualquier otro
+// lugar. El "adentro" incluye su contenedor, donde está el botón que lo abre, así ese botón
+// sigue funcionando como abrir/cerrar.
 const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, appointments = null, schedule = null }) => {
+    const containerRef = useRef(null);
+    const onCloseRef = useRef(onClose);
+    useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
+    useEffect(() => {
+        if (inline) return undefined;
+        const handleOutside = (e) => {
+            const boundary = containerRef.current?.parentElement;
+            if (boundary && !boundary.contains(e.target)) onCloseRef.current();
+        };
+        document.addEventListener('mousedown', handleOutside);
+        document.addEventListener('touchstart', handleOutside);
+        document.addEventListener('focusin', handleOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleOutside);
+            document.removeEventListener('touchstart', handleOutside);
+            document.removeEventListener('focusin', handleOutside);
+        };
+    }, [inline]);
+
     const initialDate = selectedDate ? new Date(selectedDate + 'T12:00:00Z') : new Date();
     const [viewDate, setViewDate] = useState(initialDate);
     const [showYearSelector, setShowYearSelector] = useState(false);
@@ -43,10 +66,10 @@ const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, ap
                         isDisabled 
                             ? 'bg-red-50/50 text-red-300 cursor-not-allowed line-through' 
                             : isSelected 
-                                ? 'bg-slate-800 text-white shadow-md' 
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' 
                                 : isToday 
-                                    ? 'bg-slate-200 text-slate-800 font-bold' 
-                                    : 'text-slate-700 hover:bg-slate-100'
+                                    ? 'bg-blue-50 text-blue-700 font-bold' 
+                                    : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
                     }`}
                 >
                     <span className="relative z-10">{i}</span>
@@ -60,16 +83,16 @@ const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, ap
     };
 
     return (
-        <div className={`${inline ? 'w-full' : 'absolute top-full mt-2 left-0 z-50 bg-white shadow-2xl border border-slate-100 p-4 w-72'} rounded-2xl animate-fadeIn`}>
+        <div ref={containerRef} className={`${inline ? 'w-full' : 'absolute top-full mt-2 left-0 z-50 bg-white shadow-xl border border-gray-100 p-4 w-72 max-w-[calc(100vw-3rem)]'} rounded-2xl animate-fadeIn`}>
             <div className="flex justify-between items-center mb-4">
-                <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="p-1 hover:bg-slate-100 rounded-lg text-slate-500"><ChevronLeft className="w-5 h-5"/></button>
+                <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500"><ChevronLeft className="w-5 h-5"/></button>
                 <div 
-                    className="font-bold text-slate-800 cursor-pointer hover:text-blue-600 transition-colors flex items-center gap-1"
+                    className="font-bold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors flex items-center gap-1"
                     onClick={() => setShowYearSelector(!showYearSelector)}
                 >
                     {monthNames[month]} {year} <ChevronDown className="w-3 h-3"/>
                 </div>
-                <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} className="p-1 hover:bg-slate-100 rounded-lg text-slate-500"><ChevronRight className="w-5 h-5"/></button>
+                <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500"><ChevronRight className="w-5 h-5"/></button>
             </div>
 
             {showYearSelector ? (
@@ -79,7 +102,7 @@ const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, ap
                             key={y}
                             type="button"
                             onClick={() => { setViewDate(new Date(y, month, 1)); setShowYearSelector(false); }}
-                            className={`py-2 rounded-lg text-sm font-bold ${y === year ? 'bg-slate-800 text-white' : 'hover:bg-slate-100 text-slate-700'}`}
+                            className={`py-2 rounded-lg text-sm font-bold ${y === year ? 'bg-blue-600 text-white' : 'hover:bg-blue-50 text-gray-700'}`}
                         >
                             {y}
                         </button>
@@ -88,7 +111,7 @@ const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, ap
             ) : (
                 <>
                     <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                        {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(d => <div key={d} className="text-[10px] font-black text-slate-400 uppercase">{d}</div>)}
+                        {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(d => <div key={d} className="text-[10px] font-bold text-gray-400 uppercase">{d}</div>)}
                     </div>
             <div className="grid grid-cols-7 gap-1 place-items-center mb-3">
                 {renderDays()}
@@ -96,7 +119,7 @@ const SecretaryCalendar = ({ selectedDate, onSelect, onClose, inline = false, ap
             <button 
                 type="button"
                 onClick={() => { onSelect(getToday()); onClose(); }}
-                className="w-full py-2 bg-slate-50 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors border border-slate-200"
+                className="w-full py-2 bg-gray-50 text-gray-700 text-xs font-bold rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors border border-gray-200"
             >
                 Volver a Hoy
             </button>

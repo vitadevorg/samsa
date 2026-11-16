@@ -1,13 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  HeartPulse, LogOut, ChevronDown, Menu, X,
+  LogOut, ChevronDown, Menu, X,
   Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
 import { getDoctorLabel } from '../utils/doctorName';
+import SamsaLogo from './SamsaLogo';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -53,10 +54,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center shrink-0">
-            <Link to={getHomeForRole(user?.role)} className="flex items-center gap-2 group">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-2.5 rounded-xl group-hover:shadow-md group-hover:shadow-blue-500/20 transition-all duration-300 border border-blue-100">
-                <HeartPulse className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />
-              </div>
+            <Link to={getHomeForRole(user?.role)} className="flex items-center gap-2.5 group">
+              <SamsaLogo className="h-9 w-auto shrink-0 drop-shadow-sm group-hover:scale-110 transition-transform duration-300" />
               <span className="text-2xl font-black text-slate-800 tracking-tight group-hover:text-blue-700 transition-colors">S.A.M.S.A</span>
             </Link>
           </div>
@@ -125,6 +124,9 @@ const Navbar = () => {
                 <Link to="/doctor/patients" className={getLinkClass('/doctor/patients')}>
                   Pacientes
                 </Link>
+                <Link to="/news" className={getLinkClass('/news')}>
+                  Foro
+                </Link>
               </>
             ) : isSecretary ? (
               <>
@@ -151,7 +153,7 @@ const Navbar = () => {
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin || isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
                 >
                   <div 
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-pink-500 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
                     style={{
                       backgroundImage: user.img ? `url(${user.img})` : 'none',
                       backgroundSize: 'cover',
@@ -201,7 +203,10 @@ const Navbar = () => {
                       </>
                     ) : isSecretary ? (
                       <>
-                         <div className="px-4 py-2 text-xs text-center text-pink-600 italic bg-pink-50 mx-2 rounded mt-1 font-bold">
+                         <Link to="/secretary/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <User className="w-4 h-4" /> Mi cuenta
+                         </Link>
+                         <div className="px-4 py-2 text-xs text-center text-blue-700 italic bg-blue-50 mx-2 rounded mt-1 font-bold">
                             Modo Operativo
                          </div>
                       </>
@@ -277,14 +282,16 @@ const Navbar = () => {
             </>
           ) : isDoctor ? (
             <>
-              <Link to="/doctor/profile" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>
-              <Link to="/doctor/turns" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos Asignados</Link>
-              <Link to="/doctor/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
+              <Link to="/doctor/profile" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>
+              <Link to="/doctor/turns" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos Asignados</Link>
+              <Link to="/doctor/patients" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
             </>
           ) : isSecretary ? (
             <>
-              <Link to="/secretary/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Agenda Diaria</Link>
-              <Link to="/secretary/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Directorio Pacientes</Link>
+              <Link to="/secretary/dashboard" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Agenda Diaria</Link>
+              <Link to="/secretary/patients" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Directorio Pacientes</Link>
+              <Link to="/secretary/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
             </>
           ) : (
             <>
