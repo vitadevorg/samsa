@@ -4,21 +4,16 @@ import { useTimeouts } from '../../hooks/useTimeouts';
 import { getDocumentStatus, NON_EXPIRING_DOCUMENTS } from '../../data/institutions';
 import { todayISO, formatDate } from './clinicDates';
 import { validateExpiry, addYearsISO, MAX_EXPIRY_YEARS } from './clinicValidation';
-import { FileText, X, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { STATUS_BADGES } from './documentStatus';
+import { FileText, X } from 'lucide-react';
 
 // Cuánto tiempo (en milisegundos) queda visible la ventana verde de éxito.
 const SUCCESS_DURATION_MS = 2500;
 
-// Color e ícono del badge según el estado del documento.
-const STATUS_BADGES = {
-  vigente: { label: 'Vigente', className: 'bg-green-100 text-green-700 border-green-200', Icon: CheckCircle },
-  vencido: { label: 'Vencido', className: 'bg-red-100 text-red-700 border-red-200', Icon: AlertTriangle },
-  pendiente: { label: 'Pendiente', className: 'bg-amber-100 text-amber-700 border-amber-200', Icon: Clock },
-};
-
-// Panel con la documentación de un médico vinculado. No se suben archivos:
+// Panel con la documentación de un médico. No se suben archivos:
 // solo se registra que el documento se recibió y hasta cuándo es válido.
-// - `assignment`: la vinculación del médico (con su lista `documents`).
+// Lo usan la clínica/hospital (médicos vinculados) y VitaDev (médicos particulares).
+// - `assignment`: cualquier objeto con la lista `documents` (la vinculación o el médico particular).
 // - `onUpdate(type, expiresAt)`: guarda el documento como recibido.
 const ClinicDocumentsModal = ({ doctorName, assignment, onUpdate, onClose }) => {
   const fieldId = useId();
@@ -103,7 +98,7 @@ const ClinicDocumentsModal = ({ doctorName, assignment, onUpdate, onClose }) => 
                           onClick={() => startEditing(doc)}
                           className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"
                         >
-                          {status === 'vigente' ? 'Actualizar vencimiento' : 'Marcar como recibido'}
+                          {status === 'vigente' || status === 'por_vencer' ? 'Actualizar vencimiento' : 'Marcar como recibido'}
                         </button>
                       )}
                     </div>

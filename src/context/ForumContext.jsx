@@ -1,14 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ForumContext } from './forum-context';
+import { ForumContext, canModerate } from './forum-context';
 import { createId } from '../utils/ids';
 
-// Publicaciones del foro escritas por médicos. Es un mock en memoria, como el resto de los
+// Publicaciones del foro escritas por médicos y por VitaDev, y avisos de moderación. Es un mock en memoria, como el resto de los
 // datos de la app: se conserva mientras la página esté abierta y se pierde al recargar.
 // Con backend, la verificación de autoría la hace el servidor; acá se repite en el cliente
-// para que ninguna pantalla pueda editar o borrar la nota de otro médico.
+// para que nadie edite notas ajenas y solo VitaDev pueda borrarlas (con un motivo para el autor).
 
-const sameAuthor = (post, authorEmail) =>
-  Boolean(authorEmail) && post.authorEmail === authorEmail.trim().toLowerCase();
+const normalize = (email) => (email ?? '').trim().toLowerCase();
+const sameAuthor = (post, authorEmail) => Boolean(authorEmail) && post.authorEmail === normalize(authorEmail);
 
 // Nota de demostración de otra médica: sirve para comprobar que solo se pueden editar
 // o borrar las publicaciones propias.
@@ -28,12 +28,16 @@ const SEED_POSTS = [
 
 export const ForumProvider = ({ children }) => {
   const [posts, setPosts] = useState(SEED_POSTS);
+  // Notas institucionales fijas (las del foro original) que VitaDev quitó. No tienen autor a quien avisar.
+  const [hiddenNoteIds, setHiddenNoteIds] = useState(() => new Set());
+  // Avisos para el autor de una nota borrada por moderación: { id, authorEmail, postTitle, reason, moderatedAt }.
+  const [moderationNotices, setModerationNotices] = useState([]);
 
   const addPost = useCallback((data, author) => {
     const post = {
       ...data,
       id: createId(),
-      authorEmail: author.email.trim().toLowerCase(),
+      authorEmail: normalize(author.email),
       authorName: author.name,
       createdAt: new Date().toISOString(),
       updatedAt: null,
@@ -56,9 +60,40 @@ export const ForumProvider = ({ children }) => {
 
   const isOwnPost = useCallback((post, authorEmail) => sameAuthor(post, authorEmail), []);
 
+  // Borrado de la nota de otro autor por parte de VitaDev, con el motivo que verá el autor.
+  // `moderator` es el usuario de la sesión: si no puede moderar, no se borra nada.
+  const moderatePost = useCallback((id, reason, moderator) => {
+    if (!canModerate(moderator)) return;
+    const target = posts.find((post) => post.id === id);
+    if (!target || sameAuthor(target, moderator.email)) return;
+    setPosts((prev) => prev.filter((post) => post.id !== id));
+    setModerationNotices((prev) => [...prev, {
+      id: createId(),
+      authorEmail: target.authorEmail,
+      postTitle: target.title,
+      reason: reason.trim(),
+      moderatedAt: new Date().toISOString(),
+    }]);
+  }, [posts]);
+
+  // VitaDev quita una nota institucional fija del foro.
+  const removeFixedNote = useCallback((noteId, moderator) => {
+    if (!canModerate(moderator)) return;
+    setHiddenNoteIds((prev) => new Set(prev).add(noteId));
+  }, []);
+
+  const noticesFor = useCallback(
+    (authorEmail) => moderationNotices.filter((notice) => notice.authorEmail === normalize(authorEmail)),
+    [moderationNotices]
+  );
+
+  const dismissNotice = useCallback((noticeId, authorEmail) => {
+    setModerationNotices((prev) => prev.filter((notice) => !(notice.id === noticeId && notice.authorEmail === normalize(authorEmail))));
+  }, []);
+
   const value = useMemo(
-    () => ({ posts, addPost, updatePost, deletePost, isOwnPost }),
-    [posts, addPost, updatePost, deletePost, isOwnPost]
+    () => ({ posts, addPost, updatePost, deletePost, isOwnPost, moderatePost, noticesFor, dismissNotice, hiddenNoteIds, removeFixedNote }),
+    [posts, addPost, updatePost, deletePost, isOwnPost, moderatePost, noticesFor, dismissNotice, hiddenNoteIds, removeFixedNote]
   );
 
   return <ForumContext.Provider value={value}>{children}</ForumContext.Provider>;

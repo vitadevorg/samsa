@@ -101,6 +101,23 @@ export const getRegisteredEmails = () => [
   ...createdAccounts.keys(),
 ].filter((email) => !retiredEmails.has(email));
 
+// Cuentas de pacientes para el directorio de VitaDev. Devuelve solo identidad y contacto
+// (nombre, email y teléfono): nunca contraseñas ni datos clínicos o de afiliación.
+export const getPatientAccounts = () => {
+  const byEmail = new Map();
+  [...DEMO_ACCOUNTS, ...createdAccounts.values()].forEach((account) => {
+    if (account.user?.role !== ROLES.PATIENT || retiredEmails.has(account.email)) return;
+    byEmail.set(account.email, account); // las cuentas editadas en runtime reemplazan a la demo
+  });
+  return [...byEmail.values()].map(({ email, user }) => ({
+    email,
+    firstName: user.name ?? '',
+    lastName: user.lastname ?? '',
+    name: [user.name, user.lastname].filter(Boolean).join(' '),
+    phone: user.phone ?? '',
+  }));
+};
+
 // Emails de cuentas dadas de baja por su institución. Es un Set (un conjunto:
 // no guarda repetidos) que vive en memoria mientras la página esté abierta;
 // al recargar se vacía. Con backend, esto sería un dato de la base.

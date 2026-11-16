@@ -55,7 +55,8 @@ const BookAppointment = () => {
     // Sedes donde atiende el médico: una por institución (con el horario que le fijó
     // cada una) o, si no tiene ninguna, su atención particular. Salen del estado
     // compartido, así un cambio de horario aceptado por la clínica se refleja acá.
-    const { allAssignments } = useClinicData();
+    // Solo instituciones activas: en una inhabilitada o dada de baja no se reservan turnos.
+    const { bookableAssignments: allAssignments } = useClinicData();
     const locations = useMemo(
         () => (doctor ? getDoctorLocations(doctor, allAssignments) : []),
         [doctor, allAssignments]

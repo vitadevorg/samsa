@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogOut, ChevronDown, Menu, X,
-  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
+  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact, Newspaper, UserRound
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
@@ -100,11 +100,8 @@ const Navbar = () => {
               </>
             ) : isVitadevAdmin ? (
               <>
-                <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
-                  <Shield className="w-4 h-4"/> Resumen
-                </Link>
                 <Link to="/vitadev/doctors" className={getLinkClass('/vitadev/doctors')}>
-                  <Stethoscope className="w-4 h-4"/> Médicos
+                  <UserRound className="w-4 h-4"/> Particulares
                 </Link>
                 <Link to="/vitadev/clinics" className={getLinkClass('/vitadev/clinics')}>
                   <Building2 className="w-4 h-4"/> Clínicas
@@ -114,6 +111,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/vitadev/users" className={getLinkClass('/vitadev/users')}>
                   <UserCog className="w-4 h-4"/> Usuarios
+                </Link>
+                <Link to="/news" className={getLinkClass('/news')}>
+                  <Newspaper className="w-4 h-4"/> Foro
                 </Link>
               </>
             ) : isDoctor ? (
@@ -273,12 +273,12 @@ const Navbar = () => {
             </>
           ) : isVitadevAdmin ? (
             <>
-              <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Resumen</Link>
-              <Link to="/vitadev/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to="/vitadev/clinics" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
-              <Link to="/vitadev/hospitals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
-              <Link to="/vitadev/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
-              <Link to="/vitadev/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/vitadev/doctors" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Particulares</Link>
+              <Link to="/vitadev/clinics" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
+              <Link to="/vitadev/hospitals" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
+              <Link to="/vitadev/users" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to="/vitadev/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
             </>
           ) : isDoctor ? (
             <>

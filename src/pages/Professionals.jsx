@@ -100,7 +100,8 @@ const Professionals = () => {
   const [attentionType, setAttentionType] = useState('all');
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
   // Horarios reales de cada médico (los que fija cada institución), del estado compartido.
-  const { allAssignments } = useClinicData();
+  // Solo instituciones activas (las inhabilitadas o dadas de baja no se muestran a los pacientes).
+  const { bookableAssignments: allAssignments } = useClinicData();
   const locationsByDoctor = useMemo(
       () => Object.fromEntries(doctorsData.map(doc => [doc.id, getDoctorLocations(doc, allAssignments)])),
       [allAssignments]

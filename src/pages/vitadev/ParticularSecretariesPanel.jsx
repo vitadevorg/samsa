@@ -7,8 +7,12 @@ import { resetPassword, getRegisteredEmails } from '../../services/authService';
 import { ROLES } from '../../constants/roles';
 import AccountStatusBadge from './AccountStatusBadge';
 import { buildUserDirectory } from './userDirectory';
-import { useSuccessModal, PASSWORD_SUCCESS_DURATION_MS } from './useSuccessModal';
-import { Trash2, Edit2, UserPlus, Users, Save, X } from 'lucide-react';
+import { useSuccessModal } from './useSuccessModal';
+import TemporaryPasswordModal from './TemporaryPasswordModal';
+import { useAccountActions } from './useAccountActions';
+import IconAction from './IconAction';
+import FadeIn from '../../components/FadeIn';
+import { Trash2, Pencil, KeyRound, Ban, UserCheck, UserPlus, Users, Save, X } from 'lucide-react';
 
 const EMPTY_FORM = { name: '', email: '', phone: '', doctorIds: [] };
 
@@ -47,6 +51,9 @@ const ParticularSecretariesPanel = ({ onOpen }) => {
   const [showCreate, setShowCreate] = useState(false); // el formulario de alta está oculto hasta que se pide
   const [errors, setErrors] = useState({});
   const { success, showSuccess } = useSuccessModal();
+  const [credentials, setCredentials] = useState(null); // contraseña temporal recién generada (null = ventana cerrada)
+  // Resetear contraseña, inhabilitar y habilitar (mismas acciones que Gestión de Usuarios).
+  const { statusOf: accountStatus, requestReset, requestDisable, requestEnable, modals: accountModals } = useAccountActions();
 
   const isEditing = editId !== null;
   const findDoctorLabel = (doctorId) => {
@@ -124,11 +131,11 @@ const ParticularSecretariesPanel = ({ onOpen }) => {
     const temporaryPassword = resetPassword(secretary.email, { name: secretary.name, role: ROLES.SECRETARY });
     setForm(EMPTY_FORM);
     setShowCreate(false);
-    showSuccess(
-      '¡Secretaria agregada!',
-      `${secretary.name} ya puede iniciar sesión con ${secretary.email}. Contraseña temporal: ${temporaryPassword} (la tendrá que cambiar al entrar).`,
-      PASSWORD_SUCCESS_DURATION_MS
-    );
+    setCredentials({
+      title: '¡Secretaria agregada!',
+      message: `${secretary.name} ya puede iniciar sesión con ${secretary.email}.`,
+      password: temporaryPassword,
+    });
   };
 
   const handleConfirmDelete = () => {
@@ -169,6 +176,8 @@ const ParticularSecretariesPanel = ({ onOpen }) => {
         onConfirm={handleConfirm}
       />
       <SuccessModal isOpen={success !== null} title={success?.title} message={success?.message} />
+      <TemporaryPasswordModal credentials={credentials} onClose={() => setCredentials(null)} />
+      {accountModals}
 
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <h2 id={`${fieldId}-titulo`} className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -183,7 +192,7 @@ const ParticularSecretariesPanel = ({ onOpen }) => {
       </div>
 
       {(showCreate || isEditing) && (
-      <div className={`bg-white p-8 rounded-2xl shadow-sm mb-8 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
+      <div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-8 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
             {isEditing ? '✏️ Editando Secretaria' : '✨ Agregar Secretaria'}
@@ -261,40 +270,49 @@ const ParticularSecretariesPanel = ({ onOpen }) => {
       </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-gray-50 border-b border-gray-100">
+      <FadeIn delay={150}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+        {/* Hasta lg cada fila es una tarjeta apilada (sin scroll lateral); desde lg, tabla. */}
+        <table className="w-full text-left border-collapse block lg:table">
+          <thead className="hidden lg:table-header-group bg-gray-50 border-b border-gray-100">
             <tr>
               <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Secretaria</th>
               <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Agendas</th>
-              <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
+              <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-center">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="block lg:table-row-group divide-y divide-gray-100 lg:divide-gray-50">
             {secretaries.map(secretary => (
-              <tr key={secretary.id} className={`hover:bg-blue-50/50 transition ${editId === secretary.id ? 'bg-orange-50' : ''}`}>
-                <td className="p-5">
+              <tr key={secretary.id} className={`block lg:table-row px-5 py-4 lg:p-0 hover:bg-blue-50/50 transition ${editId === secretary.id ? 'bg-orange-50' : ''}`}>
+                <td className="block lg:table-cell py-1 lg:p-5">
                   <div className="font-bold text-gray-900 flex items-center gap-2">
                     {secretary.name}
                     <AccountStatusBadge email={secretary.email} />
                   </div>
                   <div className="text-xs text-gray-500">{secretary.email}{secretary.phone && ` · ${secretary.phone}`}</div>
                 </td>
-                <td className="p-5 text-sm">
+                <td className="block lg:table-cell py-1 lg:p-5 text-sm">
                   {secretary.doctorIds.length > 0 ? (
                     <span className="text-gray-600">{secretary.doctorIds.map(findDoctorLabel).filter(Boolean).join(', ')}</span>
                   ) : (
                     <span className="text-amber-600 font-medium">Sin agendas asignadas</span>
                   )}
                 </td>
-                <td className="p-5 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button onClick={() => startEdit(secretary)} className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Editar" aria-label={`Editar a ${secretary.name}`}>
-                      <Edit2 className="w-5 h-5"/>
-                    </button>
-                    <button onClick={() => setDeleteId(secretary.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Eliminar" aria-label={`Eliminar a ${secretary.name}`}>
-                      <Trash2 className="w-5 h-5"/>
-                    </button>
+                <td className="block lg:table-cell py-1 lg:p-5">
+                  <div className="flex justify-start lg:justify-center gap-1 pt-2 lg:pt-0">
+                    {accountStatus(secretary.email) === 'active' && (
+                      <>
+                        <IconAction icon={Pencil} tone="blue" onClick={() => startEdit(secretary)} label={`Editar datos de ${secretary.name}`} />
+                        <IconAction icon={KeyRound} tone="orange" onClick={() => requestReset({ name: secretary.name, email: secretary.email, profile: { name: secretary.name, role: ROLES.SECRETARY } })} label={`Resetear contraseña de ${secretary.name}`} />
+                        <IconAction icon={Ban} tone="amber" onClick={() => requestDisable(secretary)} label={`Inhabilitar a ${secretary.name}`} />
+                      </>
+                    )}
+                    {/* Primero se inhabilita; recién con la cuenta inhabilitada se puede eliminar. */}
+                    {accountStatus(secretary.email) === 'disabled' && (
+                      <IconAction icon={UserCheck} tone="green" onClick={() => requestEnable(secretary)} label={`Habilitar a ${secretary.name}`} />
+                    )}
+                    {accountStatus(secretary.email) !== 'active' && (
+                      <IconAction icon={Trash2} tone="red" onClick={() => setDeleteId(secretary.id)} label={`Eliminar a ${secretary.name} de la lista`} />
+                    )}
                   </div>
                 </td>
               </tr>
@@ -304,7 +322,7 @@ const ParticularSecretariesPanel = ({ onOpen }) => {
         {secretaries.length === 0 && (
           <div className="p-10 text-center text-gray-400">Todavía no hay secretarias de médicos particulares.</div>
         )}
-      </div>
+      </div></FadeIn>
     </section>
   );
 };

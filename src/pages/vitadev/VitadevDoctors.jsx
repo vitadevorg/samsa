@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import ParticularDoctorsPanel from './ParticularDoctorsPanel';
-import InstitutionDoctorsList from './InstitutionDoctorsList';
 import ParticularSecretariesPanel from './ParticularSecretariesPanel';
+import { UserRound } from 'lucide-react';
+import PageHeader from '../../components/PageHeader';
 
-// Pantalla del administrador de VitaDev: médicos particulares (sin clínica ni hospital)
-// y las secretarias que manejan sus agendas. Solo datos de identidad, contacto y atención.
+// Pantalla "Particulares" del administrador de VitaDev: médicos particulares (sin clínica ni hospital)
+// y las secretarias que manejan sus agendas. Los médicos de clínicas y hospitales se ven en
+// Gestión de Usuarios y en cada institución. Solo datos de identidad, contacto y atención.
 const VitadevDoctors = () => {
   // Solo puede haber un formulario abierto: al abrir uno (alta o edición) se cierra el de la otra
   // sección. Cambiar la `key` de un panel lo vuelve a montar con el formulario cerrado.
@@ -13,12 +15,12 @@ const VitadevDoctors = () => {
   const [secretariesKey, setSecretariesKey] = useState(0);
 
   return (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-slate-50 overflow-x-hidden">
     <Navbar />
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <PageHeader icon={UserRound} eyebrow="Administración SAMSA" title="Particulares" />
       <ParticularDoctorsPanel key={`doctors-${doctorsKey}`} onOpen={() => setSecretariesKey((n) => n + 1)} />
       <ParticularSecretariesPanel key={`secretaries-${secretariesKey}`} onOpen={() => setDoctorsKey((n) => n + 1)} />
-      <InstitutionDoctorsList />
     </div>
   </div>
   );

@@ -3,7 +3,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { 
   MapPin, Clock, Star, ShieldCheck, Award, User, MessageSquare, 
   Edit3, Save, Plus, X, Wallet, Info, Trash2, ChevronDown, 
-  ChevronUp, CheckCircle, AlertTriangle, Building2, Stethoscope, Send
+  ChevronUp, CheckCircle, AlertTriangle, Building2, Stethoscope, Send, FileText
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -12,8 +12,9 @@ import { doctorsData } from '../data/doctors';
 import { createId } from '../utils/ids';
 import { SPECIALTIES, INSURANCE_OPTIONS, WEEK_DAYS } from '../constants/catalog';
 import { useClinicData } from './clinic/clinicDataContext';
-import { getInstitutionById, getInstitutionType, formatSchedule, schedulesOverlap } from '../data/institutions';
-import { formatDate } from './clinic/clinicDates';
+import { getInstitutionById, getInstitutionType, formatSchedule, schedulesOverlap, getDocumentStatus, NON_EXPIRING_DOCUMENTS } from '../data/institutions';
+import { STATUS_BADGES, countDocumentIssues } from './clinic/documentStatus';
+import { formatDate, todayISO } from './clinic/clinicDates';
 // En la vista propia (/doctor/profile) el usuario de prueba es el Dr. Zelarayan,
 // cuyo id en doctors.js es 'juan-perez'.
 const SELF_DOCTOR_ID = 'juan-perez';
@@ -269,8 +270,17 @@ const DoctorProfile = () => {
 
   // Instituciones donde atiende el médico. Se leen del estado compartido
   // (ClinicDataProvider): si una clínica lo dio de baja, esa vinculación ya no está.
-  const { allAssignments, allRequests, addRequest } = useClinicData();
-  const doctorId = isSelfView ? SELF_DOCTOR_ID : publicDoctor.id;
+  // Solo instituciones activas: en una inhabilitada o dada de baja el médico no atiende ni recibe turnos.
+  const { bookableAssignments: allAssignments, allRequests, addRequest, particularDoctors } = useClinicData();
+  // Médico particular con sesión iniciada: ve su documentación, que registra VitaDev
+  // (VitaDev administra a los particulares como una clínica administra a sus médicos).
+  const particularDoctor = isSelfView
+      ? particularDoctors.find(d => d.email === user?.email?.toLowerCase())
+      : null;
+  const today = todayISO();
+  // Un particular no tiene vinculaciones: se usa su propio id (el perfil propio de demostración
+  // usa SELF_DOCTOR_ID, que pertenece a una clínica).
+  const doctorId = particularDoctor ? particularDoctor.id : isSelfView ? SELF_DOCTOR_ID : publicDoctor.id;
   const doctorAssignments = allAssignments.filter(a => a.doctorId === doctorId);
   // Si pertenece a alguna institución, sus días y horarios los gestiona la institución.
   const isManagedByInstitution = doctorAssignments.length > 0;
@@ -446,7 +456,9 @@ const DoctorProfile = () => {
                             <div>
                                 <p className="text-xs text-gray-400 uppercase font-bold">Acepta</p>
                                 <p className="font-medium truncate max-w-xs">
-                                    {profileData.attentionType === 'Pública' 
+                                    {particularDoctor
+                                        ? (particularDoctor.insurances?.length ? particularDoctor.insurances.join(", ") : 'Solo Particular')
+                                        : profileData.attentionType === 'Pública' 
                                         ? 'Atención Hospitalaria (Gratuita)' 
                                         : (profileData.insurance && profileData.insurance.length > 0 
                                             ? profileData.insurance.join(", ") 
@@ -521,15 +533,58 @@ const DoctorProfile = () => {
                         <div className="p-5 rounded-2xl border border-gray-200 bg-gray-50 space-y-3 md:max-w-md">
                             <p className="font-bold text-gray-900">Atención particular</p>
                             <p className="text-sm text-gray-600 flex items-start gap-2">
-                                <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/> {profileData.location}
+                                <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/> {particularDoctor?.address || profileData.location}
                             </p>
                             <p className="text-sm font-medium text-gray-800 flex items-start gap-2">
                                 <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"/>
-                                {formatDays(profileData.days)} · {formatHours(profileData.hours)}
+                                {particularDoctor?.days?.length
+                                    ? formatSchedule(particularDoctor)
+                                    : `${formatDays(profileData.days)} · ${formatHours(profileData.hours)}`}
                             </p>
                         </div>
                     )}
                 </div>
+                {particularDoctor && (
+                    <section aria-labelledby={`${fieldId}-documentacion`} className="border-t border-gray-100 pt-8 pb-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                            <h2 id={`${fieldId}-documentacion`} className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-blue-600"/> Mi documentación
+                            </h2>
+                            {countDocumentIssues(particularDoctor.documents, today) > 0 ? (
+                                <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">
+                                    {countDocumentIssues(particularDoctor.documents, today)} por regularizar
+                                </span>
+                            ) : (
+                                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">Al día</span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">
+                            Como médico particular, VitaDev registra tu documentación. Enviá los documentos pendientes o vencidos a VitaDev para que los marque como recibidos.
+                        </p>
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {particularDoctor.documents.map(doc => {
+                                const status = getDocumentStatus(doc, today);
+                                const { label, className, Icon } = STATUS_BADGES[status];
+                                const expires = NON_EXPIRING_DOCUMENTS.includes(doc.type)
+                                    ? 'No vence'
+                                    : doc.expiresAt
+                                        ? `${status === 'vencido' ? 'Venció' : 'Vence'} el ${formatDate(doc.expiresAt)}`
+                                        : 'Sin fecha de vencimiento';
+                                return (
+                                    <li key={doc.type} className="flex items-center justify-between gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50">
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-gray-900">{doc.type}</p>
+                                            <p className="text-xs text-gray-500">{expires}</p>
+                                        </div>
+                                        <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${className}`}>
+                                            <Icon className="w-3.5 h-3.5"/> {label}
+                                        </span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </section>
+                )}
                 {!isSelfView && (
                   <div className="mt-4 bg-indigo-50 rounded-xl p-6 text-center">
                     <p className="text-indigo-900 font-medium mb-4">

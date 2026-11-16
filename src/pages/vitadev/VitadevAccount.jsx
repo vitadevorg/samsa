@@ -8,6 +8,8 @@ import { verifyPassword, setOwnPassword, updateAccount, getRegisteredEmails } fr
 import { buildUserDirectory } from './userDirectory';
 import { useSuccessModal } from './useSuccessModal';
 import { UserCog, Mail, KeyRound, LifeBuoy, Save } from 'lucide-react';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
 
 const EMPTY_EMAIL_FORM = { email: '', currentPassword: '' };
 const EMPTY_PASSWORD_FORM = { currentPassword: '', password: '', confirmation: '' };
@@ -118,7 +120,7 @@ const VitadevAccount = () => {
   const submitClass = 'py-3 px-8 rounded-xl font-bold text-white transition shadow-md flex justify-center gap-2 items-center bg-blue-600 hover:bg-blue-700 shadow-blue-200';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <EditConfirmModal
         isOpen={confirming !== null}
@@ -134,16 +136,15 @@ const VitadevAccount = () => {
       />
       <SuccessModal isOpen={success !== null} title={success?.title} message={success?.message} />
 
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="bg-blue-100 p-2 rounded-lg"><UserCog className="text-blue-600 w-8 h-8"/></div>
-            Mi cuenta
-          </h1>
-          <p className="text-gray-500 mt-2 text-sm">Usuario actual: <span className="font-bold text-gray-700">{user.email}</span></p>
-        </div>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={UserCog}
+          eyebrow="Administración SAMSA"
+          title="Mi cuenta"
+          description={<>Usuario actual: <span className="font-bold text-slate-700 break-all">{user.email}</span></>}
+        />
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm mb-8 border border-gray-200">
+        <FadeIn delay={100}><div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-8 border border-gray-200">
           <h3 className="font-bold text-xl text-gray-800 mb-6 flex items-center gap-2"><Mail className="w-5 h-5 text-blue-600"/> Cambiar usuario</h3>
           <form onSubmit={handleSubmitEmail} noValidate className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -154,9 +155,9 @@ const VitadevAccount = () => {
               <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Cambiar usuario</button>
             </div>
           </form>
-        </div>
+        </div></FadeIn>
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm mb-8 border border-gray-200">
+        <FadeIn delay={200}><div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-8 border border-gray-200">
           <h3 className="font-bold text-xl text-gray-800 mb-6 flex items-center gap-2"><KeyRound className="w-5 h-5 text-blue-600"/> Cambiar contraseña</h3>
           <form onSubmit={handleSubmitPassword} noValidate className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -169,9 +170,9 @@ const VitadevAccount = () => {
               <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Cambiar contraseña</button>
             </div>
           </form>
-        </div>
+        </div></FadeIn>
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+        <FadeIn delay={300}><div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-gray-200">
           <h3 className="font-bold text-xl text-gray-800 mb-6 flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-blue-600"/> Datos de recuperación</h3>
           <form onSubmit={handleSubmitRecovery} noValidate className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -183,7 +184,7 @@ const VitadevAccount = () => {
               <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Guardar datos</button>
             </div>
           </form>
-        </div>
+        </div></FadeIn>
       </div>
     </div>
   );
