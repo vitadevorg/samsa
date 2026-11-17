@@ -203,7 +203,7 @@ const ParticularSecretariesPanel = ({ onOpen, closeToken = 0 }) => {
           <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
             {isEditing ? 'Editando Secretaria' : 'Agregar Secretaria'}
           </h3>
-          <button type="button" onClick={cancelEdit} aria-label="Cerrar formulario" className="p-2 -mr-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition shrink-0"><X className="w-5 h-5"/></button>
+          <button type="button" onClick={cancelEdit} aria-label="Cerrar formulario" className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-300 outline-none flex items-center justify-center transition-colors shrink-0"><X className="w-5 h-5"/></button>
         </div>
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

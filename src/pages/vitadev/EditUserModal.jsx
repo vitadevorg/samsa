@@ -73,7 +73,7 @@ const EditUserModal = ({ person, takenEmails, onCancel, onSubmit }) => {
             <h2 id={`${fieldId}-title`} className="text-lg font-bold text-gray-900">Editar datos</h2>
             <p className="text-sm text-gray-500 truncate">{USER_GROUPS[person.group].single} · {person.name}</p>
           </div>
-          <button type="button" onClick={onCancel} aria-label="Cerrar" className="p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-900 transition shrink-0">
+          <button type="button" onClick={onCancel} aria-label="Cerrar" className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-300 outline-none flex items-center justify-center transition-colors shrink-0">
             <X className="w-5 h-5" />
           </button>
         </div>

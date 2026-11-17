@@ -214,3 +214,4 @@ Validación: `npm run lint` y `npm run build` sin errores. En el navegador:
 Validación adicional:
 - Pantallas de VitaDev y Foro a 375, 768 y 1280 px, también con los formularios abiertos: sin scroll horizontal ni elementos desbordados.
 - En Gestión de Usuarios, la etiqueta de la primera fila se ve completa, y al pasar a otro ícono queda una sola.
+9. **Botón X de cierre:** X dentro de un círculo gris claro (`bg-slate-100`). Al pasar el mouse, el círculo se pone rojo suave (`bg-red-50`) y la X rojo intenso (`text-red-600`). Se usa en los formularios de alta/edición (médicos, secretarias, instituciones y administrador) y en las ventanas de VitaDev (editar usuario, contraseña temporal y confirmación escribiendo el nombre).

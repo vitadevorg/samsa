@@ -31,7 +31,7 @@ const TypeToConfirmModal = ({ title, note, message, confirmText, confirmLabel, t
             <h3 id={`${fieldId}-title`} className="text-lg font-bold text-gray-900">{title}</h3>
             <p className={`text-sm font-medium ${styles.note}`}>{note}</p>
           </div>
-          <button type="button" onClick={onCancel} aria-label="Cerrar" className="text-gray-400 hover:text-gray-600 transition shrink-0"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onCancel} aria-label="Cerrar" className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-300 outline-none flex items-center justify-center transition-colors shrink-0"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-5 sm:p-6 space-y-4">
           <p className="text-gray-600 leading-relaxed">{message}</p>

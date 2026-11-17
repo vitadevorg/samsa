@@ -50,7 +50,7 @@ const TemporaryPasswordModal = ({ credentials, onClose }) => {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby={`${fieldId}-title`} className="fixed inset-0 z-[60] flex justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-fadeIn">
       <div className="relative bg-white rounded-3xl w-full max-w-md my-auto overflow-hidden shadow-2xl animate-slideUp text-center p-6 sm:p-8">
-        <button type="button" onClick={handleClose} aria-label="Cerrar" className="absolute top-4 right-4 p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-900 transition">
+        <button type="button" onClick={handleClose} aria-label="Cerrar" className="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-300 outline-none flex items-center justify-center transition-colors shrink-0">
           <X className="w-5 h-5" />
         </button>
         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
