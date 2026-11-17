@@ -34,13 +34,14 @@ const Navbar = () => {
     return parts[0];
   };
   const displayName = getFirstName(user?.name);
-  const userInitial = displayName ? displayName.charAt(0) : '';
   const isAdmin = user?.role === ROLES.ADMIN;
   const isDoctor = user?.role === ROLES.DOCTOR;
   const isSecretary = user?.role === ROLES.SECRETARY;
   const isClinicAdmin = user?.role === ROLES.CLINIC_ADMIN;
   const isHospitalAdmin = user?.role === ROLES.HOSPITAL_ADMIN;
   const isVitadevAdmin = user?.role === ROLES.VITADEV_ADMIN;
+  // El administrador de SAMSA siempre se muestra como "Admin" (inicial A), aunque la sesión guardada tenga otro nombre.
+  const userInitial = isVitadevAdmin ? 'A' : displayName ? displayName.charAt(0) : '';
   // Los administradores de institución usan el mismo estilo oscuro que el admin general.
   const isInstitutionAdmin = isClinicAdmin || isHospitalAdmin || isVitadevAdmin;
   // Ruta base de las pantallas de administración: '/clinic', '/hospital' o undefined.
@@ -163,7 +164,7 @@ const Navbar = () => {
                     {!user.img && userInitial}
                   </div>
                   <span className="text-sm font-bold px-1 tracking-wide whitespace-nowrap">
-                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
+                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'Admin' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>

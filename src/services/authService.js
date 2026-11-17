@@ -49,7 +49,7 @@ const DEMO_ACCOUNTS = [
     email: 'admin.samsa@samsa.med',
     password: '12345',
     // Contacto de recuperación de la cuenta (lo edita el propio administrador en Mi cuenta).
-    user: { name: 'VitaDev', role: ROLES.VITADEV_ADMIN, recoveryEmail: 'recuperacion.vitadev@samsa.med', recoveryPhone: '381 400-9000' },
+    user: { name: 'Admin', role: ROLES.VITADEV_ADMIN, recoveryEmail: 'recuperacion.vitadev@samsa.med', recoveryPhone: '381 400-9000' },
   },
   // Secretaria de Clínica del Norte (figura en src/data/institutions.js como sec-1).
   {
