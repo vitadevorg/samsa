@@ -9,7 +9,7 @@ import { getInstitutionUnits } from '../../data/institutions';
 import { resetPassword, setPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
 import { ROLES } from '../../constants/roles';
 import { createId } from '../../utils/ids';
-import { SPECIALTIES, INSURANCES, STUDY_GROUPS } from '../../constants/catalog';
+import { useCatalog } from '../../context/catalog-context';
 import CheckboxDropdown from '../../components/CheckboxDropdown';
 import { cuilDigits, formatCuil, isValidCuil } from '../../utils/cuil';
 import AccountStatusBadge from './AccountStatusBadge';
@@ -83,6 +83,8 @@ const validateInstitutionCuit = (value, taken) => {
 // sectores, gestionar a sus administradores (y sumar nuevos) e inhabilitar o dar de baja la institución.
 // Sin datos clínicos.
 const VitadevInstitutions = ({ kind }) => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { specialties: SPECIALTIES, insurances: INSURANCES, studyGroups: STUDY_GROUPS } = useCatalog();
   const fieldId = useId();
   const data = useClinicData();
   const { institutions, institutionAdmins, allAssignments, allSecretaries, deactivatedEmails, disabledEmails, addInstitution, updateInstitution, updateInstitutionAdmin, addUnit, addInstitutionAdmin, institutionStatus, setInstitutionStatus } = data;

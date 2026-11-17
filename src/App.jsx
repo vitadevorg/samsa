@@ -39,6 +39,7 @@ import AdminProfile from './pages/admin/AdminProfile';
 
 import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
 import { ForumProvider } from './context/ForumContext';
+import { CatalogProvider } from './context/CatalogContext';
 import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
@@ -48,6 +49,7 @@ import VitadevDoctors from './pages/vitadev/VitadevDoctors';
 import VitadevInstitutions from './pages/vitadev/VitadevInstitutions';
 import VitadevUsers from './pages/vitadev/VitadevUsers';
 import VitadevAccount from './pages/vitadev/VitadevAccount';
+import VitadevCatalog from './pages/vitadev/VitadevCatalog';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -66,6 +68,7 @@ function App() {
         <ScrollToTop />
         {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
             (pantallas de clínica, Navbar, perfil del médico...) */}
+        <CatalogProvider>
         <ClinicDataProvider>
         <ForumProvider>
         <Routes>
@@ -141,10 +144,12 @@ function App() {
             <Route path="/vitadev/hospitals" element={<VitadevInstitutions key="hospital" kind="hospital" />} />
             <Route path="/vitadev/users" element={<VitadevUsers />} />
             <Route path="/vitadev/account" element={<VitadevAccount />} />
+            <Route path="/vitadev/catalog" element={<VitadevCatalog />} />
           </Route>
         </Routes>
         </ForumProvider>
         </ClinicDataProvider>
+        </CatalogProvider>
       </Router>
     </AuthProvider>
   );

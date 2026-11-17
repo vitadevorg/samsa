@@ -10,7 +10,8 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/useAuth';
 import { doctorsData } from '../data/doctors';
 import { createId } from '../utils/ids';
-import { SPECIALTIES, INSURANCE_OPTIONS, WEEK_DAYS } from '../constants/catalog';
+import { WEEK_DAYS } from '../constants/catalog';
+import { useCatalog } from '../context/catalog-context';
 import { useClinicData } from './clinic/clinicDataContext';
 import { getInstitutionById, getInstitutionType, formatSchedule, schedulesOverlap, getDocumentStatus, NON_EXPIRING_DOCUMENTS } from '../data/institutions';
 import { STATUS_BADGES, countDocumentIssues } from './clinic/documentStatus';
@@ -242,6 +243,8 @@ const withRangeIds = (data) => ({
   hours: data.hours.map(range => ({ ...range, id: range.id ?? createId() })),
 });
 const DoctorProfile = () => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { specialties: SPECIALTIES, insuranceOptions: INSURANCE_OPTIONS } = useCatalog();
   const fieldId = useId();
   const { id } = useParams();
   const { user, updateUser } = useAuth();

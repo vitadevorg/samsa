@@ -46,14 +46,14 @@ const IconAction = ({ icon: Icon, label, tone = 'blue', onClick, disabled = fals
     <span className="relative inline-flex">
       <button
         type="button"
-        onClick={(e) => { hide(); onClick?.(e); }}
-        disabled={disabled}
+        onClick={(e) => { hide(); if (!disabled) onClick?.(e); }}
+        aria-disabled={disabled || undefined}
         aria-label={label}
         onMouseEnter={(e) => show(e.currentTarget)}
         onMouseLeave={hide}
         onFocus={(e) => { if (e.currentTarget.matches(':focus-visible')) show(e.currentTarget); }}
         onBlur={hide}
-        className={`w-10 h-10 inline-flex items-center justify-center rounded-lg text-gray-500 transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 ${disabled ? '' : TONES[tone]}`}
+        className={`w-10 h-10 inline-flex items-center justify-center rounded-lg text-gray-500 transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${disabled ? 'opacity-40 cursor-not-allowed' : TONES[tone]}`}
       >
         <Icon className="w-5 h-5" />
         {badge > 0 && (

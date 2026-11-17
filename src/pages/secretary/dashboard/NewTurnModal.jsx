@@ -6,7 +6,7 @@ import {
 import SecretaryCalendar from './SecretaryCalendar';
 import { SecretaryModalOverlay, SecretaryModalCard, SecretaryModalHeader, DoctorTag } from './SecretaryModal';
 import AffiliationFields from '../../../components/AffiliationFields';
-import { INSURANCE_OPTIONS } from '../../../constants/catalog';
+import { useCatalog } from '../../../context/catalog-context';
 import { emptyAffiliation, pickAffiliation, requiresAffiliation, validateAffiliation } from '../../../utils/insuranceValidation';
 import { formatCuil, validateOptionalCuil } from '../../../utils/cuil';
 import { getScheduleSlots, isSlotTaken, isWorkingDay } from './agenda';
@@ -92,6 +92,8 @@ const TurnCreatedView = ({ turn, doctor, titleId, onCreateAnother, onClose }) =>
 // `doctor`: profesional dueño de la agenda; se muestra en el encabezado y en la salida.
 // Al registrar se muestra la pantalla de salida; `onCreateAnother` abre un formulario nuevo.
 const NewTurnModal = ({ doctor, doctorAppointments, doctorSchedule, initialData, onSubmit, onCreateAnother, onClose }) => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { insuranceOptions: INSURANCE_OPTIONS } = useCatalog();
   const fieldId = useId();
   const [createdTurn, setCreatedTurn] = useState(null);
   const [newTurnData, setNewTurnData] = useState(() => ({ ...EMPTY_TURN, ...initialData }));

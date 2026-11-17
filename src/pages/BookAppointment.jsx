@@ -14,7 +14,7 @@ import {
     buildCalendarMonth, buildTimeSlots, getSlotAvailability,
 } from '../utils/schedule';
 import { useTimeouts } from '../hooks/useTimeouts';
-import { INSURANCE_OPTIONS } from '../constants/catalog';
+import { useCatalog } from '../context/catalog-context';
 import AffiliationFields from '../components/AffiliationFields';
 import TermsCheckbox from '../components/TermsCheckbox';
 import { LEGAL_CONTACT_EMAIL } from '../data/legalTexts';
@@ -27,6 +27,8 @@ const buildInitialForm = (user) => ({
     insurance: user ? (user.insurance || 'Ninguna') : '',
 });
 const BookAppointment = () => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { insuranceOptions: INSURANCE_OPTIONS } = useCatalog();
     const fieldId = useId();
     const { schedule } = useTimeouts();
     const { id } = useParams();

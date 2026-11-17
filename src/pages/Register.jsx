@@ -6,7 +6,7 @@ import {
   Hash, CreditCard, HeartPulse, ChevronDown, ChevronRight,
   ShieldCheck, Activity, Check
 } from 'lucide-react';
-import { INSURANCE_OPTIONS } from '../constants/catalog';
+import { useCatalog } from '../context/catalog-context';
 import { useTimeouts } from '../hooks/useTimeouts';
 import AffiliationFields from '../components/AffiliationFields';
 import TermsCheckbox from '../components/TermsCheckbox';
@@ -109,6 +109,8 @@ const RegistrationAvatar = ({ currentState }) => {
   );
 };
 const Register = () => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { insuranceOptions: INSURANCE_OPTIONS } = useCatalog();
   const { schedule, clear } = useTimeouts();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({

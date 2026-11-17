@@ -220,3 +220,18 @@ Validación adicional:
     - Arriba, la cabecera de la cuenta (inicial, nombre y email).
     - Debajo, separadas por divisores, las secciones Usuario, Contraseña y Datos de recuperación, cada una con su ícono, título y una bajada.
     - Mismo estilo que las pantallas principales: `rounded-3xl`, `FadeIn` y tipografía del design system.
+12. **Gestión de datos (`/vitadev/catalog`)**, desde el menú de la cuenta ("Gestión de datos", debajo de "Mi cuenta") y desde el menú mobile:
+    - **Pestañas:** Especialidades, Obras sociales y Estudios, con su cantidad.
+    - **Por pestaña:** etiqueta con la **última actualización** (fecha y hora), búsqueda, alta (los estudios llevan grupo), edición en la misma fila y eliminación con confirmación.
+    - **Validación:** nombre obligatorio, de 2 a 60 caracteres y sin repetir.
+    - **Elementos en uso:** cada fila indica si está en uso ("En uso: 2 médicos y 2 instituciones"). Lo que está en uso **no se puede eliminar ni renombrar** (decisión del producto); su etiqueta explica dónde se usa. A un estudio en uso sí se le puede cambiar el grupo.
+    - **Catálogo compartido** (`src/context/CatalogContext.jsx`): lo leen todas las pantallas que antes usaban las listas fijas de `catalog.js`. Son los filtros de Profesionales, la reserva de turno, el registro, los perfiles, el turno manual, la solicitud de adhesión y los formularios de VitaDev. Un alta aparece al instante en todas.
+    - El menú de la cuenta muestra "Admin".
+
+    Validación en el navegador:
+    - Alta y baja de "Genética", con la última actualización a la hora actual.
+    - "cardiología" se rechaza por repetida.
+    - "Cardiología" no se puede eliminar.
+    - Renombrar "OSDE" se bloquea.
+    - "Medifé" aparece en el filtro de `/professionals`.
+    - Sin scroll horizontal a 375 px.

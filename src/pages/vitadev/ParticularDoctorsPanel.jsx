@@ -7,7 +7,8 @@ import {
   validateExpiry, addYearsISO, MAX_EXPIRY_YEARS, validateSchedule,
 } from '../clinic/clinicValidation';
 import { resetPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
-import { SPECIALTIES, WEEK_DAYS, INSURANCES } from '../../constants/catalog';
+import { WEEK_DAYS } from '../../constants/catalog';
+import { useCatalog } from '../../context/catalog-context';
 import { ROLES } from '../../constants/roles';
 import AccountStatusBadge from './AccountStatusBadge';
 import { buildUserDirectory } from './userDirectory';
@@ -74,6 +75,8 @@ const cleanForm = (values) => ({
 // `onOpen` avisa a la pantalla que se abrió un formulario acá, para que cierre el de la otra sección.
 // Cuando cambia `closeToken`, este panel cierra su formulario (sin volver a montarse ni repetir la animación).
 const ParticularDoctorsPanel = ({ onOpen, closeToken = 0 }) => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { specialties: SPECIALTIES, insurances: INSURANCES } = useCatalog();
   const fieldId = useId();
   const data = useClinicData();
   const {
