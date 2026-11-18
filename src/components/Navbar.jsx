@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogOut, ChevronDown, Menu, X,
-  Building2, Hospital, UserCog, KeyRound, Stethoscope, Users, User, Calendar, FileText, Star, Inbox, Contact, Newspaper, UserRound, Database } from 'lucide-react';
+  Building2, Hospital, UserCog, KeyRound, Stethoscope, Users, User, Calendar, FileText, Star, Inbox, Newspaper, UserRound, Database } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
@@ -67,9 +67,6 @@ const Navbar = () => {
                 <Link to={`${institutionBase}/secretaries`} className={getLinkClass(`${institutionBase}/secretaries`)}>
                   <Users className="w-4 h-4"/> Secretarias
                 </Link>
-                <Link to={`${institutionBase}/staff`} className={getLinkClass(`${institutionBase}/staff`)}>
-                  <Contact className="w-4 h-4"/> Personal
-                </Link>
                 <Link to={`${institutionBase}/requests`} className={getLinkClass(`${institutionBase}/requests`)}>
                   <Inbox className="w-4 h-4"/> Solicitudes
                   {pendingRequests > 0 && (
@@ -77,6 +74,9 @@ const Navbar = () => {
                       {pendingRequests}
                     </span>
                   )}
+                </Link>
+                <Link to="/news" className={getLinkClass('/news')}>
+                  <Newspaper className="w-4 h-4"/> Foro
                 </Link>
               </>
             ) : isVitadevAdmin ? (
@@ -167,9 +167,17 @@ const Navbar = () => {
                          </div>
                        </>
                     ) : isInstitutionAdmin ? (
-                       <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
-                          Modo Gestión
-                       </div>
+                       <>
+                         <Link to={`${institutionBase}/account`} onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <KeyRound className="w-4 h-4" /> Mi cuenta
+                         </Link>
+                         <Link to={`${institutionBase}/settings`} onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           {isHospitalAdmin ? <Hospital className="w-4 h-4" /> : <Building2 className="w-4 h-4" />} {isHospitalAdmin ? 'Datos del hospital' : 'Datos de la clínica'}
+                         </Link>
+                         <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
+                            Modo Gestión
+                         </div>
+                       </>
                     ) : isDoctor ? (
                       <>
                         <Link to="/doctor/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
@@ -230,12 +238,14 @@ const Navbar = () => {
         <div className="lg:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
           {institutionBase ? (
             <>
-              <Link to={`${institutionBase}/doctors`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to={`${institutionBase}/secretaries`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
-              <Link to={`${institutionBase}/staff`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Personal</Link>
-              <Link to={`${institutionBase}/requests`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+              <Link to={`${institutionBase}/doctors`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
+              <Link to={`${institutionBase}/secretaries`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
+              <Link to={`${institutionBase}/requests`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
                 Solicitudes{pendingRequests > 0 && ` (${pendingRequests})`}
               </Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to={`${institutionBase}/account`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to={`${institutionBase}/settings`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">{isHospitalAdmin ? 'Datos del hospital' : 'Datos de la clínica'}</Link>
             </>
           ) : isVitadevAdmin ? (
             <>

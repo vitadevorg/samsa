@@ -2,7 +2,7 @@ import React, { useId, useState } from 'react';
 import { ShieldAlert, X, Trash2 } from 'lucide-react';
 import { REASON_MAX, validateReason } from './forumPosts';
 
-// VitaDev borra la nota de otro autor: el motivo es obligatorio y el autor lo ve en el foro.
+// VitaDev (o la clínica u hospital, con sus médicos) borra la nota de otro autor: el motivo es obligatorio y el autor lo ve en el foro.
 // Como pide escribir, no se cierra con click afuera: solo con Cancelar o la X.
 const ModeratePostModal = ({ post, onCancel, onConfirm }) => {
   const fieldId = useId();

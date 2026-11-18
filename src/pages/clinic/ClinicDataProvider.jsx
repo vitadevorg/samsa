@@ -9,6 +9,7 @@ import {
   getInstitutionUnits, getInstitutionTerms,
   pendingDocuments, getDoctorEmail, getParticularDoctorDocuments,
 } from '../../data/institutions';
+import { doctorsData } from '../../data/doctors';
 import { ClinicDataContext } from './clinicDataContext';
 import { todayISO } from './clinicDates';
 
@@ -45,6 +46,9 @@ const ClinicDataProvider = ({ children }) => {
   // Datos de contacto de médicos de clínicas y hospitales editados por VitaDev: { [doctorId]: { name, email, phone } }.
   // Pisan al nombre y email de doctors.js solo en su cuenta y en Gestión de Usuarios (no en el perfil público).
   const [doctorContacts, setDoctorContacts] = useState({});
+  // Médicos que dio de alta una clínica u hospital (no están en doctors.js): { id, name, email, phone,
+  // specialty, insurances, institutionId }. Su vinculación con la institución va en `allAssignments`.
+  const [institutionDoctors, setInstitutionDoctors] = useState([]);
   const [deactivatedEmails, setDeactivatedEmails] = useState(() => new Set(getDeactivatedEmails()));
   const [disabledEmails, setDisabledEmails] = useState(() => new Set(getDisabledEmails()));
 
@@ -53,9 +57,27 @@ const ClinicDataProvider = ({ children }) => {
   const assignments = allAssignments.filter((a) => a.institutionId === clinic?.id);
   // Vinculaciones donde se pueden reservar turnos: las de instituciones activas. Las pantallas de
   // pacientes (cartilla, perfil del médico, reserva) usan esta lista en lugar de `allAssignments`.
-  const bookableAssignments = allAssignments.filter((a) => (institutions.find((i) => i.id === a.institutionId)?.status ?? 'active') === 'active');
+  // Tampoco cuentan las vinculaciones que la institución inhabilitó (`status: 'disabled'`).
+  const bookableAssignments = allAssignments.filter((a) =>
+    a.status !== 'disabled' && (institutions.find((i) => i.id === a.institutionId)?.status ?? 'active') === 'active');
   const secretaries = allSecretaries.filter((s) => s.institutionId === clinic?.id);
   const requests = allRequests.filter((r) => r.institutionId === clinic?.id);
+
+  // Datos de un médico de clínica u hospital: los de doctors.js o los del alta que hizo la institución,
+  // con los datos de contacto que haya corregido VitaDev por encima. `undefined` si no existe.
+  const findDoctor = (doctorId) => {
+    const own = institutionDoctors.find((d) => d.id === doctorId);
+    const base = own ?? doctorsData.find((d) => d.id === doctorId);
+    if (!base) return undefined;
+    const contact = doctorContacts[doctorId] ?? {};
+    return {
+      ...base,
+      name: contact.name ?? base.name,
+      email: contact.email ?? base.email ?? getDoctorEmail(doctorId),
+      phone: contact.phone ?? base.phone ?? '',
+    };
+  };
+  const doctorEmailOf = (doctorId) => findDoctor(doctorId)?.email ?? getDoctorEmail(doctorId);
 
   // Da de baja una cuenta (ya no puede iniciar sesión) y lo anota en el estado para
   // que las pantallas lo muestren. Todas las bajas pasan por acá.
@@ -91,11 +113,12 @@ const ClinicDataProvider = ({ children }) => {
   // Siempre creamos listas NUEVAS (con map/filter/spread) en lugar de modificar
   // la existente: React detecta los cambios comparando referencias.
 
-  // Un médico recién vinculado arranca con toda su documentación pendiente.
+  // Vincula a un médico existente: trae la documentación que la institución cargó al vincularlo
+  // (cada institución lleva la suya); si no viene, arranca toda pendiente.
   const addAssignment = (data) => {
     setAllAssignments((prev) => [
       ...prev,
-      { ...data, id: createId(), institutionId: clinic.id, documents: pendingDocuments() },
+      { ...data, id: createId(), institutionId: clinic.id, documents: data.documents ?? pendingDocuments() },
     ]);
   };
 
@@ -120,9 +143,43 @@ const ClinicDataProvider = ({ children }) => {
     );
     const worksElsewhere = allAssignments.some((a) => a.doctorId === removed.doctorId && a.id !== removed.id);
     if (!worksElsewhere) {
-      deactivate(doctorContacts[removed.doctorId]?.email ?? getDoctorEmail(removed.doctorId));
+      deactivate(doctorEmailOf(removed.doctorId));
     }
   };
+
+  // Alta de un médico nuevo por la institución (no existía en SAMSA): se guardan sus datos y su
+  // vinculación, con la documentación cargada en el alta. Devuelve el id del médico.
+  const addInstitutionDoctor = (doctor, assignment, documents) => {
+    const doctorId = createId();
+    setInstitutionDoctors((prev) => [...prev, { ...doctor, id: doctorId, institutionId: clinic.id }]);
+    setAllAssignments((prev) => [
+      ...prev,
+      { ...assignment, id: createId(), doctorId, institutionId: clinic.id, documents: documents ?? pendingDocuments() },
+    ]);
+    return doctorId;
+  };
+
+  // La institución corrige los datos de un médico que ella misma dio de alta.
+  const updateInstitutionDoctor = (doctorId, changes) => {
+    setInstitutionDoctors((prev) => prev.map((d) => (d.id === doctorId ? { ...d, ...changes } : d)));
+  };
+
+  // Inhabilitar a un médico en UNA institución: deja de recibir turnos ahí (ver `bookableAssignments`).
+  // Su cuenta se inhabilita solo si no atiende en ninguna otra institución; si atiende en otra, sigue
+  // entrando normalmente. Habilitar deshace lo mismo.
+  const activeElsewhere = (assignment) => allAssignments.some(
+    (a) => a.doctorId === assignment.doctorId && a.id !== assignment.id && a.status !== 'disabled'
+  );
+  const setAssignmentStatus = (id, status) => {
+    const target = allAssignments.find((a) => a.id === id);
+    if (!target) return;
+    setAllAssignments((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+    if (!activeElsewhere(target)) {
+      (status === 'disabled' ? disable : enable)(doctorEmailOf(target.doctorId));
+    }
+  };
+  const disableAssignment = (id) => setAssignmentStatus(id, 'disabled');
+  const enableAssignment = (id) => setAssignmentStatus(id, 'active');
 
   // Marca un documento como recibido: queda vigente con la nueva fecha de vencimiento.
   const updateDocument = (assignmentId, type, expiresAt) => {
@@ -207,6 +264,15 @@ const ClinicDataProvider = ({ children }) => {
     setInstitutions((prev) => prev.map((i) => (i.id === id ? { ...i, ...changes } : i)));
   };
 
+  // La institución elige las obras sociales que acepta y los estudios que realiza. Si deja de aceptar
+  // una obra social, se quita también de los médicos que dio de alta (no pueden aceptar una que ella no recibe).
+  const updateInstitutionOffer = (id, { insurances, studies }) => {
+    updateInstitution(id, { insurances, studies });
+    setInstitutionDoctors((prev) => prev.map((d) => (d.institutionId === id
+      ? { ...d, insurances: (d.insurances ?? []).filter((name) => insurances.includes(name)) }
+      : d)));
+  };
+
   // Asocia una clínica (`kind` 'clinic') u hospital ('hospital') nueva, con su administrador.
   // Arranca sin áreas ni sectores; `institution.id` lo genera quien llama.
   const addInstitution = (kind, institution, admin) => {
@@ -233,7 +299,7 @@ const ClinicDataProvider = ({ children }) => {
     return [
       ...institutionAdmins.filter((a) => a.institutionId === institutionId).map((a) => a.email),
       ...allSecretaries.filter((s) => s.institutionId === institutionId).map((s) => s.email),
-      ...onlyHere.map((doctorId) => doctorContacts[doctorId]?.email ?? getDoctorEmail(doctorId)),
+      ...onlyHere.map(doctorEmailOf),
     ];
   };
 
@@ -250,7 +316,7 @@ const ClinicDataProvider = ({ children }) => {
     setInstitutionAdmins((prev) => prev.map((a) => (a.id === id ? { ...a, ...changes } : a)));
   };
 
-  // Crea un área (clínica) o sector (hospital). Aparece en Personal y en los formularios
+  // Crea un área (clínica) o sector (hospital). Aparece en los formularios
   // de médicos y secretarias de esa institución, que leen `units`.
   const addUnit = (institutionId, name) => {
     setInstitutions((prev) =>
@@ -320,6 +386,8 @@ const ClinicDataProvider = ({ children }) => {
     clinic, units, terms, basePath,
     allAssignments, allRequests, addRequest, allSecretaries,
     assignments, addAssignment, updateAssignment, removeAssignment, updateDocument,
+    findDoctor, institutionDoctors, addInstitutionDoctor, updateInstitutionDoctor,
+    disableAssignment, enableAssignment, updateInstitutionOffer,
     secretaries, addSecretary, updateSecretary, removeSecretary,
     requests, acceptRequest, rejectRequest,
     // VitaDev: todo el sistema, sin filtrar por institución.

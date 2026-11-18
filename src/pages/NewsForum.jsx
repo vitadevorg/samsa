@@ -10,7 +10,8 @@ import { getDoctorLabel, stripTitle } from '../utils/doctorName';
 import { useTimeouts } from '../hooks/useTimeouts';
 import ForumPostModal from './forum/ForumPostModal';
 import ModeratePostModal from './forum/ModeratePostModal';
-import { canModerate } from '../context/forum-context';
+import { canModerate, canPublish as canPublishIn } from '../context/forum-context';
+import { useClinicData } from './clinic/clinicDataContext';
 import { formatPostDate } from './forum/forumPosts';
 import {
     Newspaper, Calendar, ArrowRight, X, HeartPulse, Activity, BellRing,
@@ -139,12 +140,16 @@ const PostBody = ({ body }) => (
 
 const NewsForum = () => {
     const { user } = useAuth();
-    const { posts, addPost, updatePost, deletePost, isOwnPost, moderatePost, noticesFor, dismissNotice, hiddenNoteIds, removeFixedNote } = useForum();
+    const { posts, addPost, updatePost, deletePost, isOwnPost, canModeratePost, moderatePost, noticesFor, dismissNotice, hiddenNoteIds, removeFixedNote } = useForum();
+    // Institución del administrador de clínica u hospital (undefined para el resto): firma sus notas.
+    const { clinic } = useClinicData();
     const { schedule } = useTimeouts();
     const isDoctor = user?.role === ROLES.DOCTOR;
     const isVitadev = user?.role === ROLES.VITADEV_ADMIN;
-    // Publican médicos y VitaDev; solo VitaDev puede además borrar notas de otros autores.
-    const canPublish = isDoctor || isVitadev;
+    const isInstitutionAdmin = Boolean(clinic) && (user?.role === ROLES.CLINIC_ADMIN || user?.role === ROLES.HOSPITAL_ADMIN);
+    // Publican médicos, VitaDev y los administradores de clínica u hospital. VitaDev modera todo el foro;
+    // la clínica o el hospital, solo las notas de sus médicos.
+    const canPublish = canPublishIn(user);
     const isModerator = canModerate(user);
 
     const [selectedId, setSelectedId] = useState(null);
@@ -156,8 +161,9 @@ const NewsForum = () => {
     const [toast, setToast] = useState(null);
 
     const isOwn = (item) => canPublish && Boolean(item.post) && isOwnPost(item.post, user.email);
-    // VitaDev puede eliminar cualquier publicación que no sea suya (las propias se borran con Borrar).
-    const canModerateItem = (item) => isModerator && !isOwn(item);
+    // Notas ajenas que puede eliminar: VitaDev, cualquiera (también las fijas); la clínica u hospital, las de sus
+    // médicos. Las propias se borran con Borrar.
+    const canModerateItem = (item) => (item.post ? canModeratePost(user, item.post) : isModerator);
     const notices = canPublish ? noticesFor(user.email) : [];
     const doctorItems = posts.map(toNewsItem);
     const allItems = [...doctorItems, ...mockNews.filter((note) => !hiddenNoteIds.has(note.id))];
@@ -176,7 +182,7 @@ const NewsForum = () => {
             showToast('Los cambios de tu publicación se guardaron.');
         } else {
             // "Dra. Gómez" no alcanza como firma: se muestra título + nombre completo.
-            const authorName = isVitadev ? 'Equipo VitaDev' : `${getDoctorLabel(user).split(' ')[0]} ${stripTitle(user.name)}`;
+            const authorName = isVitadev ? 'Equipo VitaDev' : isInstitutionAdmin ? clinic.name : `${getDoctorLabel(user).split(' ')[0]} ${stripTitle(user.name)}`;
             addPost(data, { email: user.email, name: authorName });
             setFilter('all');
             showToast('Tu nota ya está publicada en el foro.');
@@ -231,7 +237,9 @@ const NewsForum = () => {
                         {/* VitaDev no ve bajada: solo el título y sus acciones. */}
                         {!isVitadev && (
                             <p className="text-slate-500 mt-4 text-base sm:text-lg max-w-2xl">
-                                {isDoctor
+                                {isInstitutionAdmin
+                                    ? `Publicá novedades de ${clinic.name} y moderá las notas de tus médicos.`
+                                    : isDoctor
                                     ? 'Compartí tu experiencia con la comunidad SAMSA. Cada nota que publicás contribuye a que te conozcan más pacientes.'
                                     : 'Mantente informado con las últimas noticias de nuestra institución, avances médicos y consejos de salud preventiva redactados por nuestros profesionales.'}
                             </p>
@@ -257,7 +265,7 @@ const NewsForum = () => {
                                     <ShieldAlert className="w-5 h-5 text-amber-600" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-amber-900 break-words">VitaDev eliminó tu publicación "{notice.postTitle}"</p>
+                                    <p className="font-bold text-amber-900 break-words">{notice.moderatorName ?? 'VitaDev'} eliminó tu publicación "{notice.postTitle}"</p>
                                     <p className="text-sm text-amber-800 mt-1 break-words"><span className="font-semibold">Motivo:</span> {notice.reason}</p>
                                 </div>
                                 <button type="button" onClick={() => dismissNotice(notice.id, user.email)} aria-label="Descartar aviso" className="p-1.5 rounded-full text-amber-700 hover:bg-amber-100 transition shrink-0">

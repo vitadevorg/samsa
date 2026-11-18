@@ -28,9 +28,9 @@ const SecretaryDashboard = () => {
   // Médicos de esta secretaria: los que le asignó el admin de su clínica.
   // Se la busca por su email entre las secretarias del estado compartido.
   const { user } = useAuth();
-  const { allSecretaries, allAssignments } = useClinicData();
+  const { allSecretaries, allAssignments, findDoctor: findStaffDoctor } = useClinicData();
   const secretary = allSecretaries.find(s => s.email === user?.email);
-  const doctors = buildSecretaryDoctors(secretary, allAssignments);
+  const doctors = buildSecretaryDoctors(secretary, allAssignments, findStaffDoctor);
 
   const {
     appointments, suspended,

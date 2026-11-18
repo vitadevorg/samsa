@@ -4,8 +4,10 @@ import { EditConfirmModal, SuccessModal } from '../clinic/ClinicModals';
 import { useClinicData } from '../clinic/clinicDataContext';
 import {
   validateName, validateEmail, validatePhone, validateAddress, validateRequired, errorBorder,
-  validateExpiry, addYearsISO, MAX_EXPIRY_YEARS, validateSchedule,
+  validateSchedule,
 } from '../clinic/clinicValidation';
+import DocumentsChecklist from '../clinic/DocumentsChecklist';
+import { EMPTY_DOCS, toDocuments, validateDocs } from '../clinic/documentsForm';
 import { resetPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
 import { WEEK_DAYS } from '../../constants/catalog';
 import { useCatalog } from '../../context/catalog-context';
@@ -21,7 +23,7 @@ import FadeIn from '../../components/FadeIn';
 import ClinicDocumentsModal from '../clinic/ClinicDocumentsModal';
 import { countDocumentIssues, countDocumentsExpiringSoon } from '../clinic/documentStatus';
 import { todayISO } from '../clinic/clinicDates';
-import { DOCUMENT_TYPES, NON_EXPIRING_DOCUMENTS, formatSchedule } from '../../data/institutions';
+import { formatSchedule } from '../../data/institutions';
 import { Trash2, Pencil, KeyRound, Ban, UserCheck, UserPlus, Stethoscope, Save, X, MapPin, FileText, Clock, Wallet, ChevronDown, Check } from 'lucide-react';
 
 const EMPTY_FORM = {
@@ -37,16 +39,6 @@ const EMPTY_FORM = {
   endTime: '12:00',
   insurances: [],
 };
-
-// Documentación cargada en el alta: por documento, si se recibió y hasta cuándo vale.
-// Los mismos documentos que pide una clínica; los que no se marquen quedan pendientes.
-const EMPTY_DOCS = Object.fromEntries(DOCUMENT_TYPES.map((type) => [type, { received: false, expiresAt: '' }]));
-const needsExpiry = (type) => !NON_EXPIRING_DOCUMENTS.includes(type);
-
-// Lista `documents` lista para guardar a partir de lo marcado en el alta.
-const toDocuments = (docs) => DOCUMENT_TYPES.map((type) => (docs[type].received
-  ? { type, status: 'vigente', expiresAt: needsExpiry(type) ? docs[type].expiresAt : null }
-  : { type, status: 'pendiente', expiresAt: null }));
 
 // Convierte un médico en los valores del formulario de edición.
 const toForm = (doctor) => ({
@@ -165,17 +157,13 @@ const ParticularDoctorsPanel = ({ onOpen, closeToken = 0 }) => {
 
   // Solo en el alta: la documentación es obligatoria para crear la cuenta. Los cuatro documentos
   // tienen que estar recibidos y los que vencen, con una fecha válida.
-  const validateDocs = () => (isEditing ? {} : Object.fromEntries(DOCUMENT_TYPES
-    .map((type) => [type, !docs[type].received
-      ? 'Marcalo como recibido: es obligatorio para crear la cuenta.'
-      : needsExpiry(type) ? validateExpiry(docs[type].expiresAt, today) : ''])
-    .filter(([, message]) => message)));
+  const validateAllDocs = () => (isEditing ? {} : validateDocs(docs, today));
 
   // Validamos y pedimos confirmación (naranja) tanto para agregar como para editar.
   const handleSubmit = (e) => {
     e.preventDefault(); // evita que el navegador recargue la página al enviar el form
     const found = validateForm();
-    const foundDocs = validateDocs();
+    const foundDocs = validateAllDocs();
     setErrors(found);
     setDocErrors(foundDocs);
     if (Object.keys(found).length > 0 || Object.keys(foundDocs).length > 0) return;
@@ -207,9 +195,11 @@ const ParticularDoctorsPanel = ({ onOpen, closeToken = 0 }) => {
   };
 
   const handleConfirmDelete = () => {
+    const name = particularDoctors.find((d) => d.id === deleteId)?.name;
     removeParticularDoctor(deleteId);
     if (deleteId === editId) cancelEdit();
     setDeleteId(null);
+    showSuccess('¡Médico eliminado!', `${name} salió de la lista y su cuenta fue dada de baja.`);
   };
 
   const doctorToDelete = particularDoctors.find((d) => d.id === deleteId);
@@ -408,57 +398,7 @@ const ParticularDoctorsPanel = ({ onOpen, closeToken = 0 }) => {
 
           {/* Documentación: solo en el alta. Después se actualiza con el ícono Documentación de la tabla. */}
           {!isEditing && (
-            <fieldset className="border-t border-gray-100 pt-5">
-              <legend className="font-bold text-gray-800 flex items-center gap-2 mb-1">
-                <FileText className="w-5 h-5 text-blue-600"/> Documentación
-              </legend>
-              <p className="text-sm text-gray-500 mb-4">Obligatoria para crear la cuenta: marcá los cuatro documentos como recibidos y cargá el vencimiento de los que vencen.</p>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
-                {DOCUMENT_TYPES.map((type) => {
-                  const doc = docs[type];
-                  const checkId = `${fieldId}-doc-${type.replace(/\s+/g, '-')}`;
-                  return (
-                    <li key={type} className={`p-2 rounded-xl border transition ${doc.received ? 'border-blue-200 bg-blue-50/50' : 'border-gray-200 bg-white'}`}>
-                      {/* Mismo casillero que el panel de obras sociales */}
-                      <button
-                        id={checkId}
-                        type="button"
-                        role="checkbox"
-                        aria-checked={doc.received}
-                        onClick={() => updateDoc(type, { received: !doc.received, expiresAt: doc.received ? '' : doc.expiresAt })}
-                        className={`w-full min-h-[40px] px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm font-medium text-left transition ${doc.received ? 'text-blue-700' : 'text-gray-700 hover:bg-gray-50'}`}
-                      >
-                        <span className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${doc.received ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-300 bg-white'}`}>
-                          {doc.received && <Check className="w-3.5 h-3.5" />}
-                        </span>
-                        <span className="font-bold">{type}</span>
-                        <span className={`ml-auto text-xs font-bold ${doc.received ? 'text-green-700' : 'text-amber-600'}`}>
-                          {doc.received ? 'Recibido' : 'Pendiente'}
-                        </span>
-                      </button>
-                      {doc.received && needsExpiry(type) && (
-                        <div className="mt-2 px-3 pb-2">
-                          <label htmlFor={`${checkId}-vence`} className={labelClass}>Vencimiento</label>
-                          <input
-                            id={`${checkId}-vence`}
-                            type="date"
-                            min={today}
-                            max={addYearsISO(today, MAX_EXPIRY_YEARS)}
-                            value={doc.expiresAt}
-                            onChange={(e) => updateDoc(type, { expiresAt: e.target.value })}
-                            aria-invalid={Boolean(docErrors[type])}
-                            className={`${inputClass} ${errorBorder(docErrors[type])}`}
-                          />
-                          {docErrors[type] && <p role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{docErrors[type]}</p>}
-                        </div>
-                      )}
-                      {doc.received && !needsExpiry(type) && <p className="text-xs text-gray-500 ml-[2.625rem] pb-2">No vence.</p>}
-                      {!doc.received && docErrors[type] && <p role="alert" className="text-xs text-red-600 font-medium ml-[2.625rem] pr-3 pb-2">{docErrors[type]}</p>}
-                    </li>
-                  );
-                })}
-              </ul>
-            </fieldset>
+            <DocumentsChecklist docs={docs} errors={docErrors} today={today} onChange={updateDoc} labelClass={labelClass} inputClass={inputClass} />
           )}
 
           <div className="flex justify-end">

@@ -35,9 +35,9 @@ const SecretaryAccount = () => {
   const fileInputRef = useRef(null);
   // Médicos cuya agenda maneja: los mismos que ve en la Agenda Diaria (solo lectura).
   const clinicData = useClinicData();
-  const { allSecretaries, allAssignments, updateSecretary } = clinicData;
+  const { allSecretaries, allAssignments, updateSecretary, findDoctor } = clinicData;
   const secretary = allSecretaries.find((s) => s.email === user?.email);
-  const doctors = buildSecretaryDoctors(secretary, allAssignments);
+  const doctors = buildSecretaryDoctors(secretary, allAssignments, findDoctor);
 
   const [isEditing, setIsEditing] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '', email: user?.email || '', currentPassword: '' });

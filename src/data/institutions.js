@@ -50,7 +50,7 @@ export const HOSPITALS = [
     email: 'contacto@hospitalcentral.samsa.med',
     legalName: 'Hospital Central SAMSA S.A.',
     refes: '10900054321098',
-    insurances: ['PAMI', 'Subsidio de Salud', 'IOS', 'OSECAC', 'Swiss Medical'],
+    // El hospital es público: no trabaja con obras sociales.
     studies: ['Análisis clínicos', 'Ecografía', 'Radiografía', 'Tomografía computada', 'Resonancia magnética', 'Mamografía', 'Electrocardiograma', 'Endoscopía'],
     arcaVerified: true,
     cuit: '30-70112233-6',

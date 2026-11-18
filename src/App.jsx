@@ -37,7 +37,7 @@ import { CatalogProvider } from './context/CatalogContext';
 import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
-import ClinicStaff from './pages/clinic/ClinicStaff';
+import ClinicSettings from './pages/clinic/ClinicSettings';
 import VitadevDashboard from './pages/vitadev/VitadevDashboard';
 import VitadevDoctors from './pages/vitadev/VitadevDoctors';
 import VitadevInstitutions from './pages/vitadev/VitadevInstitutions';
@@ -110,16 +110,18 @@ function App() {
           <Route element={<ProtectedRoute roles={[ROLES.CLINIC_ADMIN]} />}>
             <Route path="/clinic/doctors" element={<ClinicDoctors />} />
             <Route path="/clinic/secretaries" element={<ClinicSecretaries />} />
-            <Route path="/clinic/staff" element={<ClinicStaff />} />
             <Route path="/clinic/requests" element={<ClinicRequests />} />
+            <Route path="/clinic/settings" element={<ClinicSettings />} />
+            <Route path="/clinic/account" element={<VitadevAccount />} />
           </Route>
 
           {/* El hospital usa las mismas pantallas que la clínica, bajo /hospital/... */}
           <Route element={<ProtectedRoute roles={[ROLES.HOSPITAL_ADMIN]} />}>
             <Route path="/hospital/doctors" element={<ClinicDoctors />} />
             <Route path="/hospital/secretaries" element={<ClinicSecretaries />} />
-            <Route path="/hospital/staff" element={<ClinicStaff />} />
             <Route path="/hospital/requests" element={<ClinicRequests />} />
+            <Route path="/hospital/settings" element={<ClinicSettings />} />
+            <Route path="/hospital/account" element={<VitadevAccount />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={[ROLES.VITADEV_ADMIN]} />}>
