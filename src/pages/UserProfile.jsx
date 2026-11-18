@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/useAuth';
-import { INSURANCE_OPTIONS } from '../constants/catalog';
+import { useCatalog } from '../context/catalog-context';
 import { useTimeouts } from '../hooks/useTimeouts';
 import AffiliationFields from '../components/AffiliationFields';
 import { emptyAffiliation, pickAffiliation, requiresAffiliation, validateAffiliation } from '../utils/insuranceValidation';
@@ -36,6 +36,8 @@ const InputField = ({ label, name, type = "text", icon: Icon, value, onChange, d
   );
 };
 const UserProfile = () => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { insuranceOptions: INSURANCE_OPTIONS } = useCatalog();
   const fieldId = useId();
   const { schedule } = useTimeouts();
   const { user, updateUser, logout } = useAuth();

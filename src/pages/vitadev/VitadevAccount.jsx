@@ -8,6 +8,8 @@ import { verifyPassword, setOwnPassword, updateAccount, getRegisteredEmails } fr
 import { buildUserDirectory } from './userDirectory';
 import { useSuccessModal } from './useSuccessModal';
 import { UserCog, Mail, KeyRound, LifeBuoy, Save } from 'lucide-react';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
 
 const EMPTY_EMAIL_FORM = { email: '', currentPassword: '' };
 const EMPTY_PASSWORD_FORM = { currentPassword: '', password: '', confirmation: '' };
@@ -118,7 +120,7 @@ const VitadevAccount = () => {
   const submitClass = 'py-3 px-8 rounded-xl font-bold text-white transition shadow-md flex justify-center gap-2 items-center bg-blue-600 hover:bg-blue-700 shadow-blue-200';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <EditConfirmModal
         isOpen={confirming !== null}
@@ -134,56 +136,80 @@ const VitadevAccount = () => {
       />
       <SuccessModal isOpen={success !== null} title={success?.title} message={success?.message} />
 
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="bg-blue-100 p-2 rounded-lg"><UserCog className="text-blue-600 w-8 h-8"/></div>
-            Mi cuenta
-          </h1>
-          <p className="text-gray-500 mt-2 text-sm">Usuario actual: <span className="font-bold text-gray-700">{user.email}</span></p>
-        </div>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={UserCog}
+          eyebrow="Administración SAMSA"
+          title="Mi cuenta"
+        />
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm mb-8 border border-gray-200">
-          <h3 className="font-bold text-xl text-gray-800 mb-6 flex items-center gap-2"><Mail className="w-5 h-5 text-blue-600"/> Cambiar usuario</h3>
-          <form onSubmit={handleSubmitEmail} noValidate className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {field(emailForm, emailErrors, updateEmailField, 'email', 'usuario', 'Nuevo usuario (email)', { type: 'email', maxLength: 80, placeholder: 'nuevo@samsa.med' })}
-              {field(emailForm, emailErrors, updateEmailField, 'currentPassword', 'usuario-clave', 'Contraseña actual', { type: 'password', maxLength: 64, autoComplete: 'current-password' })}
+        <FadeIn delay={100}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+          {/* Cabecera de la cuenta */}
+          <div className="p-5 sm:p-8 flex items-center gap-4 bg-gradient-to-r from-blue-50/60 to-white">
+            <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white text-xl font-black flex items-center justify-center shadow-md shadow-blue-500/30 shrink-0">A</div>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-gray-900">Admin</p>
+              <p className="text-gray-500 text-sm break-all">{user.email}</p>
             </div>
-            <div className="flex justify-end">
-              <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Cambiar usuario</button>
+          </div>
+          <section className="p-5 sm:p-8" aria-labelledby={`${fieldId}-mail`}>
+            <div className="flex items-start gap-3 mb-6">
+              <div className="bg-blue-100 p-2 rounded-xl shrink-0"><Mail className="w-5 h-5 text-blue-700"/></div>
+              <div>
+                <h2 id={`${fieldId}-mail`} className="text-lg sm:text-xl font-bold text-gray-900">Usuario</h2>
+                <p className="text-gray-500 text-sm">El email con el que entrás al sistema.</p>
+              </div>
             </div>
-          </form>
-        </div>
-
-        <div className="bg-white p-8 rounded-2xl shadow-sm mb-8 border border-gray-200">
-          <h3 className="font-bold text-xl text-gray-800 mb-6 flex items-center gap-2"><KeyRound className="w-5 h-5 text-blue-600"/> Cambiar contraseña</h3>
-          <form onSubmit={handleSubmitPassword} noValidate className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {field(passwordForm, passwordErrors, updatePasswordField, 'currentPassword', 'clave-actual', 'Contraseña actual', { type: 'password', maxLength: 64, autoComplete: 'current-password' })}
-              {field(passwordForm, passwordErrors, updatePasswordField, 'password', 'clave-nueva', 'Nueva contraseña', { type: 'password', maxLength: 64, autoComplete: 'new-password' })}
-              {field(passwordForm, passwordErrors, updatePasswordField, 'confirmation', 'clave-repetir', 'Repetir nueva contraseña', { type: 'password', maxLength: 64, autoComplete: 'new-password' })}
+            <form onSubmit={handleSubmitEmail} noValidate className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {field(emailForm, emailErrors, updateEmailField, 'email', 'usuario', 'Nuevo usuario (email)', { type: 'email', maxLength: 80, placeholder: 'nuevo@samsa.med' })}
+                {field(emailForm, emailErrors, updateEmailField, 'currentPassword', 'usuario-clave', 'Contraseña actual', { type: 'password', maxLength: 64, autoComplete: 'current-password' })}
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Cambiar usuario</button>
+              </div>
+            </form>
+          </section>
+          <section className="p-5 sm:p-8" aria-labelledby={`${fieldId}-keyround`}>
+            <div className="flex items-start gap-3 mb-6">
+              <div className="bg-blue-100 p-2 rounded-xl shrink-0"><KeyRound className="w-5 h-5 text-blue-700"/></div>
+              <div>
+                <h2 id={`${fieldId}-keyround`} className="text-lg sm:text-xl font-bold text-gray-900">Contraseña</h2>
+                <p className="text-gray-500 text-sm">Para cambiarla, ingresá la actual y la nueva dos veces.</p>
+              </div>
             </div>
-            <p className="text-xs text-gray-400 ml-1">Mínimo 8 caracteres, combinando letras y números.</p>
-            <div className="flex justify-end">
-              <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Cambiar contraseña</button>
+            <form onSubmit={handleSubmitPassword} noValidate className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {field(passwordForm, passwordErrors, updatePasswordField, 'currentPassword', 'clave-actual', 'Contraseña actual', { type: 'password', maxLength: 64, autoComplete: 'current-password' })}
+                {field(passwordForm, passwordErrors, updatePasswordField, 'password', 'clave-nueva', 'Nueva contraseña', { type: 'password', maxLength: 64, autoComplete: 'new-password' })}
+                {field(passwordForm, passwordErrors, updatePasswordField, 'confirmation', 'clave-repetir', 'Repetir nueva contraseña', { type: 'password', maxLength: 64, autoComplete: 'new-password' })}
+              </div>
+              <p className="text-xs text-gray-400 ml-1">Mínimo 8 caracteres, combinando letras y números.</p>
+              <div className="flex justify-end">
+                <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Cambiar contraseña</button>
+              </div>
+            </form>
+          </section>
+          <section className="p-5 sm:p-8" aria-labelledby={`${fieldId}-lifebuoy`}>
+            <div className="flex items-start gap-3 mb-6">
+              <div className="bg-blue-100 p-2 rounded-xl shrink-0"><LifeBuoy className="w-5 h-5 text-blue-700"/></div>
+              <div>
+                <h2 id={`${fieldId}-lifebuoy`} className="text-lg sm:text-xl font-bold text-gray-900">Datos de recuperación</h2>
+                <p className="text-gray-500 text-sm">Adónde te enviamos el enlace si olvidás la contraseña.</p>
+              </div>
             </div>
-          </form>
-        </div>
-
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
-          <h3 className="font-bold text-xl text-gray-800 mb-6 flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-blue-600"/> Datos de recuperación</h3>
-          <form onSubmit={handleSubmitRecovery} noValidate className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {field(recoveryForm, recoveryErrors, updateRecoveryField, 'email', 'recuperacion-correo', 'Correo de recuperación', { type: 'email', maxLength: 80, placeholder: 'tu.correo@ejemplo.com' })}
-              {field(recoveryForm, recoveryErrors, updateRecoveryField, 'phone', 'recuperacion-telefono', 'Teléfono de recuperación', { type: 'tel', inputMode: 'tel', maxLength: 20, placeholder: '381 400-0000' })}
-              {field(recoveryForm, recoveryErrors, updateRecoveryField, 'currentPassword', 'recuperacion-clave', 'Contraseña actual', { type: 'password', maxLength: 64, autoComplete: 'current-password' })}
-            </div>
-            <div className="flex justify-end">
-              <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Guardar datos</button>
-            </div>
-          </form>
-        </div>
+            <form onSubmit={handleSubmitRecovery} noValidate className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {field(recoveryForm, recoveryErrors, updateRecoveryField, 'email', 'recuperacion-correo', 'Correo de recuperación', { type: 'email', maxLength: 80, placeholder: 'tu.correo@ejemplo.com' })}
+                {field(recoveryForm, recoveryErrors, updateRecoveryField, 'phone', 'recuperacion-telefono', 'Teléfono de recuperación', { type: 'tel', inputMode: 'tel', maxLength: 20, placeholder: '381 400-0000' })}
+                {field(recoveryForm, recoveryErrors, updateRecoveryField, 'currentPassword', 'recuperacion-clave', 'Contraseña actual', { type: 'password', maxLength: 64, autoComplete: 'current-password' })}
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" className={submitClass}><Save className="w-5 h-5"/> Guardar datos</button>
+              </div>
+            </form>
+          </section>
+        </div></FadeIn>
       </div>
     </div>
   );

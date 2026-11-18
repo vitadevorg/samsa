@@ -11,8 +11,8 @@ import FadeIn from '../components/FadeIn';
 import { doctorsData } from '../data/doctors';
 import { useClinicData } from './clinic/clinicDataContext';
 import { getDoctorLocations } from '../data/institutions';
-import { SPECIALTIES, INSURANCES, WEEK_DAYS } from '../constants/catalog';
-const SPECIALTY_FILTERS = ['Todas', ...SPECIALTIES];
+import { WEEK_DAYS } from '../constants/catalog';
+import { useCatalog } from '../context/catalog-context';
 const WORKING_DAYS = WEEK_DAYS.filter(day => day !== 'Dom');
 // `locations`: dónde y cuándo atiende (una por institución, o su atención particular).
 const DoctorCard = ({ doctor, locations }) => {
@@ -82,7 +82,7 @@ const DoctorCard = ({ doctor, locations }) => {
 };
 // Filtros iniciales a partir de ?specialty= (links desde Home y Turnos): si coincide con
 // una especialidad conocida la selecciona; si no, la usa como texto de búsqueda.
-const getInitialFilters = (queryString) => {
+const getInitialFilters = (queryString, SPECIALTY_FILTERS) => {
   const specialtyParam = new URLSearchParams(queryString).get('specialty');
   if (!specialtyParam) return { specialty: 'Todas', search: '' };
   const match = SPECIALTY_FILTERS.find(s => s.toLowerCase() === specialtyParam.toLowerCase());
@@ -90,8 +90,11 @@ const getInitialFilters = (queryString) => {
   return { specialty: 'Todas', search: specialtyParam };
 };
 const Professionals = () => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { specialties: SPECIALTIES, insurances: INSURANCES } = useCatalog();
+  const SPECIALTY_FILTERS = ['Todas', ...SPECIALTIES];
   const location = useLocation();
-  const [initialFilters] = useState(() => getInitialFilters(location.search));
+  const [initialFilters] = useState(() => getInitialFilters(location.search, SPECIALTY_FILTERS));
   const [search, setSearch] = useState(initialFilters.search);
   const [selectedSpecialty, setSelectedSpecialty] = useState(initialFilters.specialty);
   const [selectedInsurance, setSelectedInsurance] = useState('');
@@ -100,7 +103,8 @@ const Professionals = () => {
   const [attentionType, setAttentionType] = useState('all');
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
   // Horarios reales de cada médico (los que fija cada institución), del estado compartido.
-  const { allAssignments } = useClinicData();
+  // Solo instituciones activas (las inhabilitadas o dadas de baja no se muestran a los pacientes).
+  const { bookableAssignments: allAssignments } = useClinicData();
   const locationsByDoctor = useMemo(
       () => Object.fromEntries(doctorsData.map(doc => [doc.id, getDoctorLocations(doc, allAssignments)])),
       [allAssignments]

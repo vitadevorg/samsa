@@ -346,7 +346,7 @@ const ClinicDoctors = () => {
               {assignments.map(assignment => {
                 const doctor = findDoctor(assignment.doctorId);
                 // Documentos vencidos o pendientes: se muestran como aviso en el botón.
-                const documentIssues = assignment.documents.filter((doc) => getDocumentStatus(doc, today) !== 'vigente').length;
+                const documentIssues = assignment.documents.filter((doc) => !['vigente', 'por_vencer'].includes(getDocumentStatus(doc, today))).length;
                 return (
                   <tr key={assignment.id} className={`hover:bg-blue-50/50 transition ${editId === assignment.id ? 'bg-orange-50' : ''}`}>
                     <td className="p-5">

@@ -23,7 +23,7 @@ export const EditConfirmModal = ({ isOpen, title, message, onCancel, onConfirm, 
         <p className="text-slate-500 font-medium mb-8">{message}</p>
         <div className="flex gap-3">
           <button onClick={onCancel} className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold rounded-xl transition-colors">
-            Revisar
+            Cancelar
           </button>
           <button onClick={onConfirm} className="flex-1 py-3 px-4 bg-amber-500 text-white hover:bg-amber-600 font-bold rounded-xl transition-colors shadow-lg shadow-amber-500/30">
             {confirmLabel}

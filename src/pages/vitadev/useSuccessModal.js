@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useTimeouts } from '../../hooks/useTimeouts';
 
 // Cuánto tiempo (en milisegundos) queda visible la ventana verde de éxito.
-// Si el mensaje incluye una contraseña temporal se deja más tiempo para poder copiarla.
+// Las contraseñas temporales no usan este aviso: tienen su propia ventana (TemporaryPasswordModal).
 const SUCCESS_DURATION_MS = 2500;
-export const PASSWORD_SUCCESS_DURATION_MS = 12000;
 
 // Estado de la ventana verde de éxito (<SuccessModal>): `success` es null (cerrada) o
 // { title, message }; `showSuccess` la abre y la cierra sola pasado un tiempo.

@@ -7,7 +7,7 @@ import {
   CLINICS, HOSPITALS, PARTICULAR_DOCTORS, INSTITUTION_ADMINS,
   getAllDoctorAssignments, SECRETARIES, SCHEDULE_REQUESTS,
   getInstitutionUnits, getInstitutionTerms,
-  pendingDocuments, getDoctorEmail,
+  pendingDocuments, getDoctorEmail, getParticularDoctorDocuments,
 } from '../../data/institutions';
 import { ClinicDataContext } from './clinicDataContext';
 import { todayISO } from './clinicDates';
@@ -39,14 +39,21 @@ const ClinicDataProvider = ({ children }) => {
   const [allSecretaries, setAllSecretaries] = useState(() => [...SECRETARIES]);
   const [allRequests, setAllRequests] = useState(() => [...SCHEDULE_REQUESTS]);
   // Médicos particulares (sin clínica ni hospital) y emails dados de baja: los usa VitaDev.
-  const [particularDoctors, setParticularDoctors] = useState(() => [...PARTICULAR_DOCTORS]);
+  const [particularDoctors, setParticularDoctors] = useState(() =>
+    PARTICULAR_DOCTORS.map((doctor) => ({ ...doctor, documents: getParticularDoctorDocuments(doctor.id) })));
   const [institutionAdmins, setInstitutionAdmins] = useState(() => [...INSTITUTION_ADMINS]);
+  // Datos de contacto de médicos de clínicas y hospitales editados por VitaDev: { [doctorId]: { name, email, phone } }.
+  // Pisan al nombre y email de doctors.js solo en su cuenta y en Gestión de Usuarios (no en el perfil público).
+  const [doctorContacts, setDoctorContacts] = useState({});
   const [deactivatedEmails, setDeactivatedEmails] = useState(() => new Set(getDeactivatedEmails()));
   const [disabledEmails, setDisabledEmails] = useState(() => new Set(getDisabledEmails()));
 
   // Lo que ven las pantallas de clínica: solo los datos de la clínica del admin.
   // Se recalculan en cada render a partir del estado completo.
   const assignments = allAssignments.filter((a) => a.institutionId === clinic?.id);
+  // Vinculaciones donde se pueden reservar turnos: las de instituciones activas. Las pantallas de
+  // pacientes (cartilla, perfil del médico, reserva) usan esta lista en lugar de `allAssignments`.
+  const bookableAssignments = allAssignments.filter((a) => (institutions.find((i) => i.id === a.institutionId)?.status ?? 'active') === 'active');
   const secretaries = allSecretaries.filter((s) => s.institutionId === clinic?.id);
   const requests = allRequests.filter((r) => r.institutionId === clinic?.id);
 
@@ -113,7 +120,7 @@ const ClinicDataProvider = ({ children }) => {
     );
     const worksElsewhere = allAssignments.some((a) => a.doctorId === removed.doctorId && a.id !== removed.id);
     if (!worksElsewhere) {
-      deactivate(getDoctorEmail(removed.doctorId));
+      deactivate(doctorContacts[removed.doctorId]?.email ?? getDoctorEmail(removed.doctorId));
     }
   };
 
@@ -154,8 +161,25 @@ const ClinicDataProvider = ({ children }) => {
   // --- Administración de VitaDev ------------------------------------------
 
   // Médicos particulares. Al quitar uno sale de la agenda de sus secretarias y se da de baja su cuenta.
+  // Un médico particular nuevo trae la documentación cargada en el alta; si no, arranca toda pendiente.
   const addParticularDoctor = (data) => {
-    setParticularDoctors((prev) => [...prev, { ...data, id: createId() }]);
+    setParticularDoctors((prev) => [...prev, { ...data, id: createId(), documents: data.documents ?? pendingDocuments() }]);
+  };
+
+  // VitaDev edita el nombre, email o teléfono de un médico de clínica u hospital.
+  const updateDoctorContact = (doctorId, changes) => {
+    setDoctorContacts((prev) => ({ ...prev, [doctorId]: { ...prev[doctorId], ...changes } }));
+  };
+
+  // Marca un documento de un médico particular como recibido (lo hace VitaDev).
+  const updateParticularDocument = (doctorId, type, expiresAt) => {
+    setParticularDoctors((prev) =>
+      prev.map((d) =>
+        d.id !== doctorId
+          ? d
+          : { ...d, documents: d.documents.map((doc) => (doc.type === type ? { ...doc, status: 'vigente', expiresAt: expiresAt || null } : doc)) }
+      )
+    );
   };
 
   const updateParticularDoctor = (id, changes) => {
@@ -189,6 +213,36 @@ const ClinicDataProvider = ({ children }) => {
     const units = kind === 'hospital' ? { sectors: [] } : { areas: [] };
     setInstitutions((prev) => [...prev, { ...institution, ...units }]);
     setInstitutionAdmins((prev) => [...prev, { ...admin, id: createId(), institutionId: institution.id }]);
+  };
+
+  // Suma un administrador a una institución existente (su acceso lo crea quien llama).
+  const addInstitutionAdmin = (institutionId, admin) => {
+    setInstitutionAdmins((prev) => [...prev, { ...admin, id: createId(), institutionId }]);
+  };
+
+  // Estado de una institución: 'active' (por defecto), 'disabled' (inhabilitada, reversible)
+  // o 'deactivated' (dada de baja, definitivo).
+  const institutionStatus = (institutionId) => institutions.find((i) => i.id === institutionId)?.status ?? 'active';
+
+  // Personal que pierde el acceso con la institución: sus administradores, sus secretarias y los
+  // médicos que SOLO trabajan ahí. Un médico que también atiende en otra institución conserva su
+  // cuenta; solo deja de poder recibir turnos en esta (ver `bookableAssignments`).
+  const institutionStaffEmails = (institutionId) => {
+    const doctorIds = [...new Set(allAssignments.filter((a) => a.institutionId === institutionId).map((a) => a.doctorId))];
+    const onlyHere = doctorIds.filter((doctorId) => !allAssignments.some((a) => a.doctorId === doctorId && a.institutionId !== institutionId));
+    return [
+      ...institutionAdmins.filter((a) => a.institutionId === institutionId).map((a) => a.email),
+      ...allSecretaries.filter((s) => s.institutionId === institutionId).map((s) => s.email),
+      ...onlyHere.map((doctorId) => doctorContacts[doctorId]?.email ?? getDoctorEmail(doctorId)),
+    ];
+  };
+
+  // Inhabilita ('disabled'), vuelve a habilitar ('active') o da de baja ('deactivated') una institución
+  // y aplica lo mismo a las cuentas de su personal.
+  const setInstitutionStatus = (institutionId, status) => {
+    setInstitutions((prev) => prev.map((i) => (i.id === institutionId ? { ...i, status } : i)));
+    const apply = status === 'disabled' ? disable : status === 'deactivated' ? deactivate : enable;
+    institutionStaffEmails(institutionId).forEach(apply);
   };
 
   // Corrige los datos de un administrador de institución (el email es su usuario y no cambia).
@@ -270,7 +324,9 @@ const ClinicDataProvider = ({ children }) => {
     requests, acceptRequest, rejectRequest,
     // VitaDev: todo el sistema, sin filtrar por institución.
     institutions, institutionAdmins, addInstitution, updateInstitution, updateInstitutionAdmin, addUnit,
-    particularDoctors, addParticularDoctor, updateParticularDoctor, removeParticularDoctor,
+    addInstitutionAdmin, institutionStatus, setInstitutionStatus, bookableAssignments,
+    particularDoctors, addParticularDoctor, updateParticularDoctor, removeParticularDoctor, updateParticularDocument,
+    doctorContacts, updateDoctorContact,
     addParticularSecretary, deactivatedEmails, disabledEmails, deactivate, disable, enable,
   };
 

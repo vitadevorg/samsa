@@ -3,16 +3,25 @@ import Navbar from '../../components/Navbar';
 import { EditConfirmModal, SuccessModal } from '../clinic/ClinicModals';
 import { useClinicData } from '../clinic/clinicDataContext';
 import {
-  validateInstitutionName, validateAddress, validatePhone, validateEmail, validateName, validateNewPassword, validateUnitName, errorBorder,
+  validateInstitutionName, validateAddress, validatePhone, validateEmail, validateName, validateNewPassword, errorBorder,
 } from '../clinic/clinicValidation';
-import { getInstitutionTerms } from '../../data/institutions';
+import { getInstitutionUnits } from '../../data/institutions';
 import { resetPassword, setPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
 import { ROLES } from '../../constants/roles';
 import { createId } from '../../utils/ids';
+import { useCatalog } from '../../context/catalog-context';
+import CheckboxDropdown from '../../components/CheckboxDropdown';
+import { cuilDigits, formatCuil, isValidCuil } from '../../utils/cuil';
 import AccountStatusBadge from './AccountStatusBadge';
 import { buildUserDirectory } from './userDirectory';
-import { useSuccessModal, PASSWORD_SUCCESS_DURATION_MS } from './useSuccessModal';
-import { Building2, Hospital, Edit2, Save, X, MapPin, Phone, Mail, Plus, Stethoscope, Users, Shield } from 'lucide-react';
+import { useSuccessModal } from './useSuccessModal';
+import TemporaryPasswordModal from './TemporaryPasswordModal';
+import { useAccountActions } from './useAccountActions';
+import IconAction from './IconAction';
+import TypeToConfirmModal from './TypeToConfirmModal';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
+import { Building2, Hospital, Save, X, MapPin, Phone, Mail, Plus, Stethoscope, Users, Shield, Pencil, KeyRound, Ban, UserCheck, UserX, UserPlus, Trash2, Hash, CheckCircle2, Check, ChevronDown } from 'lucide-react';
 
 // Textos y colores que cambian según se listen clínicas u hospitales.
 const KINDS = {
@@ -20,11 +29,18 @@ const KINDS = {
   hospital: { title: 'Hospitales', single: 'hospital', article: 'el hospital', Icon: Hospital, empty: 'No hay hospitales registrados.', adminRole: ROLES.HOSPITAL_ADMIN },
 };
 
-const EMPTY_FORM = { name: '', address: '', phone: '', email: '', adminName: '', adminEmail: '', adminPhone: '' };
+const EMPTY_FORM = { name: '', legalName: '', refes: '', cuit: '', arcaVerified: false, insurances: [], studies: [], newUnits: [], address: '', phone: '', email: '', adminName: '', adminEmail: '', adminPhone: '' };
 
 const toForm = (institution) => ({
   ...EMPTY_FORM,
   name: institution.name,
+  legalName: institution.legalName ?? '',
+  refes: institution.refes ?? '',
+  cuit: institution.cuit ?? '',
+  arcaVerified: Boolean(institution.arcaVerified),
+  insurances: institution.insurances ?? [],
+  studies: institution.studies ?? [],
+  newUnits: [],
   address: institution.address,
   phone: institution.phone ?? '',
   email: institution.email ?? '',
@@ -32,14 +48,46 @@ const toForm = (institution) => ({
 
 const clean = (text) => text.trim().replace(/\s+/g, ' ');
 
+// Razón social: obligatoria, entre 3 y 120 caracteres.
+const validateLegalName = (value) => {
+  const text = value.trim();
+  if (!text) return 'Ingresá la razón social.';
+  if (text.length < 3) return 'La razón social es demasiado corta.';
+  if (text.length > 120) return 'La razón social no puede superar los 120 caracteres.';
+  return '';
+};
+
+// Código REFES (Registro Federal de Establecimientos de Salud): 14 dígitos.
+const refesDigits = (value) => value.replace(/\D/g, '');
+const validateRefes = (value, taken) => {
+  const digits = refesDigits(value);
+  if (!digits) return 'Ingresá el código REFES.';
+  if (digits.length !== 14) return 'El código REFES tiene que tener 14 dígitos.';
+  if (taken.includes(digits)) return 'Ya hay una institución con ese código REFES.';
+  return '';
+};
+
+// CUIT de la institución: XX-XXXXXXXX-X, de persona jurídica (30, 33 o 34) y con dígito verificador válido.
+const validateInstitutionCuit = (value, taken) => {
+  const digits = cuilDigits(value);
+  if (!digits) return 'Ingresá el CUIT.';
+  if (digits.length !== 11) return 'El CUIT tiene que tener 11 dígitos (XX-XXXXXXXX-X).';
+  if (!['30', '33', '34'].includes(digits.slice(0, 2))) return 'El CUIT de una institución empieza con 30, 33 o 34.';
+  if (!isValidCuil(digits)) return 'CUIT inválido: revisá el último dígito.';
+  if (taken.includes(digits)) return 'Ya hay una institución con ese CUIT.';
+  return '';
+};
+
 // Pantalla del administrador de VitaDev: clínicas (`kind="clinic"`) u hospitales (`kind="hospital"`).
 // Puede asociar una institución nueva (con su administrador), corregir sus datos, crearle áreas o
-// sectores y ver a sus administradores (las bajas y reseteos de contraseña están en Usuarios).
+// sectores, gestionar a sus administradores (y sumar nuevos) e inhabilitar o dar de baja la institución.
 // Sin datos clínicos.
 const VitadevInstitutions = ({ kind }) => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { specialties: SPECIALTIES, insurances: INSURANCES, studyGroups: STUDY_GROUPS } = useCatalog();
   const fieldId = useId();
   const data = useClinicData();
-  const { institutions, institutionAdmins, allAssignments, allSecretaries, deactivatedEmails, disabledEmails, addInstitution, updateInstitution, updateInstitutionAdmin, addUnit } = data;
+  const { institutions, institutionAdmins, allAssignments, allSecretaries, deactivatedEmails, disabledEmails, addInstitution, updateInstitution, updateInstitutionAdmin, addUnit, addInstitutionAdmin, institutionStatus, setInstitutionStatus } = data;
   const { title, single, article, Icon, empty, adminRole } = KINDS[kind];
   const list = institutions.filter((i) => Boolean(i.sectors) === (kind === 'hospital'));
 
@@ -54,9 +102,76 @@ const VitadevInstitutions = ({ kind }) => {
   const [adminErrors, setAdminErrors] = useState({});
   const [isConfirmingAdmin, setIsConfirmingAdmin] = useState(false);
   // Texto escrito en el campo "nueva área" de cada institución: { [id]: { value, error } }.
-  const [drafts, setDrafts] = useState({});
-  const [unitToCreate, setUnitToCreate] = useState(null); // { institution, name } esperando confirmación
   const { success, showSuccess } = useSuccessModal();
+  // Cuentas de los administradores: resetear, inhabilitar, habilitar y dar de baja (primero se inhabilita).
+  const { statusOf: accountStatus, requestReset, requestDisable, requestEnable, requestDeactivate, modals: accountModals } = useAccountActions();
+  const [credentials, setCredentials] = useState(null); // contraseña temporal recién generada (null = ventana cerrada)
+  // Estado de la institución: { institution, action: 'disable' | 'enable' | 'deactivate' } esperando confirmación.
+  const [statusChange, setStatusChange] = useState(null);
+  // Alta de un administrador nuevo en una institución.
+  const [newAdminFor, setNewAdminFor] = useState(null); // id de la institución (null = formulario cerrado)
+  const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '' });
+  const [newAdminErrors, setNewAdminErrors] = useState({});
+  const [confirmNewAdmin, setConfirmNewAdmin] = useState(false);
+
+  const openNewAdmin = (institutionId) => {
+    setNewAdminFor(institutionId);
+    setNewAdmin({ name: '', email: '', phone: '' });
+    setNewAdminErrors({});
+  };
+
+  const handleSubmitNewAdmin = (e) => {
+    e.preventDefault();
+    const takenEmails = [...buildUserDirectory(data).map((u) => u.email), ...getRegisteredEmails()].map((email) => email.toLowerCase());
+    const found = Object.fromEntries(Object.entries({
+      name: validateName(clean(newAdmin.name)),
+      email: validateEmail(newAdmin.email, takenEmails),
+      phone: validatePhone(newAdmin.phone, { required: true }),
+    }).filter(([, message]) => message));
+    setNewAdminErrors(found);
+    if (Object.keys(found).length === 0) setConfirmNewAdmin(true);
+  };
+
+  const handleConfirmNewAdmin = () => {
+    const institution = institutions.find((i) => i.id === newAdminFor);
+    const admin = { name: clean(newAdmin.name), email: newAdmin.email.trim().toLowerCase(), phone: newAdmin.phone.trim() };
+    addInstitutionAdmin(newAdminFor, admin);
+    // Se le crea el acceso con una contraseña temporal que tiene que cambiar al entrar.
+    const temporaryPassword = resetPassword(admin.email, { name: admin.name, role: adminRole, institutionId: newAdminFor });
+    setConfirmNewAdmin(false);
+    setNewAdminFor(null);
+    setCredentials({
+      title: '¡Administrador agregado!',
+      message: `${admin.name} ya puede administrar ${institution?.name} con ${admin.email}.`,
+      password: temporaryPassword,
+    });
+  };
+
+  const STATUS_COPY = {
+    disable: {
+      title: `¿Inhabilitar ${single}?`,
+      message: (name) => `${name} queda inhabilitada: sus administradores, secretarias y los médicos que solo trabajan ahí no podrán iniciar sesión, y no se podrán reservar turnos en ella. Los médicos que atienden en otras instituciones conservan su acceso. Podés volver a habilitarla cuando quieras.`,
+      label: 'Sí, Inhabilitar', success: (name) => [`¡${name} inhabilitada!`, 'Su personal no puede acceder y no recibe turnos.'], status: 'disabled',
+    },
+    enable: {
+      title: `¿Habilitar ${single}?`,
+      message: (name) => `${name} vuelve a estar activa: su personal recupera el acceso y se pueden reservar turnos otra vez.`,
+      label: 'Sí, Habilitar', success: (name) => [`¡${name} habilitada!`, 'Su personal ya puede volver a acceder.'], status: 'active',
+    },
+    deactivate: {
+      title: 'Dar de baja definitivamente',
+      message: (name) => `¿Confirma que desea dar de baja definitivamente ${article.split(' ')[0] === 'el' ? 'el' : 'la'} ${single} ${name}? Su personal (salvo los médicos que atienden en otras instituciones) queda dado de baja y no se podrá volver a habilitar.`,
+      label: 'Sí, Dar de baja', success: (name) => [`¡${name} dada de baja!`, 'La baja es definitiva.'], status: 'deactivated',
+    },
+  };
+
+  const handleConfirmStatus = () => {
+    const { institution, action } = statusChange;
+    const copy = STATUS_COPY[action];
+    setInstitutionStatus(institution.id, copy.status);
+    showSuccess(...copy.success(institution.name));
+    setStatusChange(null);
+  };
 
   const isEditing = editId !== null;
   const editingInstitution = institutions.find((i) => i.id === editId);
@@ -145,6 +260,10 @@ const VitadevInstitutions = ({ kind }) => {
     const nameTaken = others.some((i) => i.name.toLowerCase() === clean(form.name).toLowerCase());
     const found = {
       name: validateInstitutionName(form.name) || (nameTaken ? 'Ya hay una institución con ese nombre.' : ''),
+      legalName: validateLegalName(form.legalName),
+      refes: validateRefes(form.refes, others.map((i) => refesDigits(i.refes ?? ''))),
+      cuit: validateInstitutionCuit(form.cuit, others.map((i) => cuilDigits(i.cuit ?? ''))),
+      arcaVerified: form.arcaVerified ? '' : 'Confirmá que verificaste la inscripción en ARCA.',
       address: validateAddress(form.address),
       phone: validatePhone(form.phone, { required: true }),
       email: validateEmail(form.email, others.map((i) => (i.email ?? '').toLowerCase())),
@@ -166,6 +285,12 @@ const VitadevInstitutions = ({ kind }) => {
   const handleConfirm = () => {
     const institution = {
       name: clean(form.name),
+      legalName: clean(form.legalName),
+      refes: refesDigits(form.refes),
+      cuit: formatCuil(form.cuit),
+      arcaVerified: true,
+      insurances: form.insurances,
+      studies: form.studies,
       address: clean(form.address),
       phone: form.phone.trim(),
       email: form.email.trim().toLowerCase(),
@@ -173,6 +298,7 @@ const VitadevInstitutions = ({ kind }) => {
     setIsConfirming(false);
     if (isEditing) {
       updateInstitution(editId, institution);
+      form.newUnits.forEach((unit) => addUnit(editId, unit));
       cancelEdit();
       showSuccess('¡Cambios guardados!', `Los datos de ${article} fueron actualizados.`);
       return;
@@ -183,37 +309,13 @@ const VitadevInstitutions = ({ kind }) => {
     // Se le crea el acceso al administrador, con una contraseña temporal que tiene que cambiar al entrar.
     const temporaryPassword = resetPassword(admin.email, { name: admin.name, role: adminRole, institutionId: id });
     cancelEdit();
-    showSuccess(
-      single === 'clínica' ? '¡Clínica asociada!' : '¡Hospital asociado!',
-      `${institution.name} ya forma parte de S.A.M.S.A. Su administrador ${admin.name} entra con ${admin.email}. Contraseña temporal: ${temporaryPassword} (la tendrá que cambiar al entrar).`,
-      PASSWORD_SUCCESS_DURATION_MS
-    );
+    setCredentials({
+      title: single === 'clínica' ? '¡Clínica asociada!' : '¡Hospital asociado!',
+      message: `${institution.name} ya forma parte de S.A.M.S.A. Su administrador ${admin.name} entra con ${admin.email}.`,
+      password: temporaryPassword,
+    });
   };
 
-  // --- Áreas / sectores ---
-  const setDraft = (institutionId, draft) => setDrafts((prev) => ({ ...prev, [institutionId]: draft }));
-
-  const handleRequestUnit = (e, institution) => {
-    e.preventDefault();
-    const terms = getInstitutionTerms(institution);
-    const units = institution.areas ?? institution.sectors;
-    const value = drafts[institution.id]?.value ?? '';
-    const error = validateUnitName(value, units, terms.unitLower);
-    if (error) {
-      setDraft(institution.id, { value, error });
-      return;
-    }
-    setUnitToCreate({ institution, name: clean(value) });
-  };
-
-  const handleConfirmUnit = () => {
-    const { institution, name } = unitToCreate;
-    addUnit(institution.id, name);
-    setDraft(institution.id, { value: '', error: '' });
-    setUnitToCreate(null);
-    const terms = getInstitutionTerms(institution);
-    showSuccess(terms.unit === 'Sector' ? '¡Sector creado!' : '¡Área creada!', `${name} ya se puede elegir en ${institution.name}.`);
-  };
 
   const inputClass = 'w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white';
   const labelClass = 'text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block';
@@ -227,10 +329,9 @@ const VitadevInstitutions = ({ kind }) => {
       {fieldError(name, id)}
     </div>
   );
-  const unitTerms = unitToCreate ? getInstitutionTerms(unitToCreate.institution) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <EditConfirmModal
         isOpen={isConfirming}
@@ -249,39 +350,58 @@ const VitadevInstitutions = ({ kind }) => {
         onCancel={() => setIsConfirmingAdmin(false)}
         onConfirm={handleConfirmAdmin}
       />
-      <EditConfirmModal
-        isOpen={unitToCreate !== null}
-        title={`¿Crear ${unitTerms?.unitLower}?`}
-        message={`Vas a crear ${unitTerms?.unitLower === 'sector' ? 'el sector' : 'el área'} “${unitToCreate?.name}” en ${unitToCreate?.institution.name}. ¿Confirmar?`}
-        confirmLabel="Sí, Crear"
-        onCancel={() => setUnitToCreate(null)}
-        onConfirm={handleConfirmUnit}
-      />
       <SuccessModal isOpen={success !== null} title={success?.title} message={success?.message} />
+      <TemporaryPasswordModal credentials={credentials} onClose={() => setCredentials(null)} />
+      {accountModals}
+      {/* Inhabilitar y dar de baja piden escribir el nombre de la institución (doble verificación). */}
+      {statusChange && statusChange.action !== 'enable' && (
+        <TypeToConfirmModal
+          key={`${statusChange.institution.id}-${statusChange.action}`}
+          tone={statusChange.action === 'deactivate' ? 'red' : 'amber'}
+          title={STATUS_COPY[statusChange.action].title}
+          note={statusChange.action === 'deactivate' ? 'Esta acción no se puede deshacer' : 'Se puede revertir habilitándola de nuevo'}
+          message={STATUS_COPY[statusChange.action].message(statusChange.institution.name)}
+          confirmText={statusChange.institution.name}
+          confirmLabel={STATUS_COPY[statusChange.action].label}
+          onCancel={() => setStatusChange(null)}
+          onConfirm={handleConfirmStatus}
+        />
+      )}
+      <EditConfirmModal
+        isOpen={statusChange?.action === 'enable'}
+        title={statusChange ? STATUS_COPY[statusChange.action].title : ''}
+        message={statusChange ? STATUS_COPY[statusChange.action].message(statusChange.institution.name) : ''}
+        confirmLabel={statusChange ? STATUS_COPY[statusChange.action].label : ''}
+        onCancel={() => setStatusChange(null)}
+        onConfirm={handleConfirmStatus}
+      />
+      <EditConfirmModal
+        isOpen={confirmNewAdmin}
+        title="¿Agregar administrador?"
+        message={`Vas a sumar a ${clean(newAdmin.name)} como administrador y crear su acceso. ¿Confirmar?`}
+        confirmLabel="Sí, Agregar"
+        onCancel={() => setConfirmNewAdmin(false)}
+        onConfirm={handleConfirmNewAdmin}
+      />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="bg-blue-100 p-2 rounded-lg"><Icon className="text-blue-600 w-8 h-8"/></div>
-              {title}
-            </h1>
-          </div>
-          {!showCreate && !isEditing && (
-            <button onClick={openCreate} className="py-2.5 px-5 rounded-xl font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={Icon}
+          eyebrow="Administración SAMSA"
+          title={title}
+          actions={!showCreate && !isEditing && (
+            <button onClick={openCreate} className="w-full sm:w-auto shrink-0 py-2.5 px-5 rounded-xl font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition flex items-center justify-center gap-2">
               <Plus className="w-5 h-5"/> Asociar {single}
             </button>
           )}
-        </div>
+        />
 
         {/* Edición de un administrador (naranja): nombre y teléfono; el email es su usuario */}
         {editingAdmin && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm mb-10 border border-orange-200 ring-4 ring-orange-50 transition-all duration-300">
+          <div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-10 border border-orange-200 ring-4 ring-orange-50 transition-all duration-300">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-xl text-orange-600">✏️ Editando administrador</h3>
-              <button onClick={cancelEditAdmin} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
-                <X className="w-3 h-3"/> Cancelar Edición
-              </button>
+              <h3 className="font-bold text-xl text-orange-600">Editando administrador</h3>
+              <button type="button" onClick={cancelEditAdmin} aria-label="Cerrar formulario" className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-300 outline-none flex items-center justify-center transition-colors shrink-0"><X className="w-5 h-5"/></button>
             </div>
             <form onSubmit={handleSubmitAdmin} noValidate className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -321,21 +441,47 @@ const VitadevInstitutions = ({ kind }) => {
 
         {/* Formulario: azul para asociar una nueva (oculto hasta pedirlo), naranja mientras se edita */}
         {(showCreate || isEditing) && (
-        <div className={`bg-white p-8 rounded-2xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
+        <div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
           <div className="flex justify-between items-center mb-6">
             <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
-              {isEditing ? `✏️ Editando ${editingInstitution?.name}` : `✨ Asociar ${single === 'clínica' ? 'Clínica' : 'Hospital'}`}
+              {isEditing ? `Editando ${editingInstitution?.name}` : `Asociar ${single === 'clínica' ? 'Clínica' : 'Hospital'}`}
             </h3>
-            <button onClick={cancelEdit} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
-              <X className="w-3 h-3"/> {isEditing ? 'Cancelar Edición' : 'Cancelar'}
-            </button>
+            <button type="button" onClick={cancelEdit} aria-label="Cerrar formulario" className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-300 outline-none flex items-center justify-center transition-colors shrink-0"><X className="w-5 h-5"/></button>
           </div>
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {textField('name', 'nombre', 'Nombre', { maxLength: 80 })}
+              {textField('legalName', 'razon-social', 'Razón social', { maxLength: 120, placeholder: 'Ej: Clínica del Norte S.A.' })}
+              {textField('refes', 'refes', 'Código REFES (14 dígitos)', { inputMode: 'numeric', maxLength: 14, placeholder: '10900012345678', onChange: (e) => updateField('refes', refesDigits(e.target.value).slice(0, 14)) })}
+              {textField('cuit', 'cuit', 'CUIT', { inputMode: 'numeric', maxLength: 13, placeholder: '30-12345678-9', onChange: (e) => updateField('cuit', formatCuil(e.target.value)) })}
+              <div className="md:col-span-2">
+                <label htmlFor={`${fieldId}-arca`} className={`flex items-start gap-3 min-h-[44px] p-3 rounded-xl border cursor-pointer transition ${form.arcaVerified ? 'bg-emerald-50 border-emerald-200' : errors.arcaVerified ? 'border-red-300 bg-red-50/40' : 'border-gray-200 hover:bg-gray-50'}`}>
+                  <input id={`${fieldId}-arca`} type="checkbox" checked={form.arcaVerified} onChange={(e) => updateField('arcaVerified', e.target.checked)} aria-invalid={Boolean(errors.arcaVerified)} aria-describedby={`${fieldId}-arca-error`} className="mt-0.5 w-5 h-5 accent-blue-600 shrink-0" />
+                  <span className="text-sm text-gray-700">Es necesario que la institución se encuentre inscripta al <span className="font-bold">ARCA</span>.</span>
+                </label>
+                {errors.arcaVerified && <p id={`${fieldId}-arca-error`} role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{errors.arcaVerified}</p>}
+              </div>
               {textField('address', 'direccion', 'Dirección', { maxLength: 100 })}
               {textField('phone', 'telefono', 'Teléfono', { type: 'tel', inputMode: 'tel', maxLength: 20 })}
               {textField('email', 'email', 'Email de contacto', { type: 'email', maxLength: 80 })}
+              <div className="md:col-span-2">
+                <CheckboxDropdown labelClass={labelClass} label="Obras sociales que acepta" options={INSURANCES} selected={form.insurances} onChange={(value) => updateField('insurances', value)} placeholder="Solo atención particular" />
+              </div>
+              {isEditing && editingInstitution && (
+                <div className="md:col-span-2">
+                  <CheckboxDropdown
+                    labelClass={labelClass}
+                    label={`Agregar ${kind === 'hospital' ? 'sectores' : 'áreas'} (ya tiene: ${getInstitutionUnits(editingInstitution).join(', ') || 'ninguno'})`}
+                    options={SPECIALTIES.filter((unit) => !getInstitutionUnits(editingInstitution).includes(unit))}
+                    selected={form.newUnits}
+                    onChange={(value) => updateField('newUnits', value)}
+                    placeholder={`Elegí ${kind === 'hospital' ? 'sectores' : 'áreas'} nuevos de la lista`}
+                  />
+                </div>
+              )}
+              <div className="md:col-span-2">
+                <CheckboxDropdown labelClass={labelClass} label="Estudios que se realizan" groups={STUDY_GROUPS} selected={form.studies} onChange={(value) => updateField('studies', value)} placeholder="Elegí los estudios de la lista" />
+              </div>
             </div>
             {!isEditing && (
               <div>
@@ -358,28 +504,46 @@ const VitadevInstitutions = ({ kind }) => {
         )}
 
         <div className="space-y-8">
-          {list.map((institution) => {
-            const terms = getInstitutionTerms(institution);
+          {list.map((institution, index) => {
             const units = institution.areas ?? institution.sectors;
-            const draft = drafts[institution.id] ?? { value: '', error: '' };
             const doctorCount = new Set(allAssignments.filter((a) => a.institutionId === institution.id).map((a) => a.doctorId)).size;
             const secretaryCount = allSecretaries.filter((s) => s.institutionId === institution.id).length;
             const admins = institutionAdmins.filter((a) => a.institutionId === institution.id);
+            const status = institutionStatus(institution.id);
             return (
-              <article key={institution.id} aria-label={institution.name} className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 ${editId === institution.id ? 'border-orange-200 bg-orange-50/40' : 'border-gray-200'}`}>
+              <FadeIn delay={Math.min(index, 4) * 100} key={institution.id}><article key={institution.id} aria-label={institution.name} className={`bg-white rounded-3xl shadow-sm border overflow-hidden transition-all duration-300 ${editId === institution.id ? 'border-orange-200 bg-orange-50/40' : 'border-gray-200'}`}>
                 <div className="p-6 flex flex-wrap justify-between gap-4 border-b border-gray-100">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">{institution.name}</h2>
+                    <h2 className="text-xl font-bold text-gray-900 flex flex-wrap items-center gap-2">
+                      {institution.name}
+                      {status === 'disabled' && <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">Inhabilitada</span>}
+                      {status === 'deactivated' && <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold border border-red-200">Dada de baja</span>}
+                    </h2>
                     <div className="mt-2 space-y-1 text-sm text-gray-500">
                       <p className="flex items-center gap-2"><MapPin className="w-4 h-4"/> {institution.address}</p>
+                      <p className="flex items-center gap-2"><Building2 className="w-4 h-4"/> {institution.legalName || 'Sin razón social cargada'}</p>
+                      <p className="flex flex-wrap items-center gap-x-4 gap-y-1"><span className="flex items-center gap-2"><Hash className="w-4 h-4"/> REFES {institution.refes || '—'}</span><span>CUIT {institution.cuit || '—'}</span>{institution.arcaVerified && <span className="inline-flex items-center gap-1 text-emerald-600 font-bold"><CheckCircle2 className="w-4 h-4"/> Verificado en ARCA</span>}</p>
                       <p className="flex items-center gap-2"><Phone className="w-4 h-4"/> {institution.phone}</p>
                       <p className="flex items-center gap-2"><Mail className="w-4 h-4"/> {institution.email}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-3">
-                    <button onClick={() => startEdit(institution)} className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition" aria-label={`Editar datos de ${institution.name}`}>
-                      <Edit2 className="w-5 h-5"/> Editar datos
-                    </button>
+                    {/* Primero se inhabilita; recién inhabilitada se puede dar de baja. */}
+                    <div className="flex gap-1">
+                      {status === 'active' && (
+                        <>
+                          <IconAction icon={Pencil} tone="blue" onClick={() => startEdit(institution)} label={`Editar datos de ${institution.name}`} />
+                          <IconAction icon={Ban} tone="amber" onClick={() => setStatusChange({ institution, action: 'disable' })} label={`Inhabilitar ${institution.name}`} />
+                        </>
+                      )}
+                      {status === 'disabled' && (
+                        <>
+                          <IconAction icon={UserCheck} tone="green" onClick={() => setStatusChange({ institution, action: 'enable' })} label={`Habilitar ${institution.name}`} />
+                          <IconAction icon={Trash2} tone="red" onClick={() => setStatusChange({ institution, action: 'deactivate' })} label={`Dar de baja ${institution.name}`} />
+                        </>
+                      )}
+                      {status === 'deactivated' && <span className="text-sm text-gray-400 py-2">Sin acciones</span>}
+                    </div>
                     <div className="flex gap-4 text-sm text-gray-500">
                       <span className="flex items-center gap-1"><Stethoscope className="w-4 h-4 text-blue-500"/> {doctorCount} médico(s)</span>
                       <span className="flex items-center gap-1"><Users className="w-4 h-4 text-pink-500"/> {secretaryCount} secretaria(s)</span>
@@ -391,33 +555,26 @@ const VitadevInstitutions = ({ kind }) => {
                   {/* Áreas (clínica) o sectores (hospital) */}
                   <div>
                     <h3 className="text-xs font-bold text-gray-500 uppercase mb-3">{kind === 'hospital' ? 'Sectores' : 'Áreas'} ({units.length})</h3>
-                    <ul className="flex flex-wrap gap-2 mb-4">
+                    <ul className="flex flex-wrap gap-2">
                       {units.map((unit) => (
                         <li key={unit} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">{unit}</li>
                       ))}
                     </ul>
-                    <form onSubmit={(e) => handleRequestUnit(e, institution)} noValidate className="flex flex-wrap gap-3 items-start">
-                      <div className="flex-1 min-w-48">
-                        <label htmlFor={`${fieldId}-${institution.id}-unidad`} className="sr-only">Nueva {terms.unitLower}</label>
-                        <input
-                          id={`${fieldId}-${institution.id}-unidad`}
-                          maxLength={40}
-                          autoComplete="off"
-                          aria-invalid={Boolean(draft.error)}
-                          placeholder={kind === 'hospital' ? 'Nuevo sector, ej: Traumatología' : 'Nueva área, ej: Traumatología'}
-                          className={`${inputClass} ${errorBorder(draft.error)}`}
-                          value={draft.value}
-                          onChange={(e) => setDraft(institution.id, { value: e.target.value, error: '' })}
-                        />
-                        {draft.error && <p role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{draft.error}</p>}
-                      </div>
-                      <button type="submit" className="py-3 px-5 rounded-xl font-bold text-white transition shadow-md flex gap-2 items-center bg-blue-600 hover:bg-blue-700 shadow-blue-200">
-                        <Plus className="w-5 h-5"/> Crear {terms.unitLower}
-                      </button>
-                    </form>
                   </div>
 
-                  {/* Administradores de la institución (la baja y el reseteo están en Usuarios) */}
+                  {/* Obras sociales que acepta y estudios que realiza */}
+                  {[['Obras sociales que acepta', institution.insurances, 'Solo atención particular'], ['Estudios que se realizan', institution.studies, 'Sin estudios cargados']].map(([title, items = [], empty]) => (
+                    <div key={title}>
+                      <h3 className="text-xs font-bold text-gray-500 uppercase mb-3">{title} ({items.length})</h3>
+                      {items.length === 0 ? <p className="text-sm text-gray-400">{empty}</p> : (
+                        <ul className="flex flex-wrap gap-2">
+                          {items.map((item) => <li key={item} className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">{item}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Administradores de la institución: editar, resetear e inhabilitar; con la cuenta inhabilitada, habilitar o dar de baja. */}
                   <div>
                     <h3 className="text-xs font-bold text-gray-500 uppercase mb-3">Administradores</h3>
                     {admins.length === 0 ? (
@@ -434,20 +591,65 @@ const VitadevInstitutions = ({ kind }) => {
                               </p>
                               <p className="text-xs text-gray-500 truncate">{admin.email}{admin.phone && ` · ${admin.phone}`}</p>
                             </div>
-                            <button onClick={() => startEditAdmin(admin)} className="ml-auto p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Editar administrador" aria-label={`Editar a ${admin.name}`}>
-                              <Edit2 className="w-5 h-5"/>
-                            </button>
+                            <div className="ml-auto flex gap-1 shrink-0">
+                              {accountStatus(admin.email) === 'active' && (
+                                <>
+                                  <IconAction icon={Pencil} tone="blue" onClick={() => startEditAdmin(admin)} label={`Editar datos de ${admin.name}`} />
+                                  <IconAction icon={KeyRound} tone="orange" onClick={() => requestReset({ name: admin.name, email: admin.email, profile: { name: admin.name, role: adminRole, institutionId: institution.id } })} label={`Resetear contraseña de ${admin.name}`} />
+                                  <IconAction icon={Ban} tone="amber" onClick={() => requestDisable(admin)} label={`Inhabilitar a ${admin.name}`} />
+                                </>
+                              )}
+                              {accountStatus(admin.email) === 'disabled' && (
+                                <>
+                                  <IconAction icon={UserCheck} tone="green" onClick={() => requestEnable(admin)} label={`Habilitar a ${admin.name}`} />
+                                  <IconAction icon={UserX} tone="red" onClick={() => requestDeactivate(admin)} label={`Dar de baja definitivamente a ${admin.name}`} />
+                                </>
+                              )}
+                              {accountStatus(admin.email) === 'deactivated' && <span className="text-xs text-gray-400 py-2 whitespace-nowrap">Sin acciones</span>}
+                            </div>
                           </li>
                         ))}
                       </ul>
                     )}
+                    {status === 'active' && (newAdminFor === institution.id ? (
+                      <form onSubmit={handleSubmitNewAdmin} noValidate className="mt-3 p-4 rounded-2xl border border-blue-200 bg-blue-50/40 space-y-3">
+                        <p className="font-bold text-gray-800 text-sm flex items-center gap-2"><UserPlus className="w-4 h-4 text-blue-600"/> Nuevo administrador</p>
+                        {[
+                          { name: 'name', label: 'Nombre y apellido', props: { maxLength: 60 } },
+                          { name: 'email', label: 'Email (usuario)', props: { type: 'email', maxLength: 80, placeholder: 'admin@samsa.med' } },
+                          { name: 'phone', label: 'Teléfono', props: { type: 'tel', inputMode: 'tel', maxLength: 20, placeholder: '381 400-0000' } },
+                        ].map(({ name, label, props }) => (
+                          <div key={name}>
+                            <label htmlFor={`${fieldId}-${institution.id}-nuevo-${name}`} className={labelClass}>{label}</label>
+                            <input
+                              id={`${fieldId}-${institution.id}-nuevo-${name}`}
+                              autoComplete="off"
+                              aria-invalid={Boolean(newAdminErrors[name])}
+                              className={`${inputClass} ${errorBorder(newAdminErrors[name])}`}
+                              value={newAdmin[name]}
+                              onChange={(e) => { setNewAdmin((prev) => ({ ...prev, [name]: e.target.value })); setNewAdminErrors((prev) => ({ ...prev, [name]: '' })); }}
+                              {...props}
+                            />
+                            {newAdminErrors[name] && <p role="alert" className="text-xs text-red-600 font-medium mt-1 ml-1">{newAdminErrors[name]}</p>}
+                          </div>
+                        ))}
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
+                          <button type="button" onClick={() => setNewAdminFor(null)} className="py-2.5 px-4 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-100 transition">Cancelar</button>
+                          <button type="submit" className="py-2.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-md shadow-blue-200 transition inline-flex items-center justify-center gap-2"><UserPlus className="w-4 h-4"/> Agregar</button>
+                        </div>
+                      </form>
+                    ) : (
+                      <button type="button" onClick={() => openNewAdmin(institution.id)} className="mt-3 w-full min-h-[44px] py-2.5 px-4 rounded-xl border-2 border-dashed border-gray-300 text-sm font-bold text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition inline-flex items-center justify-center gap-2">
+                        <UserPlus className="w-4 h-4"/> Agregar administrador
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </article>
+              </article></FadeIn>
             );
           })}
           {list.length === 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center text-gray-400">{empty}</div>
+            <div className="bg-white rounded-3xl border border-gray-100 p-10 text-center text-gray-400">{empty}</div>
           )}
         </div>
       </div>

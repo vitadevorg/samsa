@@ -2,8 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogOut, ChevronDown, Menu, X,
-  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
-} from 'lucide-react';
+  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact, Newspaper, UserRound, Database } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
@@ -34,13 +33,14 @@ const Navbar = () => {
     return parts[0];
   };
   const displayName = getFirstName(user?.name);
-  const userInitial = displayName ? displayName.charAt(0) : '';
   const isAdmin = user?.role === ROLES.ADMIN;
   const isDoctor = user?.role === ROLES.DOCTOR;
   const isSecretary = user?.role === ROLES.SECRETARY;
   const isClinicAdmin = user?.role === ROLES.CLINIC_ADMIN;
   const isHospitalAdmin = user?.role === ROLES.HOSPITAL_ADMIN;
   const isVitadevAdmin = user?.role === ROLES.VITADEV_ADMIN;
+  // El administrador de SAMSA siempre se muestra como "Admin" (inicial A), aunque la sesión guardada tenga otro nombre.
+  const userInitial = isVitadevAdmin ? 'A' : displayName ? displayName.charAt(0) : '';
   // Los administradores de institución usan el mismo estilo oscuro que el admin general.
   const isInstitutionAdmin = isClinicAdmin || isHospitalAdmin || isVitadevAdmin;
   // Ruta base de las pantallas de administración: '/clinic', '/hospital' o undefined.
@@ -100,11 +100,8 @@ const Navbar = () => {
               </>
             ) : isVitadevAdmin ? (
               <>
-                <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
-                  <Shield className="w-4 h-4"/> Resumen
-                </Link>
                 <Link to="/vitadev/doctors" className={getLinkClass('/vitadev/doctors')}>
-                  <Stethoscope className="w-4 h-4"/> Médicos
+                  <UserRound className="w-4 h-4"/> Particulares
                 </Link>
                 <Link to="/vitadev/clinics" className={getLinkClass('/vitadev/clinics')}>
                   <Building2 className="w-4 h-4"/> Clínicas
@@ -114,6 +111,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/vitadev/users" className={getLinkClass('/vitadev/users')}>
                   <UserCog className="w-4 h-4"/> Usuarios
+                </Link>
+                <Link to="/news" className={getLinkClass('/news')}>
+                  <Newspaper className="w-4 h-4"/> Foro
                 </Link>
               </>
             ) : isDoctor ? (
@@ -163,7 +163,7 @@ const Navbar = () => {
                     {!user.img && userInitial}
                   </div>
                   <span className="text-sm font-bold px-1 tracking-wide whitespace-nowrap">
-                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
+                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'Admin' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
@@ -171,7 +171,7 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 z-50">
                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
                       <p className="text-xs font-bold text-gray-400 uppercase">Cuenta</p>
-                      <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
+                      <p className="text-sm font-bold text-gray-800 truncate">{isVitadevAdmin ? 'Admin' : user.name}</p>
                     </div>
                     {isAdmin ? (
                        <>
@@ -186,6 +186,9 @@ const Navbar = () => {
                        <>
                          <Link to="/vitadev/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                            <KeyRound className="w-4 h-4" /> Mi cuenta
+                         </Link>
+                         <Link to="/vitadev/catalog" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <Database className="w-4 h-4" /> Gestión de datos
                          </Link>
                          <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
                             Modo Gestión
@@ -273,12 +276,13 @@ const Navbar = () => {
             </>
           ) : isVitadevAdmin ? (
             <>
-              <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Resumen</Link>
-              <Link to="/vitadev/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to="/vitadev/clinics" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
-              <Link to="/vitadev/hospitals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
-              <Link to="/vitadev/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
-              <Link to="/vitadev/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/vitadev/doctors" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Particulares</Link>
+              <Link to="/vitadev/clinics" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
+              <Link to="/vitadev/hospitals" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
+              <Link to="/vitadev/users" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to="/vitadev/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/vitadev/catalog" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Gestión de datos</Link>
             </>
           ) : isDoctor ? (
             <>
