@@ -2,12 +2,15 @@ import React, { useId, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
+import IconAction from '../vitadev/IconAction';
 import { EditConfirmModal, SuccessModal } from './ClinicModals';
 import { useClinicData } from './clinicDataContext';
 import { useTimeouts } from '../../hooks/useTimeouts';
 import { validateName, validateEmail, validatePhone, validateRequired, errorBorder } from './clinicValidation';
 import { doctorsData } from '../../data/doctors';
-import { Trash2, Edit2, UserPlus, Users, Save, X, MapPin } from 'lucide-react';
+import { Trash2, Edit2, UserPlus, Users, Save, X } from 'lucide-react';
 
 // Cuánto tiempo (en milisegundos) queda visible la ventana verde de éxito.
 const SUCCESS_DURATION_MS = 2500;
@@ -163,7 +166,7 @@ const ClinicSecretaries = () => {
   // Protección: si el usuario no tiene una clínica válida, no hay nada que mostrar.
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -183,7 +186,7 @@ const ClinicSecretaries = () => {
   const labelClass = 'text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <ConfirmModal
         isOpen={deleteId !== null}
@@ -201,24 +204,19 @@ const ClinicSecretaries = () => {
       />
       <SuccessModal isOpen={success !== null} title={success?.title} message={success?.message} />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex justify-between items-end mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="bg-blue-100 p-2 rounded-lg"><Users className="text-blue-600 w-8 h-8"/></div>
-              Secretarias de {clinic.name}
-            </h1>
-            <p className="text-gray-500 mt-2 flex items-center gap-1 text-sm">
-              <MapPin className="w-4 h-4"/> {clinic.address}
-            </p>
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={Users}
+          eyebrow={`Administración ${terms.fromPlace}`}
+          title="Secretarias"
+          description={`${clinic.name} · ${clinic.address}`}
+        />
 
         {/* Formulario: azul para agregar, naranja mientras se edita */}
-        <div className={`bg-white p-8 rounded-2xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
+        <FadeIn delay={100}><div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-6 sm:mb-8 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-100'}`}>
           <div className="flex justify-between items-center mb-6">
             <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
-              {isEditing ? '✏️ Editando Secretaria' : '✨ Agregar Secretaria'}
+              {isEditing ? 'Editando Secretaria' : 'Agregar Secretaria'}
             </h3>
             {isEditing && (
               <button onClick={cancelEdit} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
@@ -322,12 +320,12 @@ const ClinicSecretaries = () => {
               </button>
             </div>
           </form>
-        </div>
+        </div></FadeIn>
 
         {/* Tabla de secretarias de la clínica */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 border-b border-gray-100">
+        <FadeIn delay={200}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-left border-collapse block lg:table">
+            <thead className="hidden lg:table-header-group bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Secretaria</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">{terms.unit}</th>
@@ -335,19 +333,19 @@ const ClinicSecretaries = () => {
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="block lg:table-row-group divide-y divide-gray-100 lg:divide-gray-50">
               {secretaries.map(secretary => (
-                <tr key={secretary.id} className={`hover:bg-blue-50/50 transition ${editId === secretary.id ? 'bg-orange-50' : ''}`}>
-                  <td className="p-5">
+                <tr key={secretary.id} className={`block lg:table-row px-5 py-4 lg:p-0 hover:bg-blue-50/50 transition ${editId === secretary.id ? 'bg-orange-50' : ''}`}>
+                  <td className="block lg:table-cell py-1 lg:p-5">
                     <div className="font-bold text-gray-900">{secretary.name}</div>
                     <div className="text-xs text-gray-500">{secretary.email}{secretary.phone && ` · ${secretary.phone}`}</div>
                   </td>
-                  <td className="p-5">
+                  <td className="block lg:table-cell py-1 lg:p-5">
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">
                       {secretary.area}
                     </span>
                   </td>
-                  <td className="p-5 text-sm">
+                  <td className="block lg:table-cell py-1 lg:p-5 text-sm">
                     {secretary.doctorIds.length > 0 ? (
                       // Hasta 3 nombres; el resto se resume como "y N más" (la lista completa, al pasar el mouse).
                       <span className="text-gray-600" title={secretary.doctorIds.map(id => findDoctor(id)?.name).join(', ')}>
@@ -360,22 +358,10 @@ const ClinicSecretaries = () => {
                       <span className="text-amber-600 font-medium">Sin agendas asignadas</span>
                     )}
                   </td>
-                  <td className="p-5 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => startEdit(secretary)}
-                        className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-5 h-5"/>
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(secretary.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-5 h-5"/>
-                      </button>
+                  <td className="block lg:table-cell py-1 lg:p-5">
+                    <div className="flex justify-start lg:justify-end gap-1 pt-2 lg:pt-0">
+                      <IconAction icon={Edit2} tone="orange" onClick={() => startEdit(secretary)} label={`Editar a ${secretary.name}`} />
+                      <IconAction icon={Trash2} tone="red" onClick={() => setDeleteId(secretary.id)} label={`Eliminar a ${secretary.name}`} />
                     </div>
                   </td>
                 </tr>
@@ -385,7 +371,7 @@ const ClinicSecretaries = () => {
           {secretaries.length === 0 && (
             <div className="p-10 text-center text-gray-400">Todavía no hay secretarias en {terms.thisPlace}.</div>
           )}
-        </div>
+        </div></FadeIn>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import Navbar from '../../components/Navbar';
+import FadeIn from '../../components/FadeIn';
 import Footer from '../../components/Footer';
 import { createId } from '../../utils/ids';
 import { useAuth } from '../../context/useAuth';
@@ -151,7 +152,7 @@ const SecretaryDashboard = () => {
   // Sin médicos asignados no hay agenda que mostrar.
   if (doctors.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans text-slate-800 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 overflow-x-hidden">
         <Navbar />
         <main className="flex-grow max-w-3xl mx-auto w-full px-4 py-20 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Todavía no tenés agendas asignadas</h1>
@@ -163,7 +164,7 @@ const SecretaryDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
       <Navbar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:pt-12">
@@ -176,9 +177,9 @@ const SecretaryDashboard = () => {
           onOpenChat={() => setShowChat(true)}
         />
 
-        <DateStrip dates={dateCarousel} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+        <FadeIn delay={100} className="relative z-20"><DateStrip dates={dateCarousel} selectedDate={selectedDate} onSelectDate={setSelectedDate} /></FadeIn>
 
-        {viewMode === 'single' ? (
+        <FadeIn delay={200}>{viewMode === 'single' ? (
           <AgendaTable
             doctor={currentDoctor}
             date={selectedDate}
@@ -201,7 +202,7 @@ const SecretaryDashboard = () => {
             onAction={handleAction}
             onPatientClick={handlePatientClick}
           />
-        )}
+        )}</FadeIn>
       </main>
       <Footer />
 

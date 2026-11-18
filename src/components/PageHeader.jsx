@@ -3,8 +3,9 @@ import FadeIn from './FadeIn';
 
 // Encabezado de página con el estilo de las pestañas principales de SAMSA (Foro, Profesionales...):
 // etiqueta chica con ícono arriba y título grande, con la misma aparición suave (FadeIn). `actions` va a la derecha en pantallas grandes.
-const PageHeader = ({ icon: Icon, eyebrow, title, description, actions }) => (
-  <FadeIn className="relative z-10 mb-8 sm:mb-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+// `layer`: capa (z-index) del encabezado; se sube cuando `actions` tiene desplegables que deben quedar sobre el contenido de abajo.
+const PageHeader = ({ icon: Icon, eyebrow, title, description, actions, layer = 'z-10' }) => (
+  <FadeIn className={`relative ${layer} mb-8 sm:mb-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6`}>
     <div>
       <div className="flex items-center gap-3 mb-3">
         <div className="bg-blue-100 p-2 rounded-xl">

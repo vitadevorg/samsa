@@ -2,6 +2,9 @@ import React, { useId, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
+import IconAction from '../vitadev/IconAction';
 import { EditConfirmModal, SuccessModal } from './ClinicModals';
 import ClinicDocumentsModal from './ClinicDocumentsModal';
 import { todayISO } from './clinicDates';
@@ -50,7 +53,6 @@ const validateAssignment = (form, clinicId, assignments) => {
 
 // Pantalla del administrador de institución (clínica u hospital): médicos vinculados
 // a SU institución, con el área o sector, el consultorio y el horario en que atienden.
-// Plantilla visual: src/pages/admin/AdminDoctors.jsx.
 const ClinicDoctors = () => {
   // useId genera un prefijo único para los id de los inputs (para los <label htmlFor>).
   const fieldId = useId();
@@ -172,7 +174,7 @@ const ClinicDoctors = () => {
   // Protección: si el usuario no tiene una clínica válida, no hay nada que mostrar.
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -200,7 +202,7 @@ const ClinicDoctors = () => {
   const labelClass = 'text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <ConfirmModal
         isOpen={deleteId !== null}
@@ -226,24 +228,19 @@ const ClinicDoctors = () => {
         />
       )}
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex justify-between items-end mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="bg-blue-100 p-2 rounded-lg"><Stethoscope className="text-blue-600 w-8 h-8"/></div>
-              Médicos de {clinic.name}
-            </h1>
-            <p className="text-gray-500 mt-2 flex items-center gap-1 text-sm">
-              <MapPin className="w-4 h-4"/> {clinic.address}
-            </p>
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={Stethoscope}
+          eyebrow={`Administración ${terms.fromPlace}`}
+          title="Médicos"
+          description={`${clinic.name} · ${clinic.address}`}
+        />
 
-        {/* Formulario: azul para vincular, naranja mientras se edita (igual que AdminDoctors) */}
-        <div className={`bg-white p-8 rounded-2xl shadow-sm mb-10 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-200'}`}>
+        {/* Formulario: azul para vincular, naranja mientras se edita */}
+        <FadeIn delay={100}><div className={`bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-6 sm:mb-8 border transition-all duration-300 ${isEditing ? 'border-orange-200 ring-4 ring-orange-50' : 'border-gray-100'}`}>
           <div className="flex justify-between items-center mb-6">
             <h3 className={`font-bold text-xl ${isEditing ? 'text-orange-600' : 'text-gray-800'}`}>
-              {isEditing ? '✏️ Editando Profesional' : '✨ Vincular Profesional'}
+              {isEditing ? 'Editando Profesional' : 'Vincular Profesional'}
             </h3>
             {isEditing && (
               <button onClick={cancelEdit} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full transition">
@@ -328,12 +325,12 @@ const ClinicDoctors = () => {
               </div>
             )}
           </form>
-        </div>
+        </div></FadeIn>
 
         {/* Tabla de médicos de la clínica */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 border-b border-gray-100">
+        <FadeIn delay={200}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-left border-collapse block lg:table">
+            <thead className="hidden lg:table-header-group bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Profesional</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">{terms.unit}</th>
@@ -342,14 +339,14 @@ const ClinicDoctors = () => {
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="block lg:table-row-group divide-y divide-gray-100 lg:divide-gray-50">
               {assignments.map(assignment => {
                 const doctor = findDoctor(assignment.doctorId);
                 // Documentos vencidos o pendientes: se muestran como aviso en el botón.
                 const documentIssues = assignment.documents.filter((doc) => !['vigente', 'por_vencer'].includes(getDocumentStatus(doc, today))).length;
                 return (
-                  <tr key={assignment.id} className={`hover:bg-blue-50/50 transition ${editId === assignment.id ? 'bg-orange-50' : ''}`}>
-                    <td className="p-5">
+                  <tr key={assignment.id} className={`block lg:table-row px-5 py-4 lg:p-0 hover:bg-blue-50/50 transition ${editId === assignment.id ? 'bg-orange-50' : ''}`}>
+                    <td className="block lg:table-cell py-1 lg:p-5">
                       <div className="flex items-center gap-3">
                         <img src={doctor?.img} alt="" className="w-10 h-10 rounded-full object-cover bg-gray-100" />
                         <div>
@@ -358,43 +355,26 @@ const ClinicDoctors = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="p-5">
+                    <td className="block lg:table-cell py-1 lg:p-5">
                       <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">
                         {assignment.area}
                       </span>
                     </td>
-                    <td className="p-5 text-gray-500 font-medium">{assignment.office}</td>
-                    <td className="p-5 text-gray-500 text-sm">
+                    <td className="block lg:table-cell py-1 lg:p-5 text-gray-500 font-medium">{assignment.office}</td>
+                    <td className="block lg:table-cell py-1 lg:p-5 text-gray-500 text-sm">
                       <span className="flex items-center gap-1"><Clock className="w-4 h-4 text-gray-400"/> {formatSchedule(assignment)}</span>
                     </td>
-                    <td className="p-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
+                    <td className="block lg:table-cell py-1 lg:p-5">
+                      <div className="flex justify-start lg:justify-end gap-1 pt-2 lg:pt-0">
+                        <IconAction
+                          icon={FileText}
+                          tone="blue"
+                          badge={documentIssues}
                           onClick={() => setDocumentsId(assignment.id)}
-                          className="relative flex items-center gap-1 px-3 py-2 text-sm font-bold text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title={documentIssues > 0 ? `${documentIssues} documento(s) vencido(s) o pendiente(s)` : 'Documentación al día'}
-                        >
-                          <FileText className="w-5 h-5"/> Documentación
-                          {documentIssues > 0 && (
-                            <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
-                              {documentIssues}
-                            </span>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => startEdit(assignment)}
-                          className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition"
-                          title="Editar"
-                        >
-                          <Edit2 className="w-5 h-5"/>
-                        </button>
-                        <button
-                          onClick={() => setDeleteId(assignment.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title={`Quitar ${terms.fromPlace}`}
-                        >
-                          <Trash2 className="w-5 h-5"/>
-                        </button>
+                          label={documentIssues > 0 ? `Documentación de ${doctor?.name}: ${documentIssues} vencido(s) o pendiente(s)` : `Documentación de ${doctor?.name}: al día`}
+                        />
+                        <IconAction icon={Edit2} tone="orange" onClick={() => startEdit(assignment)} label={`Editar a ${doctor?.name}`} />
+                        <IconAction icon={Trash2} tone="red" onClick={() => setDeleteId(assignment.id)} label={`Quitar a ${doctor?.name} ${terms.fromPlace}`} />
                       </div>
                     </td>
                   </tr>
@@ -405,7 +385,7 @@ const ClinicDoctors = () => {
           {assignments.length === 0 && (
             <div className="p-10 text-center text-gray-400">Todavía no hay médicos vinculados a {terms.thisPlace}.</div>
           )}
-        </div>
+        </div></FadeIn>
       </div>
     </div>
   );

@@ -25,7 +25,6 @@ const Footer = ({ theme = 'dark' }) => {
   const { user } = useAuth();
   const isLight = theme === 'light';
 
-  const isAdmin = user?.role === 'admin';
   const isDoctor = user?.role === 'doctor';
 
   const bgClass = isLight ? 'bg-white border-t border-gray-100' : 'bg-slate-950 border-t border-slate-800';
@@ -54,15 +53,9 @@ const Footer = ({ theme = 'dark' }) => {
           </div>
 
           <div>
-              <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>{isDoctor || isAdmin ? 'Accesos de Gestión' : 'Navegación'}</h4>
+              <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>{isDoctor ? 'Accesos de Gestión' : 'Navegación'}</h4>
               <ul className={`space-y-3 ${textMutedClass} text-sm`}>
-                  {isAdmin ? (
-                      <>
-                          <li><Link to="/admin/doctors" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Gestión Médicos</Link></li>
-                          <li><Link to="/admin/patients" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Gestión Pacientes</Link></li>
-                          <li><Link to="/admin/offices" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Consultorios</Link></li>
-                      </>
-                  ) : isDoctor ? (
+                  {isDoctor ? (
                       <>
                           <li><Link to="/doctor/turns" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Turnos Asignados</Link></li>
                           <li><Link to="/doctor/patients" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Mis Pacientes</Link></li>

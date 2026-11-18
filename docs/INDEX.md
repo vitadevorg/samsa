@@ -10,7 +10,7 @@ Punto de entrada a toda la documentación técnica, estándares de diseño, fluj
 |-----------|-------------|
 | [`docs/flujo-codigo-trello.md`](./flujo-codigo-trello.md) | **Flujo de trabajo oficial:** Reglas duras de Git, convención de tarjetas de Trello, nombres de ramas, Conventional Commits, prueba manual local y checklist de calidad antes del PR. |
 | [`docs/design-system.md`](./design-system.md) | **Design System y UI/UX:** Paleta de colores, jerarquía tipográfica, estilos de botones, tarjetas *glassmorphism*, animaciones y reglas de responsiveness (Mobile, Tablet y Desktop). |
-| [`docs/arquitectura-y-roles.md`](./arquitectura-y-roles.md) | **Arquitectura y Roles:** Stack tecnológico, los 7 roles del sistema (`ROLES`), mapa completo de rutas públicas y protegidas, y contextos globales (`AuthContext`, `ClinicDataProvider`). |
+| [`docs/arquitectura-y-roles.md`](./arquitectura-y-roles.md) | **Arquitectura y Roles:** Stack tecnológico, los 6 roles del sistema (`ROLES`), mapa completo de rutas públicas y protegidas, y contextos globales (`AuthContext`, `ClinicDataProvider`). |
 | [`docs/tareas/INDEX.md`](./tareas/INDEX.md) | **Índice de Tareas e Historias de Usuario:** Registro de tarjetas, estado, criterios de aceptación y decisiones pendientes. |
 
 ---
@@ -34,4 +34,6 @@ Cada Pull Request que incorpora una funcionalidad, módulo o rediseño relevante
 | **`feature`** | [`docs/medico-publicar-en-foro.md`](./medico-publicar-en-foro.md) | Foro: el médico accede desde su cabecera, publica notas (título, categoría, imagen opcional y contenido) y edita o borra solo las propias, con filtro "Mis publicaciones". |
 | **`style`** | [`docs/nuevo-logo.md`](./nuevo-logo.md) | Nuevo símbolo de marca en SVG (componente `SamsaLogo`) en Navbar, Footer, intro de la Home, membretes de impresión y favicon, reemplazando el logo de corazón. |
 | **`feature`** | [`docs/vitadev-foro-y-pacientes.md`](./vitadev-foro-y-pacientes.md) | VitaDev: cabecera sin Resumen, con Foro y con "Particulares" (solo médicos y secretarias particulares, con acciones de cuenta y documentación de los médicos, visible también en su perfil); publica y modera el foro (borrado de notas ajenas con aclaración que ve el autor); Gestión de Usuarios con pacientes, filtro particular/institución, acciones con íconos y edición de datos; contraseña temporal con botón Copiar; Panel general con secretarias y pacientes. |
-| **`docs`** | [`docs/readme-visual.md`](./readme-visual.md) | Portada del repositorio con capturas de los siete roles, diagramas de arquitectura y guía de ejecución local. |
+| **`docs`** | [`docs/readme-visual.md`](./readme-visual.md) | Portada del repositorio con capturas de los roles, diagramas de arquitectura y guía de ejecución local. |
+| **`style`** | [`docs/eliminar-admin-general.md`](./eliminar-admin-general.md) | Limpieza del rol `admin` anterior: se eliminan sus seis pantallas (`/admin/...`), su rol, accesos en Navbar y Footer y el hook `useCrudList`. El administrador general queda en VitaDev. |
+| **`style`** | [`docs/estilo-unificado-secretaria-e-instituciones.md`](./estilo-unificado-secretaria-e-instituciones.md) | Secretaría, Admin de Clínica y Admin de Hospital con el mismo estilo y animaciones que Turnos, Profesionales, Foro y VitaDev: `PageHeader`, `FadeIn` escalonado, tarjetas `rounded-3xl`, tablas apiladas en mobile e `IconAction`. |

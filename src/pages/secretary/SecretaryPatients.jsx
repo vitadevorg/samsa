@@ -1,5 +1,7 @@
 import React, { useState, useId } from 'react';
 import Navbar from '../../components/Navbar';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
 import Footer from '../../components/Footer';
 import {
   Users, Search, Plus, Calendar, Phone, Mail, FileText, CheckCircle, AlertCircle, Edit, Save, UserPlus
@@ -227,7 +229,7 @@ export default function SecretaryPatients() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden flex flex-col">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden flex flex-col">
       <Navbar />
 
       <AddPatientModal
@@ -245,22 +247,14 @@ export default function SecretaryPatients() {
 
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12">
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-5 md:gap-6 mb-8 sm:mb-10">
-            <div className="w-full md:w-auto">
-                <div className="flex items-center gap-3 mb-3">
-                    <div className="bg-blue-50 p-2.5 rounded-2xl text-blue-600">
-                        <Users className="w-5 h-5" />
-                    </div>
-                    <span className="font-bold tracking-wider uppercase text-xs text-blue-600">Gestión de Pacientes</span>
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-                    Directorio <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Pacientes</span>
-                </h1>
-                <p className="text-gray-500 text-sm sm:text-base mt-1">Gestión administrativa de pacientes de S.A.M.S.A.</p>
-            </div>
-
-            <div className="flex gap-3 w-full md:w-auto">
-                <div className="relative flex-1 md:w-96 group">
+        <PageHeader
+          icon={Users}
+          eyebrow="Gestión de Pacientes"
+          title="Directorio Pacientes"
+          description="Gestión administrativa de pacientes de S.A.M.S.A."
+          actions={(
+            <div className="flex gap-3 w-full lg:w-auto">
+                <div className="relative flex-1 lg:w-96 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                     <input
                         type="text"
@@ -279,11 +273,12 @@ export default function SecretaryPatients() {
                     <Plus className="w-5 h-5" /> <span className="hidden sm:inline">Nuevo Paciente</span>
                 </button>
             </div>
-        </div>
+          )}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredPatients.map((patient) => (
-                <div key={patient.id} className="bg-white p-5 sm:p-6 rounded-[1.5rem] border border-gray-100 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 group relative overflow-hidden flex flex-col">
+            {filteredPatients.map((patient, index) => (
+                <FadeIn key={patient.id} delay={(index % 2) * 100} className="h-full"><div className="h-full bg-white p-5 sm:p-6 rounded-[1.5rem] border border-gray-100 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 group relative overflow-hidden flex flex-col">
                     <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top"></div>
 
                     <div className="flex items-start gap-4 sm:gap-5">
@@ -313,7 +308,7 @@ export default function SecretaryPatients() {
                             <Edit className="w-4 h-4"/> Editar Contacto
                         </button>
                     </div>
-                </div>
+                </div></FadeIn>
             ))}
         </div>
 

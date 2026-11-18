@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogOut, ChevronDown, Menu, X,
-  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact, Newspaper, UserRound, Database } from 'lucide-react';
+  Building2, Hospital, UserCog, KeyRound, Stethoscope, Users, User, Calendar, FileText, Star, Inbox, Contact, Newspaper, UserRound, Database } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
@@ -33,7 +33,6 @@ const Navbar = () => {
     return parts[0];
   };
   const displayName = getFirstName(user?.name);
-  const isAdmin = user?.role === ROLES.ADMIN;
   const isDoctor = user?.role === ROLES.DOCTOR;
   const isSecretary = user?.role === ROLES.SECRETARY;
   const isClinicAdmin = user?.role === ROLES.CLINIC_ADMIN;
@@ -60,25 +59,7 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="hidden lg:flex space-x-2 xl:space-x-6 items-center">
-            {isAdmin ? (
-              <>
-                <Link to="/admin/offices" className={getLinkClass('/admin/offices')}>
-                  <Building className="w-4 h-4"/> Consultorios
-                </Link>
-                <Link to="/admin/specialties" className={getLinkClass('/admin/specialties')}>
-                  <Tag className="w-4 h-4"/> Especialidades
-                </Link>
-                <Link to="/admin/doctors" className={getLinkClass('/admin/doctors')}>
-                  <Stethoscope className="w-4 h-4"/> Médicos
-                </Link>
-                <Link to="/admin/patients" className={getLinkClass('/admin/patients')}>
-                  <Users className="w-4 h-4"/> Pacientes
-                </Link>
-                <Link to="/admin/insurances" className={getLinkClass('/admin/insurances')}>
-                  <Wallet className="w-4 h-4"/> Obras Sociales
-                </Link>
-              </>
-            ) : institutionBase ? (
+            {institutionBase ? (
               <>
                 <Link to={`${institutionBase}/doctors`} className={getLinkClass(`${institutionBase}/doctors`)}>
                   <Stethoscope className="w-4 h-4"/> Médicos
@@ -150,10 +131,10 @@ const Navbar = () => {
               <div className="relative ml-2 xl:ml-4 shrink-0">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin || isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
                 >
                   <div 
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
                     style={{
                       backgroundImage: user.img ? `url(${user.img})` : 'none',
                       backgroundSize: 'cover',
@@ -163,7 +144,7 @@ const Navbar = () => {
                     {!user.img && userInitial}
                   </div>
                   <span className="text-sm font-bold px-1 tracking-wide whitespace-nowrap">
-                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'Admin' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
+                    {isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'Admin' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
@@ -173,16 +154,7 @@ const Navbar = () => {
                       <p className="text-xs font-bold text-gray-400 uppercase">Cuenta</p>
                       <p className="text-sm font-bold text-gray-800 truncate">{isVitadevAdmin ? 'Admin' : user.name}</p>
                     </div>
-                    {isAdmin ? (
-                       <>
-                         <Link to="/admin/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                           <Shield className="w-4 h-4" /> Mi Perfil
-                         </Link>
-                         <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
-                            Modo Gestión
-                         </div>
-                       </>
-                    ) : isVitadevAdmin ? (
+                    {isVitadevAdmin ? (
                        <>
                          <Link to="/vitadev/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                            <KeyRound className="w-4 h-4" /> Mi cuenta
@@ -256,16 +228,7 @@ const Navbar = () => {
       </div>
       {isOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
-          {isAdmin ? (
-            <>
-              <Link to="/admin/offices" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Consultorios</Link>
-              <Link to="/admin/specialties" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Especialidades</Link>
-              <Link to="/admin/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to="/admin/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
-              <Link to="/admin/insurances" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Obras Sociales</Link>
-              <Link to="/admin/profile" className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 bg-blue-50">Mi Perfil Admin</Link>
-            </>
-            ) : institutionBase ? (
+          {institutionBase ? (
             <>
               <Link to={`${institutionBase}/doctors`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
               <Link to={`${institutionBase}/secretaries`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
