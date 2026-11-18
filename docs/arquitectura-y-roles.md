@@ -61,8 +61,10 @@ El sistema define 6 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 * **Administrador de Clínica / Hospital (`ROLES.CLINIC_ADMIN` / `ROLES.HOSPITAL_ADMIN`):**
   * `/clinic/doctors` y `/hospital/doctors` → `ClinicDoctors.jsx`
   * `/clinic/secretaries` y `/hospital/secretaries` → `ClinicSecretaries.jsx`
-  * `/clinic/staff` y `/hospital/staff` → `ClinicStaff.jsx`
   * `/clinic/requests` y `/hospital/requests` → `ClinicRequests.jsx`
+  * `/clinic/settings` y `/hospital/settings` → `ClinicSettings.jsx` (contacto, obras sociales y estudios)
+  * `/clinic/account` y `/hospital/account` → `VitadevAccount.jsx` (Mi cuenta, compartida con VitaDev)
+  * `/news` → `NewsForum.jsx` (publican y moderan las notas de sus médicos)
 * **Administrador VitaDev (`ROLES.VITADEV_ADMIN`):**
   * `/vitadev/dashboard` → `VitadevDashboard.jsx` (`NetworkGraph.jsx` + `SynapseCanvas.jsx`)
   * `/vitadev/doctors` → `VitadevDoctors.jsx` (`ParticularDoctorsPanel.jsx` + `ParticularSecretariesPanel.jsx`)

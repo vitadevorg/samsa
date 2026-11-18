@@ -25,7 +25,7 @@ Las capturas se realizaron en el entorno local con cuentas de demostración. Cad
 | [Médicos](#médicos) | `/doctor/turns` | Gestionar la agenda, consultar pacientes y acceder a protocolos. |
 | [Secretaría](#secretaría) | `/secretary/dashboard` | Coordinar agendas, registrar turnos manuales y consultar pacientes. |
 | [Administración de clínica](#administración-de-clínica) | `/clinic/doctors` | Administrar el equipo de la clínica y sus solicitudes. |
-| [Administración de hospital](#administración-de-hospital) | `/hospital/doctors` | Gestionar médicos, secretarías, personal y solicitudes del hospital. |
+| [Administración de hospital](#administración-de-hospital) | `/hospital/doctors` | Gestionar médicos, secretarías, solicitudes y datos del hospital. |
 | [Administración VitaDev](#administración-vitadev) | `/vitadev/dashboard` | Visualizar la red institucional y gestionar instituciones, profesionales y usuarios. |
 
 ### Pacientes
@@ -54,7 +54,7 @@ La agenda de recepción permite revisar las citas por médico y registrar turnos
 
 ### Administración de clínica
 
-La administración de la clínica dispone de vistas para médicos, secretarías, personal y solicitudes de su institución.
+La administración de la clínica dispone de vistas para médicos, secretarías, solicitudes, foro y datos de su institución.
 
 [![Directorio de médicos de una clínica](docs/assets/readme/clinica-medicos.webp)](docs/assets/readme/clinica-medicos.webp)
 
@@ -62,11 +62,9 @@ La administración de la clínica dispone de vistas para médicos, secretarías,
 
 ### Administración de hospital
 
-El hospital utiliza las mismas pantallas institucionales con sus propios datos y rutas. La vista de personal permite consultar su equipo.
+El hospital utiliza las mismas pantallas institucionales con sus propios datos y rutas.
 
-[![Personal del hospital](docs/assets/readme/hospital-personal.webp)](docs/assets/readme/hospital-personal.webp)
-
-[Médicos del hospital](docs/assets/readme/hospital-medicos.webp)
+[![Médicos del hospital](docs/assets/readme/hospital-medicos.webp)](docs/assets/readme/hospital-medicos.webp)
 
 ### Administración VitaDev
 

@@ -24,7 +24,7 @@ export const PARTICULAR_LABEL = 'Atención particular';
 // Los pacientes además traen `firstName` y `lastName` (su cuenta los guarda por separado).
 // `particular` vale para médicos y secretarias: true si no pertenecen a ninguna clínica u hospital.
 // `profile` son los datos con los que se crea la cuenta si todavía no existía (ver resetPassword).
-export const buildUserDirectory = ({ allAssignments, particularDoctors, allSecretaries, institutions, institutionAdmins, doctorContacts = {} }) => {
+export const buildUserDirectory = ({ allAssignments, particularDoctors, allSecretaries, institutions, institutionAdmins, doctorContacts = {}, institutionDoctors = [] }) => {
   const institutionName = (id) => institutions.find((i) => i.id === id)?.name ?? '';
   const isHospital = (id) => Boolean(institutions.find((i) => i.id === id)?.sectors);
 
@@ -37,7 +37,8 @@ export const buildUserDirectory = ({ allAssignments, particularDoctors, allSecre
       existing.where = `${existing.where} · ${where}`;
       return;
     }
-    const doctor = doctorsData.find((d) => d.id === assignment.doctorId);
+    // De doctors.js o dado de alta por una clínica u hospital.
+    const doctor = doctorsData.find((d) => d.id === assignment.doctorId) ?? institutionDoctors.find((d) => d.id === assignment.doctorId);
     if (!doctor) return;
     // Datos de contacto editados por VitaDev (si los hay) sobre los de doctors.js.
     const contact = doctorContacts[assignment.doctorId] ?? {};
@@ -48,8 +49,8 @@ export const buildUserDirectory = ({ allAssignments, particularDoctors, allSecre
       particular: false,
       sourceId: assignment.doctorId,
       name: contact.name ?? doctor.name,
-      email: contact.email ?? getDoctorEmail(assignment.doctorId),
-      phone: contact.phone ?? '',
+      email: contact.email ?? doctor.email ?? getDoctorEmail(assignment.doctorId),
+      phone: contact.phone ?? doctor.phone ?? '',
       where,
       profile: { name: stripTitle(doctor.name), title: getTitleFromName(doctor.name), role: ROLES.DOCTOR, img: doctor.img },
     });

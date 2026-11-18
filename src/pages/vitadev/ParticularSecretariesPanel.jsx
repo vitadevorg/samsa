@@ -145,9 +145,11 @@ const ParticularSecretariesPanel = ({ onOpen, closeToken = 0 }) => {
   };
 
   const handleConfirmDelete = () => {
+    const name = secretaries.find((s) => s.id === deleteId)?.name;
     removeSecretary(deleteId);
     if (deleteId === editId) cancelEdit();
     setDeleteId(null);
+    showSuccess('¡Secretaria eliminada!', `${name} salió de la lista y su cuenta fue dada de baja.`);
   };
 
   // Médicos ya asignados (para los chips) y los que todavía se pueden agregar.

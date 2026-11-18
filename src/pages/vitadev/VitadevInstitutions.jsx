@@ -289,7 +289,8 @@ const VitadevInstitutions = ({ kind }) => {
       refes: refesDigits(form.refes),
       cuit: formatCuil(form.cuit),
       arcaVerified: true,
-      insurances: form.insurances,
+      // Los hospitales no trabajan con obras sociales.
+      insurances: kind === 'hospital' ? [] : form.insurances,
       studies: form.studies,
       address: clean(form.address),
       phone: form.phone.trim(),
@@ -464,9 +465,11 @@ const VitadevInstitutions = ({ kind }) => {
               {textField('address', 'direccion', 'Dirección', { maxLength: 100 })}
               {textField('phone', 'telefono', 'Teléfono', { type: 'tel', inputMode: 'tel', maxLength: 20 })}
               {textField('email', 'email', 'Email de contacto', { type: 'email', maxLength: 80 })}
-              <div className="md:col-span-2">
-                <CheckboxDropdown labelClass={labelClass} label="Obras sociales que acepta" options={INSURANCES} selected={form.insurances} onChange={(value) => updateField('insurances', value)} placeholder="Solo atención particular" />
-              </div>
+              {kind !== 'hospital' && (
+                <div className="md:col-span-2">
+                  <CheckboxDropdown labelClass={labelClass} label="Obras sociales que acepta" options={INSURANCES} selected={form.insurances} onChange={(value) => updateField('insurances', value)} placeholder="Solo atención particular" />
+                </div>
+              )}
               {isEditing && editingInstitution && (
                 <div className="md:col-span-2">
                   <CheckboxDropdown
@@ -563,7 +566,7 @@ const VitadevInstitutions = ({ kind }) => {
                   </div>
 
                   {/* Obras sociales que acepta y estudios que realiza */}
-                  {[['Obras sociales que acepta', institution.insurances, 'Solo atención particular'], ['Estudios que se realizan', institution.studies, 'Sin estudios cargados']].map(([title, items = [], empty]) => (
+                  {[...(kind === 'hospital' ? [] : [['Obras sociales que acepta', institution.insurances, 'Solo atención particular']]), ['Estudios que se realizan', institution.studies, 'Sin estudios cargados']].map(([title, items = [], empty]) => (
                     <div key={title}>
                       <h3 className="text-xs font-bold text-gray-500 uppercase mb-3">{title} ({items.length})</h3>
                       {items.length === 0 ? <p className="text-sm text-gray-400">{empty}</p> : (

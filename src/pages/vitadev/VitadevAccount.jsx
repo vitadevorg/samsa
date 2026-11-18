@@ -6,6 +6,7 @@ import { useAuth } from '../../context/useAuth';
 import { validateEmail, validatePhone, validateNewPassword, validatePasswordConfirmation, errorBorder } from '../clinic/clinicValidation';
 import { verifyPassword, setOwnPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
 import { buildUserDirectory } from './userDirectory';
+import { INSTITUTION_ADMIN_PATHS } from '../../constants/roles';
 import { useSuccessModal } from './useSuccessModal';
 import { UserCog, Mail, KeyRound, LifeBuoy, Save } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
@@ -14,12 +15,17 @@ import FadeIn from '../../components/FadeIn';
 const EMPTY_EMAIL_FORM = { email: '', currentPassword: '' };
 const EMPTY_PASSWORD_FORM = { currentPassword: '', password: '', confirmation: '' };
 
-// Mi cuenta del administrador de VitaDev: cambiar su usuario (email) y su contraseña.
-// Para cualquiera de los dos cambios pide la contraseña actual, que nunca se muestra.
+// Mi cuenta de los administradores: el de VitaDev (/vitadev/account) y los de clínica u hospital
+// (/clinic/account y /hospital/account). Cambiar su usuario (email), su contraseña y sus datos de recuperación.
+// Para cualquier cambio pide la contraseña actual, que nunca se muestra.
 const VitadevAccount = () => {
   const fieldId = useId();
   const data = useClinicData();
   const { user, updateUser } = useAuth();
+  // Administrador de clínica u hospital: se muestra con su nombre y su institución.
+  const isInstitutionAdmin = Boolean(INSTITUTION_ADMIN_PATHS[user.role]);
+  const displayName = isInstitutionAdmin ? user.name : 'Admin';
+  const eyebrow = isInstitutionAdmin ? `Administración ${data.terms.fromPlace}` : 'Administración SAMSA';
   const { success, showSuccess } = useSuccessModal();
 
   const [emailForm, setEmailForm] = useState(EMPTY_EMAIL_FORM);
@@ -97,6 +103,9 @@ const VitadevAccount = () => {
     } else if (confirming === 'email') {
       const newEmail = emailForm.email.trim().toLowerCase();
       updateAccount(user.email, { email: newEmail });
+      // El administrador de una institución también figura en su lista de administradores (la ve VitaDev).
+      const adminRecord = isInstitutionAdmin && data.institutionAdmins.find((a) => a.email.toLowerCase() === user.email.toLowerCase());
+      if (adminRecord) data.updateInstitutionAdmin(adminRecord.id, { email: newEmail });
       updateUser({ email: newEmail });
       setEmailForm(EMPTY_EMAIL_FORM);
       showSuccess('¡Usuario actualizado!', `Desde ahora iniciás sesión con ${newEmail}.`);
@@ -139,16 +148,17 @@ const VitadevAccount = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <PageHeader
           icon={UserCog}
-          eyebrow="Administración SAMSA"
+          eyebrow={eyebrow}
           title="Mi cuenta"
         />
 
         <FadeIn delay={100}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
           {/* Cabecera de la cuenta */}
           <div className="p-5 sm:p-8 flex items-center gap-4 bg-gradient-to-r from-blue-50/60 to-white">
-            <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white text-xl font-black flex items-center justify-center shadow-md shadow-blue-500/30 shrink-0">A</div>
+            <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white text-xl font-black flex items-center justify-center shadow-md shadow-blue-500/30 shrink-0">{displayName.charAt(0).toUpperCase()}</div>
             <div className="min-w-0">
-              <p className="text-lg sm:text-xl font-bold text-gray-900">Admin</p>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 break-words">{displayName}</p>
+              {isInstitutionAdmin && data.clinic && <p className="text-sm font-semibold text-blue-700">{data.clinic.name}</p>}
               <p className="text-gray-500 text-sm break-all">{user.email}</p>
             </div>
           </div>

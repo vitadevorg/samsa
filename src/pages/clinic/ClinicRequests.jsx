@@ -5,7 +5,6 @@ import FadeIn from '../../components/FadeIn';
 import { EditConfirmModal, SuccessModal, RejectConfirmModal } from './ClinicModals';
 import { useClinicData } from './clinicDataContext';
 import { useTimeouts } from '../../hooks/useTimeouts';
-import { doctorsData } from '../../data/doctors';
 import { schedulesOverlap, formatSchedule } from '../../data/institutions';
 import { findOfficeConflict } from './clinicValidation';
 import { WEEK_DAYS } from '../../constants/catalog';
@@ -14,8 +13,6 @@ import { Inbox, ArrowRight, Clock, Check, X, AlertTriangle, History } from 'luci
 
 // Cuánto tiempo (en milisegundos) queda visible la ventana verde de éxito.
 const SUCCESS_DURATION_MS = 2500;
-
-const findDoctor = (doctorId) => doctorsData.find((doctor) => doctor.id === doctorId);
 
 // Colores del badge según el estado de la solicitud.
 const STATUS_STYLES = {
@@ -50,7 +47,7 @@ const ScheduleView = ({ label, schedule, highlight = false }) => (
 // Pantalla del administrador de institución (clínica u hospital): pedidos de cambio de horario de sus médicos.
 // Arriba las solicitudes pendientes (para aceptar o rechazar) y abajo el historial.
 const ClinicRequests = () => {
-  const { clinic, terms, assignments, requests, acceptRequest, rejectRequest } = useClinicData();
+  const { clinic, terms, assignments, requests, acceptRequest, rejectRequest, findDoctor } = useClinicData();
 
   // Qué solicitud se está confirmando y en qué ventana (naranja = aceptar, roja = rechazar).
   const [acceptingId, setAcceptingId] = useState(null);
@@ -97,8 +94,10 @@ const ClinicRequests = () => {
   };
 
   const handleConfirmReject = () => {
+    const doctorName = findDoctor(requestBeingRejected.doctorId)?.name;
     rejectRequest(rejectingId);
     setRejectingId(null);
+    showSuccess('¡Solicitud rechazada!', `${doctorName} mantiene su horario actual. La solicitud quedó en el historial.`);
   };
 
   return (
