@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ModalScrollManager from './components/ModalScrollManager';
 import { ROLES } from './constants/roles';
 
 import HomeRoute from './components/HomeRoute';
@@ -29,13 +30,6 @@ import DoctorSupport from './pages/doctor/DoctorSupport';
 import SecretaryDashboard from './pages/secretary/SecretaryDashboard';
 import SecretaryPatients from './pages/secretary/SecretaryPatients';
 import SecretaryAccount from './pages/secretary/SecretaryAccount';
-
-import AdminDoctors from './pages/admin/AdminDoctors';
-import AdminSpecialties from './pages/admin/AdminSpecialties';
-import AdminOffices from './pages/admin/AdminOffices';
-import AdminPatients from './pages/admin/AdminPatients';
-import AdminInsurances from './pages/admin/AdminInsurances';
-import AdminProfile from './pages/admin/AdminProfile';
 
 import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
 import { ForumProvider } from './context/ForumContext';
@@ -66,6 +60,7 @@ function App() {
     <AuthProvider>
       <Router>
         <ScrollToTop />
+        <ModalScrollManager />
         {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
             (pantallas de clínica, Navbar, perfil del médico...) */}
         <CatalogProvider>
@@ -109,15 +104,6 @@ function App() {
             <Route path="/secretary/dashboard" element={<SecretaryDashboard />} />
             <Route path="/secretary/patients" element={<SecretaryPatients />} />
             <Route path="/secretary/account" element={<SecretaryAccount />} />
-          </Route>
-
-          <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
-            <Route path="/admin/doctors" element={<AdminDoctors />} />
-            <Route path="/admin/specialties" element={<AdminSpecialties />} />
-            <Route path="/admin/offices" element={<AdminOffices />} />
-            <Route path="/admin/patients" element={<AdminPatients />} />
-            <Route path="/admin/insurances" element={<AdminInsurances />} />
-            <Route path="/admin/profile" element={<AdminProfile />} />
           </Route>
 
           {/* Administradores de institución: cada grupo solo es accesible para su rol */}

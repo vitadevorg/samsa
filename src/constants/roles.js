@@ -2,7 +2,6 @@ export const ROLES = Object.freeze({
   PATIENT: 'patient',
   DOCTOR: 'doctor',
   SECRETARY: 'secretary',
-  ADMIN: 'admin',
   // Roles de administración por institución
   CLINIC_ADMIN: 'clinic_admin',     // administra una clínica
   HOSPITAL_ADMIN: 'hospital_admin', // administra un hospital (base preparada)
@@ -13,7 +12,6 @@ export const ROLE_HOME = Object.freeze({
   [ROLES.PATIENT]: '/turns',
   [ROLES.DOCTOR]: '/doctor/turns',
   [ROLES.SECRETARY]: '/secretary/dashboard',
-  [ROLES.ADMIN]: '/admin/doctors',
   [ROLES.CLINIC_ADMIN]: '/clinic/doctors',
   [ROLES.HOSPITAL_ADMIN]: '/hospital/doctors',
   [ROLES.VITADEV_ADMIN]: '/vitadev/dashboard',

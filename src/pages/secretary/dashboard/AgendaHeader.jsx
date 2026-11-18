@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeader from '../../../components/PageHeader';
 import { Calendar, User, ChevronDown, List, LayoutGrid, MessageSquare } from 'lucide-react';
 
 const groupBySpecialty = (doctors) =>
@@ -11,20 +12,13 @@ const AgendaHeader = ({ doctors, selectedDoctorId, onSelectDoctor, viewMode, onV
   const [showDoctorMenu, setShowDoctorMenu] = useState(false);
   const groupedDoctors = groupBySpecialty(doctors);
   return (
-    <div className="relative mb-6 sm:mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-5 lg:gap-6">
-        <div className="w-full lg:w-1/2">
-            <div className="flex items-center gap-3 mb-3">
-                <div className="bg-blue-50 p-2.5 rounded-2xl text-blue-600">
-                    <Calendar className="w-5 h-5" />
-                </div>
-                <span className="font-bold tracking-wider uppercase text-xs text-blue-600">Gestión de Agendas</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-                Agenda <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Diaria</span>
-            </h1>
-            <p className="text-gray-500 text-sm sm:text-base mt-1">Turnos del día, llegadas y reprogramaciones de tus profesionales.</p>
-        </div>
-
+    <PageHeader
+      icon={Calendar}
+      eyebrow="Gestión de Agendas"
+      title="Agenda Diaria"
+      description="Turnos del día, llegadas y reprogramaciones de tus profesionales."
+      layer="z-30"
+      actions={(
         <div className="w-full lg:w-auto flex gap-3">
             <div className="relative flex-1 lg:flex-none min-w-0">
                 <button
@@ -81,7 +75,8 @@ const AgendaHeader = ({ doctors, selectedDoctorId, onSelectDoctor, viewMode, onV
                 <MessageSquare className="w-5 h-5" />
             </button>
         </div>
-    </div>
+      )}
+    />
   );
 };
 

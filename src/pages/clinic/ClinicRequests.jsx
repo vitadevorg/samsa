@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
 import { EditConfirmModal, SuccessModal, RejectConfirmModal } from './ClinicModals';
 import { useClinicData } from './clinicDataContext';
 import { useTimeouts } from '../../hooks/useTimeouts';
@@ -8,7 +10,7 @@ import { schedulesOverlap, formatSchedule } from '../../data/institutions';
 import { findOfficeConflict } from './clinicValidation';
 import { WEEK_DAYS } from '../../constants/catalog';
 import { formatDate } from './clinicDates';
-import { Inbox, ArrowRight, Clock, Check, X, AlertTriangle, MapPin, History } from 'lucide-react';
+import { Inbox, ArrowRight, Clock, Check, X, AlertTriangle, History } from 'lucide-react';
 
 // Cuánto tiempo (en milisegundos) queda visible la ventana verde de éxito.
 const SUCCESS_DURATION_MS = 2500;
@@ -63,7 +65,7 @@ const ClinicRequests = () => {
 
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -100,7 +102,7 @@ const ClinicRequests = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <EditConfirmModal
         isOpen={requestBeingAccepted !== undefined}
@@ -123,26 +125,23 @@ const ClinicRequests = () => {
       />
       <SuccessModal isOpen={success !== null} title={success?.title} message={success?.message} />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="bg-blue-100 p-2 rounded-lg"><Inbox className="text-blue-600 w-8 h-8"/></div>
-            Solicitudes de cambio de horario
-          </h1>
-          <p className="text-gray-500 mt-2 flex items-center gap-1 text-sm">
-            <MapPin className="w-4 h-4"/> {clinic.name}
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={Inbox}
+          eyebrow={`Administración ${terms.fromPlace}`}
+          title="Solicitudes de cambio de horario"
+          description={clinic.name}
+        />
 
         {/* ---------------- Pendientes ---------------- */}
-        <h2 className="font-bold text-xl text-gray-800 mb-4">Pendientes ({pending.length})</h2>
+        <FadeIn delay={100}><h2 className="font-bold text-lg sm:text-xl text-gray-900 mb-4">Pendientes ({pending.length})</h2></FadeIn>
         {pending.length === 0 && (
-          <div className="bg-white p-10 rounded-2xl border border-gray-200 text-center text-gray-400 mb-10">
+          <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm text-center text-gray-400 mb-10">
             No hay solicitudes pendientes.
           </div>
         )}
         <div className="space-y-6 mb-12">
-          {pending.map((request) => {
+          {pending.map((request, index) => {
             const doctor = findDoctor(request.doctorId);
             const assignment = findAssignment(request.doctorId);
             // No se puede aceptar si el médico ya no está en la clínica, o si en el
@@ -160,7 +159,7 @@ const ClinicRequests = () => {
                 : '';
 
             return (
-              <div key={request.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+              <FadeIn key={request.id} delay={Math.min(index * 100, 300)}><div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-100">
                 <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                   <div className="flex items-center gap-3">
                     <img src={doctor?.img} alt="" className="w-12 h-12 rounded-full object-cover bg-gray-100" />
@@ -188,33 +187,33 @@ const ClinicRequests = () => {
                   </div>
                 )}
 
-                <div className="flex justify-end gap-3">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                   <button
                     onClick={() => setRejectingId(request.id)}
-                    className="px-5 py-2.5 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition flex items-center gap-2"
+                    className="justify-center px-5 py-2.5 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition flex items-center gap-2"
                   >
                     <X className="w-4 h-4"/> Rechazar
                   </button>
                   <button
                     onClick={() => setAcceptingId(request.id)}
                     disabled={Boolean(blockReason)}
-                    className="px-5 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                    className="justify-center px-5 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/30 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     <Check className="w-4 h-4"/> Aceptar
                   </button>
                 </div>
-              </div>
+              </div></FadeIn>
             );
           })}
         </div>
 
         {/* ---------------- Historial ---------------- */}
-        <h2 className="font-bold text-xl text-gray-800 mb-4 flex items-center gap-2">
+        <FadeIn><h2 className="font-bold text-lg sm:text-xl text-gray-900 mb-4 flex items-center gap-2">
           <History className="w-5 h-5 text-gray-400"/> Historial
-        </h2>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 border-b border-gray-100">
+        </h2></FadeIn>
+        <FadeIn delay={100}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-left border-collapse block lg:table">
+            <thead className="hidden lg:table-header-group bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Profesional</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Cambio pedido</th>
@@ -223,18 +222,18 @@ const ClinicRequests = () => {
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="block lg:table-row-group divide-y divide-gray-100 lg:divide-gray-50">
               {history.map((request) => (
-                <tr key={request.id} className="hover:bg-blue-50/50 transition">
-                  <td className="p-5 font-bold text-gray-900">{findDoctor(request.doctorId)?.name}</td>
-                  <td className="p-5 text-sm text-gray-500">
+                <tr key={request.id} className="block lg:table-row px-5 py-4 lg:p-0 hover:bg-blue-50/50 transition">
+                  <td className="block lg:table-cell py-1 lg:p-5 font-bold text-gray-900">{findDoctor(request.doctorId)?.name}</td>
+                  <td className="block lg:table-cell py-1 lg:p-5 text-sm text-gray-500">
                     <span className="line-through">{formatSchedule(request.currentSchedule)}</span>
                     <br />
                     <span className="text-gray-800 font-medium">{formatSchedule(request.requestedSchedule)}</span>
                   </td>
-                  <td className="p-5 text-sm text-gray-500">{formatDate(request.date)}</td>
-                  <td className="p-5 text-sm text-gray-500">{request.resolvedAt ? formatDate(request.resolvedAt) : '—'}</td>
-                  <td className="p-5">
+                  <td className="block lg:table-cell py-1 lg:p-5 text-sm text-gray-500">{formatDate(request.date)}</td>
+                  <td className="block lg:table-cell py-1 lg:p-5 text-sm text-gray-500">{request.resolvedAt ? formatDate(request.resolvedAt) : '—'}</td>
+                  <td className="block lg:table-cell py-1 lg:p-5">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${STATUS_STYLES[request.status]}`}>
                       {request.status}
                     </span>
@@ -246,7 +245,7 @@ const ClinicRequests = () => {
           {history.length === 0 && (
             <div className="p-10 text-center text-gray-400">Todavía no hay solicitudes resueltas.</div>
           )}
-        </div>
+        </div></FadeIn>
       </div>
     </div>
   );

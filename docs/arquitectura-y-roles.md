@@ -16,14 +16,13 @@ Documentación técnica de la estructura del frontend de **SAMSA**, sus roles de
 
 ## 2. Roles del Sistema (`src/constants/roles.js`)
 
-El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME`):
+El sistema define 6 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME`):
 
 | Constante | Valor | Ruta Home (`ROLE_HOME`) | Descripción |
 |-----------|-------|-------------------------|-------------|
 | `ROLES.PATIENT` | `'patient'` | `/turns` | Paciente: solicita turnos, consulta estudios, reseñas y perfil |
 | `ROLES.DOCTOR` | `'doctor'` | `/doctor/turns` | Profesional médico: gestiona su agenda, pacientes, protocolos y soporte |
 | `ROLES.SECRETARY` | `'secretary'` | `/secretary/dashboard` | Secretaria: administra turnos y directorio de pacientes |
-| `ROLES.ADMIN` | `'admin'` | `/admin/doctors` | Administrador general de consultorios, médicos, especialidades y obras sociales |
 | `ROLES.CLINIC_ADMIN` | `'clinic_admin'` | `/clinic/doctors` | Administrador de Clínica (médicos, secretarias, personal y solicitudes) |
 | `ROLES.HOSPITAL_ADMIN` | `'hospital_admin'` | `/hospital/doctors` | Administrador de Hospital (reutiliza las vistas de institución bajo `/hospital/...`) |
 | `ROLES.VITADEV_ADMIN` | `'vitadev_admin'` | `/vitadev/dashboard` | Superadministrador VitaDev: red neuronal del ecosistema, clínicas, hospitales, médicos particulares y usuarios |
@@ -59,8 +58,6 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 * **Secretaria (`ROLES.SECRETARY`):**
   * `/secretary/dashboard` → `SecretaryDashboard.jsx`
   * `/secretary/patients` → `SecretaryPatients.jsx`
-* **Administrador (`ROLES.ADMIN`):**
-  * `/admin/doctors`, `/admin/specialties`, `/admin/offices`, `/admin/patients`, `/admin/insurances`, `/admin/profile`
 * **Administrador de Clínica / Hospital (`ROLES.CLINIC_ADMIN` / `ROLES.HOSPITAL_ADMIN`):**
   * `/clinic/doctors` y `/hospital/doctors` → `ClinicDoctors.jsx`
   * `/clinic/secretaries` y `/hospital/secretaries` → `ClinicSecretaries.jsx`

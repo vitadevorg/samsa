@@ -24,7 +24,6 @@ Las capturas se realizaron en el entorno local con cuentas de demostración. Cad
 | [Pacientes](#pacientes) | `/turns` | Buscar especialistas, solicitar turnos y consultar estudios y reservas. |
 | [Médicos](#médicos) | `/doctor/turns` | Gestionar la agenda, consultar pacientes y acceder a protocolos. |
 | [Secretaría](#secretaría) | `/secretary/dashboard` | Coordinar agendas, registrar turnos manuales y consultar pacientes. |
-| [Administración general](#administración-general) | `/admin/doctors` | Gestionar médicos, especialidades, consultorios, pacientes y obras sociales. |
 | [Administración de clínica](#administración-de-clínica) | `/clinic/doctors` | Administrar el equipo de la clínica y sus solicitudes. |
 | [Administración de hospital](#administración-de-hospital) | `/hospital/doctors` | Gestionar médicos, secretarías, personal y solicitudes del hospital. |
 | [Administración VitaDev](#administración-vitadev) | `/vitadev/dashboard` | Visualizar la red institucional y gestionar instituciones, profesionales y usuarios. |
@@ -52,14 +51,6 @@ La agenda de recepción permite revisar las citas por médico y registrar turnos
 [![Agenda de secretaría](docs/assets/readme/secretaria-agenda.webp)](docs/assets/readme/secretaria-agenda.webp)
 
 [Formulario de turno manual](docs/assets/readme/secretaria-turno-manual.webp) · [Directorio de pacientes](docs/assets/readme/secretaria-pacientes.webp)
-
-### Administración general
-
-El panel operativo centraliza el mantenimiento de profesionales, especialidades, consultorios, pacientes y obras sociales.
-
-[![Administración general de médicos](docs/assets/readme/administracion-medicos.webp)](docs/assets/readme/administracion-medicos.webp)
-
-[Consultorios](docs/assets/readme/administracion-consultorios.webp)
 
 ### Administración de clínica
 
@@ -101,7 +92,7 @@ flowchart TD
     Routes --> Public["Portal público · Turnos y cartilla"]
     Routes --> Guard["ProtectedRoute · Sesión y rol"]
     Guard --> Care["Paciente · Médico · Secretaría"]
-    Guard --> Admin["Administración general · Clínica · Hospital · VitaDev"]
+    Guard --> Admin["Clínica · Hospital · VitaDev"]
     Auth --> Service["authService.js · Cuentas demo"]
     Auth --> Storage["sessionStorage · samsa_user"]
     Clinic --> Fixtures["institutions.js · Datos iniciales"]

@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import ConfirmModal from '../../components/ConfirmModal';
+import PageHeader from '../../components/PageHeader';
+import FadeIn from '../../components/FadeIn';
+import IconAction from '../vitadev/IconAction';
 import { useClinicData } from './clinicDataContext';
 import { doctorsData } from '../../data/doctors';
 import { formatSchedule } from '../../data/institutions';
-import { Users, MapPin, Edit2, Trash2, Search, X } from 'lucide-react';
+import { Users, Edit2, Trash2, Search, X } from 'lucide-react';
 
 const findDoctor = (doctorId) => doctorsData.find((doctor) => doctor.id === doctorId);
 
@@ -35,7 +38,7 @@ const ClinicStaff = () => {
 
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -99,18 +102,14 @@ const ClinicStaff = () => {
 
   // Botones de editar y eliminar (los mismos íconos que en las otras pantallas).
   const actions = (person) => (
-    <div className="flex justify-end gap-2">
-      <button onClick={() => handleEdit(person)} className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition" title="Editar">
-        <Edit2 className="w-5 h-5"/>
-      </button>
-      <button onClick={() => setToDelete(person)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Eliminar">
-        <Trash2 className="w-5 h-5"/>
-      </button>
+    <div className="flex justify-start lg:justify-end gap-1 pt-2 lg:pt-0">
+      <IconAction icon={Edit2} tone="orange" onClick={() => handleEdit(person)} label={`Editar a ${person.name}`} />
+      <IconAction icon={Trash2} tone="red" onClick={() => setToDelete(person)} label={`Eliminar a ${person.name}`} />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <Navbar />
       <ConfirmModal
         isOpen={toDelete !== null}
@@ -122,19 +121,16 @@ const ClinicStaff = () => {
           : `¿Confirma que desea eliminar a ${toDelete?.name} de ${clinic.name}? Se dará de baja su cuenta y no podrá volver a iniciar sesión.`}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="bg-blue-100 p-2 rounded-lg"><Users className="text-blue-600 w-8 h-8"/></div>
-            Personal de {clinic.name}
-          </h1>
-          <p className="text-gray-500 mt-2 flex items-center gap-1 text-sm">
-            <MapPin className="w-4 h-4"/> {clinic.address} · {assignments.length} médico(s) y {secretaries.length} secretaria(s)
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <PageHeader
+          icon={Users}
+          eyebrow={`Administración ${terms.fromPlace}`}
+          title="Personal"
+          description={`${clinic.name} · ${clinic.address} · ${assignments.length} médico(s) y ${secretaries.length} secretaria(s)`}
+        />
 
         {/* Barra de búsqueda (mismo estilo que la de Profesionales) */}
-        <div className="relative mb-6 group">
+        <FadeIn delay={100}><div className="relative mb-6 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
           <input
             type="search"
@@ -155,7 +151,7 @@ const ClinicStaff = () => {
               <X className="w-4 h-4"/>
             </button>
           )}
-        </div>
+        </div></FadeIn>
         {isSearching && (
           <p className="text-sm text-gray-500 mb-3 ml-1" aria-live="polite">
             {visibleStaff.length} resultado(s) para “{search.trim()}”
@@ -163,9 +159,9 @@ const ClinicStaff = () => {
         )}
 
         {/* Todo el personal en una sola tabla, organizada por área o sector */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 border-b border-gray-100">
+        <FadeIn delay={200}><div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-left border-collapse block lg:table">
+            <thead className="hidden lg:table-header-group bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Nombre</th>
                 <th className="p-5 font-bold text-gray-600 text-sm uppercase tracking-wider">Tipo</th>
@@ -175,24 +171,24 @@ const ClinicStaff = () => {
             </thead>
             {/* Un <tbody> por área o sector: su primera fila es el título del grupo */}
             {groups.map(({ unit, people }) => (
-              <tbody key={unit} className="divide-y divide-gray-50 border-t border-gray-100">
-                <tr className="bg-blue-50/60">
-                  <th colSpan={4} scope="rowgroup" className="px-5 py-3 text-left">
+              <tbody key={unit} className="block lg:table-row-group divide-y divide-gray-100 lg:divide-gray-50 border-t border-gray-100">
+                <tr className="block lg:table-row bg-blue-50/60">
+                  <th colSpan={4} scope="rowgroup" className="block lg:table-cell px-5 py-3 text-left">
                     <span className="font-bold text-gray-800">{unit}</span>
                     <span className="ml-2 text-xs font-bold text-gray-400 uppercase">{people.length} persona(s)</span>
                   </th>
                 </tr>
                 {people.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-5 py-4 text-sm text-gray-400">Sin personal en {terms.thisUnit}.</td>
+                  <tr className="block lg:table-row">
+                    <td colSpan={4} className="block lg:table-cell px-5 py-4 text-sm text-gray-400">Sin personal en {terms.thisUnit}.</td>
                   </tr>
                 ) : (
                   people.map((person) => (
-                    <tr key={person.id} className="hover:bg-blue-50/50 transition">
-                      <td className="p-5 font-bold text-gray-900">{person.name}</td>
-                      <td className="p-5"><TypeBadge type={person.type} /></td>
-                      <td className="p-5 text-sm text-gray-500">{person.detail}</td>
-                      <td className="p-5 text-right">{actions(person)}</td>
+                    <tr key={person.id} className="block lg:table-row px-5 py-4 lg:p-0 hover:bg-blue-50/50 transition">
+                      <td className="block lg:table-cell py-1 lg:p-5 font-bold text-gray-900">{person.name}</td>
+                      <td className="block lg:table-cell py-1 lg:p-5"><TypeBadge type={person.type} /></td>
+                      <td className="block lg:table-cell py-1 lg:p-5 text-sm text-gray-500">{person.detail}</td>
+                      <td className="block lg:table-cell py-1 lg:p-5">{actions(person)}</td>
                     </tr>
                   ))
                 )}
@@ -210,7 +206,7 @@ const ClinicStaff = () => {
               </button>
             </div>
           )}
-        </div>
+        </div></FadeIn>
       </div>
     </div>
   );
