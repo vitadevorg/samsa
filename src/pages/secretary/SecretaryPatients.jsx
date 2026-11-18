@@ -229,7 +229,7 @@ export default function SecretaryPatients() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden flex flex-col">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-clip flex flex-col">
       <Navbar />
 
       <AddPatientModal

@@ -129,7 +129,7 @@ const VitadevAccount = () => {
   const submitClass = 'py-3 px-8 rounded-xl font-bold text-white transition shadow-md flex justify-center gap-2 items-center bg-blue-600 hover:bg-blue-700 shadow-blue-200';
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <EditConfirmModal
         isOpen={confirming !== null}

@@ -39,7 +39,7 @@ const VitadevDashboard = () => {
   const titleRef = useRef(null);
 
   return (
-    <div className="relative min-h-screen bg-slate-50 overflow-hidden">
+    <div className="relative min-h-screen bg-slate-50 overflow-clip">
       <Navbar />
       {/* Decoración de fondo: neuronas pegadas al borde inferior, detrás del contenido */}
       <SynapseCanvas avoidRef={titleRef} />

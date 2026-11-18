@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Calendar, Mail } from 'lucide-react';
+import { Phone, Calendar, Mail, LifeBuoy } from 'lucide-react';
 import SamsaLogo from './SamsaLogo';
 import { useAuth } from '../context/useAuth';
+import { useSupport, useCanReportSupport } from '../context/support-context';
+import { useRegisterFooter } from './support/footer-presence';
 
 const CONTACT_EMAIL = 'vitadev.org@gmail.com';
 const INSTAGRAM_URL = 'https://www.instagram.com/vitadev.ar?utm_source=ig_web_button_share_sheet&psln=ZDNlZDc0MzIxNw==';
@@ -23,6 +25,10 @@ const ChevronRight = ({className}) => (
 
 const Footer = ({ theme = 'dark' }) => {
   const { user } = useAuth();
+  const { openSupport } = useSupport();
+  // Cualquier usuario con sesión puede reportar un problema (el admin SAMSA recibe los tickets).
+  const canReport = useCanReportSupport();
+  useRegisterFooter();
   const isLight = theme === 'light';
 
   const isDoctor = user?.role === 'doctor';
@@ -96,6 +102,17 @@ const Footer = ({ theme = 'dark' }) => {
                       </div>
                       Lunes a Viernes 8-20hs
                   </li>
+                  {canReport && (
+                      <li>
+                          <button
+                              type="button"
+                              onClick={() => openSupport()}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors"
+                          >
+                              <LifeBuoy className="w-4 h-4" /> Contactar soporte
+                          </button>
+                      </li>
+                  )}
               </ul>
           </div>
 

@@ -39,7 +39,7 @@ const ClinicSettings = () => {
 
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 overflow-x-clip">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -144,7 +144,7 @@ const ClinicSettings = () => {
   const sectionClass = (section) => `p-5 sm:p-8 transition-colors ${editing === section ? 'bg-orange-50/30' : ''}`;
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <EditConfirmModal
         isOpen={confirming !== null}

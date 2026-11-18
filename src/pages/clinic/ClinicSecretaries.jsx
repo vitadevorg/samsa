@@ -169,7 +169,7 @@ const ClinicSecretaries = () => {
   // Protección: si el usuario no tiene una clínica válida, no hay nada que mostrar.
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 overflow-x-clip">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -190,7 +190,7 @@ const ClinicSecretaries = () => {
   const labelClass = 'text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block';
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <ConfirmModal
         isOpen={deleteId !== null}
