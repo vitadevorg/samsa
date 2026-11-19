@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import ProfessionalApplicationModal from './ProfessionalApplicationModal';
 import Reveal from './Reveal';
 import { ScrollMaskReveal } from './ScrollImageReveal';
+import Marquee from './Marquee';
 import { useInView } from '../hooks/useInView';
 
 const AnimatedStepsFlow = () => {
@@ -112,7 +113,8 @@ const ProfessionalB2BSection = () => {
                             Llevá tu práctica profesional al <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">siguiente nivel.</span>
                         </h2>
                     </Reveal>
-                    <Reveal delay={200}>
+
+                <Reveal delay={200}>
                         <p className="text-lg md:text-xl text-slate-400 leading-relaxed">
                             Unite a la red médica más innovadora. Conectá con pacientes, centralizá tus agendas y reducí la carga administrativa en un ecosistema diseñado para potenciar tu tiempo.
                         </p>
@@ -225,6 +227,73 @@ const ProfessionalB2BSection = () => {
                         ))}
                     </div>
                 </div>
+
+                <Reveal delay={150}>
+                    <div className="mb-20 sm:mb-24">
+                        <div className="text-center mb-8">
+                            <p className="text-xs font-bold tracking-widest uppercase text-blue-400 mb-2">Reseñas verificadas</p>
+                            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Lo que dicen los pacientes de nuestros profesionales</h3>
+                        </div>
+                        <div className="relative flex h-[340px] w-full flex-row items-center justify-center overflow-hidden gap-4">
+                            <Marquee pauseOnHover vertical className="[--duration:26s] w-full sm:w-1/2">
+                                {[
+                                    { name: "Lucía Fernández", doctor: "Dra. Elena Villarroel · Cardiología", quote: "Excelente atención y puntualidad. Saqué el turno en segundos desde la plataforma." },
+                                    { name: "Martín Sosa", doctor: "Dr. Jesús Zelarayan · Clínica Médica", quote: "Muy claro para explicar el diagnóstico y el seguimiento digital es súper práctico." },
+                                    { name: "Carolina Méndez", doctor: "Dra. Priscila Gómez · Dermatología", quote: "Me llegó el recordatorio automático y no tuve que esperar nada en recepción." },
+                                ].map((rev) => (
+                                    <div key={rev.name} className="bg-slate-900/70 backdrop-blur-md border border-slate-800/90 hover:border-blue-500/40 rounded-2xl p-5 text-left transition-colors">
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {rev.name.split(' ').map((n) => n[0]).join('')}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-white font-bold text-sm truncate">{rev.name}</p>
+                                                    <p className="text-blue-400 text-xs font-medium truncate">{rev.doctor}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-0.5 text-amber-400 shrink-0 pt-0.5">
+                                                {Array.from({ length: 5 }).map((_, idx) => (
+                                                    <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">"{rev.quote}"</p>
+                                    </div>
+                                ))}
+                            </Marquee>
+                            <Marquee reverse pauseOnHover vertical className="[--duration:26s] hidden sm:flex sm:w-1/2">
+                                {[
+                                    { name: "Diego Morales", doctor: "Dr. Mateo Cruz · Traumatología", quote: "Pude ver sus horarios disponibles en tiempo real y elegir la sede más cercana." },
+                                    { name: "Valentina Ruiz", doctor: "Dra. Sofía Rocha · Pediatría", quote: "Trato humano impecable. Tener el historial y los estudios en un solo lugar da tranquilidad." },
+                                    { name: "Gustavo Pereyra", doctor: "Dr. Luis Coronel · Neumonología", quote: "Atención ágil, profesional y sin trámites en papel. Totalmente recomendable." },
+                                ].map((rev) => (
+                                    <div key={rev.name} className="bg-slate-900/70 backdrop-blur-md border border-slate-800/90 hover:border-blue-500/40 rounded-2xl p-5 text-left transition-colors">
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {rev.name.split(' ').map((n) => n[0]).join('')}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-white font-bold text-sm truncate">{rev.name}</p>
+                                                    <p className="text-blue-400 text-xs font-medium truncate">{rev.doctor}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-0.5 text-amber-400 shrink-0 pt-0.5">
+                                                {Array.from({ length: 5 }).map((_, idx) => (
+                                                    <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">"{rev.quote}"</p>
+                                    </div>
+                                ))}
+                            </Marquee>
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-slate-950 to-transparent z-10" />
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950 to-transparent z-10" />
+                        </div>
+                    </div>
+                </Reveal>
 
                 <Reveal delay={200}>
                     <div className="mx-6 sm:mx-10 md:mx-0 border-y border-slate-800/80 py-2 sm:py-0 mb-20 sm:mb-28">
