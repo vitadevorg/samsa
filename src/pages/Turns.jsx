@@ -68,9 +68,6 @@ const Turns = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <button className="hidden sm:flex items-center justify-center w-10 h-10 bg-gray-900 rounded-full text-white hover:bg-blue-600 transition-colors duration-300">
-                  <Filter className="w-4 h-4" />
-                </button>
               </div>
             </div>
           </FadeIn>

@@ -9,7 +9,7 @@ const AdhesionReceipt = ({ receiptNumber, subject, rows }) => createPortal(
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6 mb-12">
         <div className="flex items-center gap-4">
-          <SamsaLogo className="w-16 h-16" />
+          <SamsaLogo className="h-12 w-auto shrink-0" />
           <div>
             <h1 className="text-5xl font-black text-slate-900 tracking-tighter mb-1">SAMSA<span className="text-blue-600">.</span></h1>
             <p className="text-slate-500 uppercase tracking-widest text-xs font-bold font-sans">Sistema de Adhesión</p>

@@ -7,6 +7,7 @@ import { todayISO } from '../../pages/clinic/clinicDates';
 import DoctorAdhesionSteps from './DoctorAdhesionSteps';
 import InstitutionAdhesionSteps from './InstitutionAdhesionSteps';
 import AdhesionReceipt from './AdhesionReceipt';
+import AnimatedStepper from '../AnimatedStepper';
 import {
   EMPTY_DOCTOR, EMPTY_INSTITUTION, DOCTOR_STEPS, INSTITUTION_STEPS, INSTITUTION_KINDS,
   buildDoctorPayload, buildInstitutionPayload,
@@ -81,7 +82,7 @@ const AdhesionModal = ({ onClose }) => {
   const today = todayISO();
   const [path, setPath] = useState(null);           // null = pantalla de elección
   const [step, setStep] = useState(1);
-  const [direction, setDirection] = useState('forward');
+  const [direction, setDirection] = useState(1);
   const [forms, setForms] = useState({ doctor: EMPTY_DOCTOR, institution: EMPTY_INSTITUTION });
   const [errors, setErrors] = useState({});
   const [dirty, setDirty] = useState(false);         // hay datos cargados que se perderían al salir
@@ -148,7 +149,7 @@ const AdhesionModal = ({ onClose }) => {
   const choosePath = (next) => {
     setPath(next);
     setStep(1);
-    setDirection('forward');
+    setDirection(1);
     setErrors({});
     scrollBodyTop();
   };
@@ -172,7 +173,8 @@ const AdhesionModal = ({ onClose }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      // En `npm run dev` no existe /api (responde 404): se toma como enviado para poder probar el flujo.
+      if (!response.ok && !(import.meta.env.DEV && response.status === 404)) throw new Error(`HTTP ${response.status}`);
       setSuccess({ receiptNumber: generateTransactionId(), ...receiptFor(path, form) });
     } catch {
       setSubmitError('No pudimos enviar la solicitud. Revisá tu conexión e intentá de nuevo en unos minutos.');
@@ -192,7 +194,7 @@ const AdhesionModal = ({ onClose }) => {
       submit();
       return;
     }
-    setDirection('forward');
+    setDirection(1);
     setStep((s) => s + 1);
     scrollBodyTop();
   };
@@ -200,7 +202,7 @@ const AdhesionModal = ({ onClose }) => {
   const goBack = () => {
     setErrors({});
     setSubmitError('');
-    setDirection('back');
+    setDirection(-1);
     if (step === 1) setPath(null);
     else setStep((s) => s - 1);
     scrollBodyTop();
@@ -245,7 +247,6 @@ const AdhesionModal = ({ onClose }) => {
   }
 
   const Steps = path === 'doctor' ? DoctorAdhesionSteps : InstitutionAdhesionSteps;
-  const slide = direction === 'forward' ? 'slide-in-from-right-4' : 'slide-in-from-left-4';
 
   return createPortal(
     <div
@@ -319,9 +320,9 @@ const AdhesionModal = ({ onClose }) => {
               })}
             </div>
           ) : (
-            <div key={`${path}-${step}`} className={`animate-in fade-in ${slide} duration-300 motion-reduce:animate-none`}>
+            <AnimatedStepper steps={config.steps.map((s) => s.short)} currentStep={step} direction={direction}>
               <Steps step={step} form={form} errors={errors} update={update} setFieldError={setFieldError} today={today} />
-            </div>
+            </AnimatedStepper>
           )}
         </div>
 

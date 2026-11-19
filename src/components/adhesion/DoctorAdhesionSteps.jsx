@@ -4,7 +4,7 @@ import { formatCuil, dniFromCuil, formatDni } from '../../utils/cuil';
 import { addYearsISO, MAX_EXPIRY_YEARS } from '../../pages/clinic/clinicValidation';
 import CheckboxDropdown from '../CheckboxDropdown';
 import TermsCheckbox from '../TermsCheckbox';
-import { DOCTOR_FILES, DOCTOR_STEPS, validateFile } from './adhesionForms';
+import { DOCTOR_FILES, DOCTOR_STEPS, validateFile, licenseDigits } from './adhesionForms';
 import { Field, StepTitle, DaysPicker, FileDrop, ErrorText } from './AdhesionFields';
 import { labelClass } from './adhesionStyles';
 
@@ -46,14 +46,14 @@ const DoctorAdhesionSteps = ({ step, form, errors, update, setFieldError, today 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <Field label="Especialidad principal" error={errors.specialty}>
             {(props) => (
-              <select {...props} value={form.specialty} onChange={(e) => update('specialty', e.target.value)}>
-                <option value="">Seleccioná una especialidad</option>
-                {specialties.map((s) => <option key={s} value={s}>{s}</option>)}
+              <select {...props} className={`${props.className} cursor-pointer`} value={form.specialty} onChange={(e) => update('specialty', e.target.value)}>
+                <option value="" className="bg-slate-900 text-slate-400">Seleccioná una especialidad</option>
+                {specialties.map((s) => <option key={s} value={s} className="bg-slate-900 text-white">{s}</option>)}
               </select>
             )}
           </Field>
-          <Field label="Número de matrícula" error={errors.licenseNumber} hint="Provincial o nacional.">
-            {(props) => <input {...props} type="text" maxLength={20} value={form.licenseNumber} onChange={(e) => update('licenseNumber', e.target.value)} placeholder="Ej. MP 12345" />}
+          <Field label="Número de matrícula" error={errors.licenseNumber} hint="Provincial o nacional, solo números.">
+            {(props) => <input {...props} type="text" inputMode="numeric" pattern="[0-9]*" maxLength={10} value={form.licenseNumber} onChange={(e) => update('licenseNumber', licenseDigits(e.target.value))} placeholder="Ej. 12345" />}
           </Field>
           <Field label="Dirección del consultorio" error={errors.address} className="sm:col-span-2">
             {(props) => <input {...props} type="text" autoComplete="street-address" maxLength={100} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="Ej. Av. Sarmiento 450, San Miguel de Tucumán" />}
@@ -127,7 +127,7 @@ const DoctorAdhesionSteps = ({ step, form, errors, update, setFieldError, today 
         ))}
       </div>
       <ErrorText>{errors.files}</ErrorText>
-      <p className="text-xs text-slate-500 mt-4">Matrícula, Seguro de mala praxis y Título son obligatorios. El contrato se firma cuando se aprueba la solicitud.</p>
+      <p className="text-xs text-slate-500 mt-4">Todos los archivos son obligatorios. El contrato se firma cuando se aprueba la solicitud.</p>
       <div className="mt-5 space-y-1">
         <TermsCheckbox doc="profesional" dark checked={form.acceptedTerms} onChange={(value) => update('acceptedTerms', value)} />
         <ErrorText>{errors.acceptedTerms}</ErrorText>

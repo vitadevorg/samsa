@@ -24,7 +24,7 @@ const mockNews = [
         title: "El Poder del Sueño: Cómo 8 horas transforman tu sistema inmunológico",
         date: "20 de Agosto, 2026",
         category: "Salud Preventiva",
-        image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=1000",
+        image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1000",
         icon: HeartPulse,
         content: (
             <>
@@ -54,7 +54,7 @@ const mockNews = [
         title: "Microbioma Intestinal: Tu segundo cerebro y cómo alimentarlo",
         date: "12 de Agosto, 2026",
         category: "Salud Preventiva",
-        image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=1000",
+        image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=1000",
         icon: Activity,
         content: (
             <>
@@ -86,7 +86,7 @@ const mockNews = [
         title: "Neuroplasticidad y Ejercicio: Prevención del deterioro cognitivo",
         date: "2 de Agosto, 2026",
         category: "Salud Preventiva",
-        image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=1000",
+        image: "https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=1000",
         icon: BellRing,
         content: (
             <>
@@ -227,13 +227,9 @@ const NewsForum = () => {
 
                 <FadeIn delay={0} className="relative z-10"><div className="relative z-10 mb-8 sm:mb-12 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
                     <div>
-                        <div className="flex items-center gap-3 text-blue-600 mb-3">
-                            <div className="bg-blue-100 p-2 rounded-xl">
-                                <Newspaper className="w-6 h-6 text-blue-700" />
-                            </div>
-                            <span className="font-black tracking-widest uppercase text-sm text-blue-700">Comunidad SAMSA</span>
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-800 tracking-tight">Foro de Novedades</h1>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+                            Foro de <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Novedades</span>
+                        </h1>
                         {/* VitaDev no ve bajada: solo el título y sus acciones. */}
                         {!isVitadev && (
                             <p className="text-slate-500 mt-4 text-base sm:text-lg max-w-2xl">

@@ -22,8 +22,8 @@ export const DOCTOR_FILES = [
   { key: 'license', type: 'Matrícula', label: 'Matrícula', hint: 'PDF, JPG o PNG', accept: DOCUMENT_FILE_TYPES, required: true, expires: true },
   { key: 'malpractice', type: 'Seguro de mala praxis', label: 'Seguro de mala praxis', hint: 'PDF, JPG o PNG', accept: DOCUMENT_FILE_TYPES, required: true, expires: true },
   { key: 'degree', type: 'Título', label: 'Título', hint: 'PDF, JPG o PNG', accept: DOCUMENT_FILE_TYPES, required: true, expires: false },
-  { key: 'profilePic', label: 'Foto de perfil', hint: 'JPG o PNG', accept: IMAGE_TYPES, required: false, image: true },
-  { key: 'cv', label: 'Currículum vitae', hint: 'PDF', accept: ['application/pdf'], required: false },
+  { key: 'profilePic', label: 'Foto de perfil', hint: 'JPG o PNG', accept: IMAGE_TYPES, required: true, image: true },
+  { key: 'cv', label: 'Currículum vitae', hint: 'PDF', accept: ['application/pdf'], required: true },
 ];
 
 export const formatBytes = (bytes) => (bytes >= 1024 * 1024
@@ -57,13 +57,12 @@ const validatePersonCuil = (value) => {
   return '';
 };
 
-// Matrícula provincial o nacional: letras, números, espacios, puntos, guiones y barras (ej. "MP 12345").
+// Matrícula provincial o nacional: solo el número (el campo descarta lo que no sea dígito).
+export const licenseDigits = (value) => value.replace(/\D/g, '').slice(0, 10);
 const validateLicense = (value) => {
-  const text = value.trim();
-  if (!text) return 'Ingresá tu número de matrícula.';
-  if (!/\d/.test(text)) return 'La matrícula tiene que incluir el número.';
-  if (!/^[A-Za-z0-9 .\-/]+$/.test(text)) return 'Solo letras, números, espacios, puntos, guiones o barras.';
-  if (text.length > 20) return 'La matrícula no puede superar los 20 caracteres.';
+  const digits = licenseDigits(value);
+  if (!digits) return 'Ingresá tu número de matrícula.';
+  if (digits.length < 3) return 'El número de matrícula es demasiado corto.';
   return '';
 };
 
@@ -84,9 +83,11 @@ export const EMPTY_DOCTOR = {
 
 const totalSize = (files) => Object.values(files).reduce((sum, file) => sum + (file?.size ?? 0), 0);
 
+// `short`: etiqueta del indicador de pasos (AnimatedStepper).
 export const DOCTOR_STEPS = [
   {
     title: 'Datos personales y contacto',
+    short: 'Datos personales',
     message: 'Comencemos con tus datos principales.',
     validate: (form) => onlyErrors({
       firstName: validatePersonPart(form.firstName, 'tus nombres'),
@@ -98,6 +99,7 @@ export const DOCTOR_STEPS = [
   },
   {
     title: 'Datos profesionales',
+    short: 'Perfil profesional',
     message: '¡Excelente! Ahora contanos sobre tu perfil profesional.',
     validate: (form) => onlyErrors({
       specialty: validateRequired(form.specialty, 'Elegí tu especialidad.'),
@@ -107,16 +109,18 @@ export const DOCTOR_STEPS = [
   },
   {
     title: 'Atención',
+    short: 'Disponibilidad',
     message: 'Indicá cuándo atendés y qué obras sociales aceptás.',
     validate: (form) => onlyErrors({ schedule: validateSchedule(form) }),
   },
   {
     title: 'Documentación',
+    short: 'Documentación',
     message: 'Estás a un paso. Subí tu documentación.',
     validate: (form, today) => {
       const found = {};
       DOCTOR_FILES.forEach((spec) => {
-        if (spec.required && !form.files[spec.key]) found[spec.key] = `Subí ${spec.label === 'Título' ? 'tu título' : `tu ${spec.label.toLowerCase()}`}.`;
+        if (spec.required && !form.files[spec.key]) found[spec.key] = `Subí ${spec.label === 'Currículum vitae' ? 'tu currículum' : `tu ${spec.label.toLowerCase()}`}.`;
         if (spec.expires && form.files[spec.key]) {
           const message = validateExpiry(form.expiry[spec.key], today);
           if (message) found[`${spec.key}Expiry`] = message;
@@ -145,6 +149,7 @@ export const EMPTY_INSTITUTION = {
 export const INSTITUTION_STEPS = [
   {
     title: 'Datos de la institución',
+    short: 'Institución',
     message: 'Comencemos con los datos legales de la institución.',
     validate: (form) => onlyErrors({
       name: validateInstitutionName(form.name),
@@ -156,6 +161,7 @@ export const INSTITUTION_STEPS = [
   },
   {
     title: 'Contacto y servicios',
+    short: 'Contacto y servicios',
     message: '¡Muy bien! Ahora contanos dónde están y qué ofrecen.',
     validate: (form) => onlyErrors({
       address: validateAddress(form.address),
@@ -165,6 +171,7 @@ export const INSTITUTION_STEPS = [
   },
   {
     title: 'Administrador',
+    short: 'Administrador',
     message: 'Último paso: ¿quién va a administrar la cuenta?',
     validate: (form) => onlyErrors({
       adminName: validateName(form.adminName),
@@ -205,7 +212,7 @@ export const buildDoctorPayload = async (form) => {
     email: form.email.trim().toLowerCase(),
     phone: form.phone.trim(),
     specialty: form.specialty,
-    licenseNumber: clean(form.licenseNumber),
+    licenseNumber: licenseDigits(form.licenseNumber),
     address: clean(form.address),
     days: form.days,
     startTime: form.startTime,
