@@ -108,14 +108,9 @@ const Home = () => {
             <div className="absolute top-[40%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-tr from-cyan-100/50 to-blue-100/50 rounded-full blur-3xl animate-float" style={{animationDuration: '15s', animationDelay: '1s'}}></div>
         </div>
         <div className="max-w-7xl mx-auto">
-          <div className="relative z-10 pb-8 bg-white/0 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-20 px-4 sm:px-6 lg:px-8">
-            <main className="mt-10 mx-auto max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
+          <div className="relative z-10 pb-8 bg-white/0 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-8 sm:pt-10 lg:pt-14 px-4 sm:px-6 lg:px-8">
+            <main className="mt-2 mx-auto max-w-7xl sm:mt-4 lg:mt-6">
               <div className="sm:text-center lg:text-left">
-                <Reveal delay={100}>
-                    <span className="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-wider uppercase mb-4 border border-blue-100 shadow-sm">
-                        S.A.M.S.A Salud Digital
-                    </span>
-                </Reveal>
                 <Reveal delay={200}>
                     <h1 className="text-5xl tracking-tighter font-extrabold text-slate-900 sm:text-6xl md:text-7xl mb-6">
                     Tu salud <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">primero.</span>
@@ -123,6 +118,14 @@ const Home = () => {
                     <span className="block text-slate-800 text-4xl sm:text-5xl md:text-6xl mt-2">Sin filas, sin demoras.</span>
                     </h1>
                 </Reveal>
+                <div className="lg:hidden relative w-full h-64 sm:h-72 md:h-96 my-6 rounded-2xl overflow-hidden pointer-events-none animate-float">
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent z-10"></div>
+                    <img
+                      className="w-full h-full object-cover object-top"
+                      src="/img/claudioMoya.png"
+                      alt="Equipo Médico SAMSA"
+                    />
+                </div>
                 <Reveal delay={400}>
                     <p className="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0 leading-relaxed">
                     Gestioná tus turnos médicos de manera eficiente con el sistema líder en Argentina. Tecnología y calidez humana al servicio de tu bienestar.
@@ -160,7 +163,7 @@ const Home = () => {
             </main>
           </div>
         </div>
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-full flex items-center justify-center pointer-events-none">
+        <div className="hidden lg:flex lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-full items-center justify-center pointer-events-none">
              <div className="relative w-full h-64 sm:h-72 md:h-96 lg:h-full animate-float">
                  <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent z-10 lg:via-white/20"></div>
                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 lg:hidden"></div>
