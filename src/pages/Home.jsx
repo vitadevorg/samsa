@@ -9,6 +9,7 @@ import SharedReveal from '../components/Reveal';
 import ScrollImageReveal, { ScrollMaskReveal } from '../components/ScrollImageReveal';
 import PixelImage from '../components/PixelImage';
 import SamsaLogoAnimation from '../components/SamsaLogoAnimation';
+import BorderBeam from '../components/BorderBeam';
 import { RevealGateContext } from '../context/reveal-gate-context';
 const homeStyles = `
   html {
@@ -142,7 +143,8 @@ const Home = () => {
                 </Reveal>
                 <div className="mt-10 sm:mt-12 sm:flex sm:justify-center lg:justify-start gap-4">
                   <Reveal delay={600} className="w-full sm:w-auto">
-                    <Link to="/turns" className="w-full flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 md:text-lg transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-500/30 group">
+                    <Link to="/turns" className="relative overflow-hidden w-full flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 md:text-lg transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-500/30 group">
+                      <BorderBeam size={64} duration={4.5} colorFrom="#93c5fd" colorTo="#4f46e5" borderWidth={2} />
                       Solicitar turno
                       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"/>
                     </Link>
@@ -242,7 +244,8 @@ const Home = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/register">
-                          <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-900/50 hover:scale-105">
+                          <button className="relative overflow-hidden px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-900/50 hover:scale-105">
+                              <BorderBeam size={64} duration={4.5} colorFrom="#93c5fd" colorTo="#4f46e5" borderWidth={2} />
                               Crear mi cuenta ahora
                           </button>
                       </Link>
