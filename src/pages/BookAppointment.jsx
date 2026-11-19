@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/useAuth'; 
 import { doctorsData } from '../data/doctors';
 import { useClinicData } from './clinic/clinicDataContext';
+import { useNotifications } from '../context/notifications-context';
 import { getDoctorLocations } from '../data/institutions';
 import PrintReceipt from '../components/PrintReceipt';
 import { generateTransactionId } from '../utils/ids';
@@ -58,7 +59,8 @@ const BookAppointment = () => {
     // cada una) o, si no tiene ninguna, su atención particular. Salen del estado
     // compartido, así un cambio de horario aceptado por la clínica se refleja acá.
     // Solo instituciones activas: en una inhabilitada o dada de baja no se reservan turnos.
-    const { bookableAssignments: allAssignments } = useClinicData();
+    const { bookableAssignments: allAssignments, findDoctor } = useClinicData();
+    const { push } = useNotifications();
     const locations = useMemo(
         () => (doctor ? getDoctorLocations(doctor, allAssignments) : []),
         [doctor, allAssignments]
@@ -133,7 +135,16 @@ const BookAppointment = () => {
     const handleConfirm = () => {
         if (!canConfirm) return;
         setIsAnimatingSuccess(true);
+        const when = `${new Date(selectedDate.date).toLocaleDateString('es-AR')} a las ${selectedTime}`;
         schedule(() => {
+            // Avisos en la campana: al paciente (si tiene sesión) y al médico.
+            if (user?.email) {
+                push({ to: { email: user.email }, type: 'turn', title: 'Turno confirmado', body: `${doctorName}, ${when}.`, action: { type: 'link', to: '/my-turns' } });
+            }
+            const doctorEmail = findDoctor(id)?.email;
+            if (doctorEmail) {
+                push({ to: { email: doctorEmail }, type: 'turn', title: 'Nuevo turno asignado', body: `${formData.name || 'Un paciente'}, ${when}.`, action: { type: 'link', to: '/doctor/turns' } });
+            }
             setStep(4);
             setIsAnimatingSuccess(false); 
         }, 700); 

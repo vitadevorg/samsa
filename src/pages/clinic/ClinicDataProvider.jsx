@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { createId } from '../../utils/ids';
 import { deactivateAccount, disableAccount, enableAccount, getDeactivatedEmails, getDisabledEmails } from '../../services/authService';
-import { INSTITUTION_ADMIN_PATHS } from '../../constants/roles';
+import { INSTITUTION_ADMIN_PATHS, ROLES } from '../../constants/roles';
+import { useNotifications } from '../../context/notifications-context';
 import {
   CLINICS, HOSPITALS, PARTICULAR_DOCTORS, INSTITUTION_ADMINS,
   getAllDoctorAssignments, SECRETARIES, SCHEDULE_REQUESTS,
@@ -24,6 +25,7 @@ const ClinicDataProvider = ({ children }) => {
   // Institución del administrador logueado (su `institutionId`). Es undefined si
   // no hay sesión o si el usuario no administra una institución.
   const { user } = useAuth();
+  const { push } = useNotifications();
   // Clínicas y hospitales (con sus áreas o sectores). Viven en el estado porque el
   // administrador de VitaDev puede editar sus datos y crear áreas.
   const [institutions, setInstitutions] = useState(() => [...CLINICS, ...HOSPITALS]);
@@ -332,6 +334,20 @@ const ClinicDataProvider = ({ children }) => {
   // Aceptar: el médico pasa a tener el horario pedido y la solicitud queda en el historial.
   // Solo cambia la vinculación con ESA institución: un médico puede tener otras
   // (por ejemplo, mateo-cruz también atiende en el hospital) y esas no se tocan.
+  // Avisa al médico (campana) cómo resolvió la institución su pedido de cambio de horario.
+  const notifyDoctor = (request, result) => {
+    const email = doctorEmailOf(request.doctorId);
+    if (!email) return;
+    const place = institutions.find((i) => i.id === request.institutionId)?.name ?? 'La institución';
+    push({
+      to: { email },
+      type: 'request',
+      title: `Solicitud de horario ${result}`,
+      body: `${place} ${result === 'aceptada' ? 'aceptó' : 'rechazó'} tu pedido de cambio de horario.`,
+      action: { type: 'link', to: '/doctor/profile' },
+    });
+  };
+
   const acceptRequest = (requestId) => {
     const request = allRequests.find((r) => r.id === requestId);
     if (!request) return;
@@ -345,6 +361,7 @@ const ClinicDataProvider = ({ children }) => {
     setAllRequests((prev) =>
       prev.map((r) => (r.id === requestId ? { ...r, status: 'aceptada', resolvedAt: todayISO() } : r))
     );
+    notifyDoctor(request, 'aceptada');
   };
 
   // Un médico pide cambiar su horario en una institución (desde su perfil).
@@ -369,12 +386,22 @@ const ClinicDataProvider = ({ children }) => {
         status: 'pendiente',
       },
     ]);
+    // Avisa a los administradores de esa institución (clínica u hospital).
+    push({
+      to: { roles: [ROLES.CLINIC_ADMIN, ROLES.HOSPITAL_ADMIN], institutionId },
+      type: 'request',
+      title: 'Nueva solicitud de horario',
+      body: `${findDoctor(doctorId)?.name ?? 'Un médico'} pidió cambiar su horario.`,
+      action: { type: 'institution-link', path: 'requests' },
+    });
   };
 
   const rejectRequest = (requestId) => {
+    const request = allRequests.find((r) => r.id === requestId);
     setAllRequests((prev) =>
       prev.map((r) => (r.id === requestId ? { ...r, status: 'rechazada', resolvedAt: todayISO() } : r))
     );
+    if (request) notifyDoctor(request, 'rechazada');
   };
 
   // Todo lo que las pantallas (y el Navbar) pueden leer o usar.

@@ -15,7 +15,7 @@ const VitadevDoctors = () => {
   const [closeSecretaries, setCloseSecretaries] = useState(0);
 
   return (
-  <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+  <div className="min-h-screen bg-slate-50 overflow-x-clip">
     <Navbar />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <PageHeader icon={UserRound} eyebrow="Administración SAMSA" title="Particulares" />

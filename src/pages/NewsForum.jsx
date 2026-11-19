@@ -218,7 +218,7 @@ const NewsForum = () => {
     const deleteButtonClass = 'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors';
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
+        <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-clip">
             <Navbar />
 
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative">

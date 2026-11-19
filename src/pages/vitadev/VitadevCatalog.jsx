@@ -141,7 +141,7 @@ const VitadevCatalog = () => {
   const inputClass = 'w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white';
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <EditConfirmModal
         isOpen={confirm?.type === 'add' || confirm?.type === 'edit'}

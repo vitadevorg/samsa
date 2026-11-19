@@ -311,7 +311,7 @@ const ClinicDoctors = () => {
 
   if (!clinic) {
     return (
-      <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 overflow-x-clip">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center text-gray-500">
           Tu usuario no tiene una institución asignada.
@@ -356,7 +356,7 @@ const ClinicDoctors = () => {
   }[mode ?? 'edit'];
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <EditConfirmModal isOpen={isConfirming} title={confirmCopy.title} message={confirmCopy.message} confirmLabel={confirmCopy.label} onCancel={() => setIsConfirming(false)} onConfirm={handleConfirm} />
       <EditConfirmModal

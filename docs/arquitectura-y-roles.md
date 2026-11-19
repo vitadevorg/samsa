@@ -72,6 +72,7 @@ El sistema define 6 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
   * `/vitadev/hospitals` → `VitadevInstitutions.jsx` (`kind="hospital"`)
   * `/vitadev/users` → `VitadevUsers.jsx`
   * `/vitadev/account` → `VitadevAccount.jsx`
+  * `/vitadev/support` → `VitadevSupport.jsx` (tickets de soporte de todos los usuarios)
 
 ---
 
@@ -81,3 +82,5 @@ El sistema define 6 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
   * Gestiona la sesión activa, login, registro, recuperación/reseteo de contraseña, cambio de contraseña y estado de cuentas (activas, inhabilitadas o dadas de baja).
 * **`ClinicDataProvider` (`src/pages/clinic/ClinicDataProvider.jsx`):**
   * Envuelve todas las rutas en `App.jsx` para compartir el estado de instituciones, médicos, secretarias, personal y solicitudes pendientes (consumido tanto por las pantallas de clínica/hospital/VitaDev como por el contador de notificaciones en `Navbar.jsx`).
+* **`NotificationsProvider` y `SupportProvider` (`src/context/`):**
+  * Campana de notificaciones por persona o rol y tickets de soporte (mock en memoria). `SupportBar` y el `Footer` ofrecen "Contactar soporte" en todos los módulos.

@@ -510,10 +510,10 @@ export default function DoctorPatients() {
         onAdd={handleAddPatient}
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 print:hidden">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-            <div className="relative z-10 w-full md:w-auto text-center md:text-left">
-                <h1 className="text-3xl md:text-4xl font-black text-slate-800 flex items-center justify-center md:justify-start gap-3 tracking-tight">
+            <div className="relative z-10 w-full lg:w-auto text-center lg:text-left">
+                <h1 className="text-3xl md:text-4xl font-black text-slate-800 flex items-center justify-center lg:justify-start gap-3 tracking-tight">
                     <div className="bg-blue-600 p-2.5 rounded-2xl shadow-lg shadow-blue-200">
                         <Users className="w-7 h-7 text-white"/>
                     </div>
@@ -521,8 +521,8 @@ export default function DoctorPatients() {
                 </h1>
                 <p className="text-slate-500 mt-2 font-medium">Gestión integral de historias clínicas y evoluciones.</p>
             </div>
-            <div className="flex gap-4 w-full md:w-auto relative z-10">
-                <div className="relative flex-1 md:w-96">
+            <div className="flex gap-4 w-full lg:w-auto relative z-10">
+                <div className="relative flex-1 lg:w-96">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input 
                         type="text" 

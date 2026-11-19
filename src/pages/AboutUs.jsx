@@ -304,7 +304,7 @@ const Counter = ({ end, duration = 2000, suffix = "" }) => {
 
 const AboutUs = () => {
   return (
-    <div className="font-sans text-slate-800 bg-white selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+    <div className="font-sans text-slate-800 bg-white selection:bg-blue-100 selection:text-blue-900 overflow-x-clip">
       <Navbar />
       <div className="relative pt-8 pb-12 sm:pt-12 sm:pb-16 lg:pt-16 lg:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

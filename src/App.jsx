@@ -34,6 +34,11 @@ import SecretaryAccount from './pages/secretary/SecretaryAccount';
 import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
 import { ForumProvider } from './context/ForumContext';
 import { CatalogProvider } from './context/CatalogContext';
+import { NotificationsProvider } from './context/NotificationsContext';
+import { SupportProvider } from './context/SupportContext';
+import SupportBar from './components/support/SupportBar';
+import SupportModalHost from './components/support/SupportModalHost';
+import FooterPresenceProvider from './components/support/FooterPresence';
 import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
@@ -44,6 +49,7 @@ import VitadevInstitutions from './pages/vitadev/VitadevInstitutions';
 import VitadevUsers from './pages/vitadev/VitadevUsers';
 import VitadevAccount from './pages/vitadev/VitadevAccount';
 import VitadevCatalog from './pages/vitadev/VitadevCatalog';
+import VitadevSupport from './pages/vitadev/VitadevSupport';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -63,9 +69,12 @@ function App() {
         <ModalScrollManager />
         {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
             (pantallas de clínica, Navbar, perfil del médico...) */}
+        <NotificationsProvider>
         <CatalogProvider>
         <ClinicDataProvider>
         <ForumProvider>
+        <SupportProvider>
+        <FooterPresenceProvider>
         <Routes>
 
           <Route path="/" element={<HomeRoute />} />
@@ -133,11 +142,17 @@ function App() {
             <Route path="/vitadev/users" element={<VitadevUsers />} />
             <Route path="/vitadev/account" element={<VitadevAccount />} />
             <Route path="/vitadev/catalog" element={<VitadevCatalog />} />
+            <Route path="/vitadev/support" element={<VitadevSupport />} />
           </Route>
         </Routes>
+        <SupportBar />
+        <SupportModalHost />
+        </FooterPresenceProvider>
+        </SupportProvider>
         </ForumProvider>
         </ClinicDataProvider>
         </CatalogProvider>
+        </NotificationsProvider>
       </Router>
     </AuthProvider>
   );

@@ -1,9 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogOut, ChevronDown, Menu, X,
-  Building2, Hospital, UserCog, KeyRound, Stethoscope, Users, User, Calendar, FileText, Star, Inbox, Newspaper, UserRound, Database } from 'lucide-react';
+  Building2, Hospital, UserCog, KeyRound, Stethoscope, Users, User, Calendar, FileText, Star, Inbox, Newspaper, UserRound, Database, LifeBuoy } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
+import { useSupport } from '../context/support-context';
+import { useDismissOnOutside } from '../hooks/useDismissOnOutside';
+import NotificationBell from './NotificationBell';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
 import { getDoctorLabel } from '../utils/doctorName';
@@ -14,6 +17,10 @@ const Navbar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const accountMenuRef = useRef(null);
+  // El menú de cuenta se cierra al hacer click afuera o con Escape.
+  const closeAccountMenu = useCallback(() => setIsDropdownOpen(false), []);
+  useDismissOnOutside(accountMenuRef, isDropdownOpen, closeAccountMenu);
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -48,6 +55,9 @@ const Navbar = () => {
   // las solicitudes; en el resto del sitio el contexto es null y el contador queda en 0.
   const clinicData = useContext(ClinicDataContext);
   const pendingRequests = clinicData?.requests.filter((r) => r.status === 'pendiente').length ?? 0;
+  // Tickets de soporte sin resolver (solo los ve el admin SAMSA).
+  const { openCount } = useSupport();
+  const pendingTickets = isVitadevAdmin ? openCount : 0;
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,7 +80,7 @@ const Navbar = () => {
                 <Link to={`${institutionBase}/requests`} className={getLinkClass(`${institutionBase}/requests`)}>
                   <Inbox className="w-4 h-4"/> Solicitudes
                   {pendingRequests > 0 && (
-                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingRequests} pendientes`}>
+                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingRequests} pendientes`}>
                       {pendingRequests}
                     </span>
                   )}
@@ -80,7 +90,7 @@ const Navbar = () => {
                 </Link>
               </>
             ) : isVitadevAdmin ? (
-              <>
+              <div className="flex items-center gap-1 xl:gap-2 [&>a]:px-2 xl:[&>a]:px-4">
                 <Link to="/vitadev/doctors" className={getLinkClass('/vitadev/doctors')}>
                   <UserRound className="w-4 h-4"/> Particulares
                 </Link>
@@ -93,10 +103,20 @@ const Navbar = () => {
                 <Link to="/vitadev/users" className={getLinkClass('/vitadev/users')}>
                   <UserCog className="w-4 h-4"/> Usuarios
                 </Link>
+                {/* Gestión de cuentas e instituciones a la izquierda; comunicación (foro y soporte) a la derecha. */}
+                <span className="mx-1 h-6 w-px bg-slate-200" aria-hidden="true" />
                 <Link to="/news" className={getLinkClass('/news')}>
                   <Newspaper className="w-4 h-4"/> Foro
                 </Link>
-              </>
+                <Link to="/vitadev/support" className={getLinkClass('/vitadev/support')}>
+                  <LifeBuoy className="w-4 h-4"/> Soporte
+                  {pendingTickets > 0 && (
+                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingTickets} tickets sin resolver`}>
+                      {pendingTickets}
+                    </span>
+                  )}
+                </Link>
+              </div>
             ) : isDoctor ? (
               <>
                 <Link to="/doctor/turns" className={getLinkClass('/doctor/turns')}>
@@ -128,22 +148,24 @@ const Navbar = () => {
               </>
             )}
             {user ? (
-              <div className="relative ml-2 xl:ml-4 shrink-0">
-                <button 
+              <div className="flex items-center gap-2 xl:gap-3 ml-2 xl:ml-4 shrink-0">
+              <div ref={accountMenuRef} className="relative shrink-0">
+                <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                 >
                   <div 
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
-                    style={{
-                      backgroundImage: user.img ? `url(${user.img})` : 'none',
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
+                    // Sin foto no se fija `backgroundImage`: pisaría el degradado de Tailwind y la inicial blanca quedaría sobre fondo blanco.
+                    style={user.img ? {
+                      backgroundImage: `url(${user.img})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center'
-                    }}
+                    } : undefined}
                   >
                     {!user.img && userInitial}
                   </div>
-                  <span className="text-sm font-bold px-1 tracking-wide whitespace-nowrap">
+                  <span className={`text-sm font-bold px-1 tracking-wide whitespace-nowrap ${isInstitutionAdmin ? 'hidden xl:inline' : ''}`}>
                     {isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'Admin' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
@@ -215,7 +237,8 @@ const Navbar = () => {
                     </button>
                   </div>
                 )}
-                {isDropdownOpen && <div className="fixed inset-0 z-30 cursor-default" onClick={() => setIsDropdownOpen(false)}></div>}
+              </div>
+              <NotificationBell />
               </div>
             ) : (
               <Link to="/login" className="ml-2 xl:ml-4 shrink-0">
@@ -227,7 +250,8 @@ const Navbar = () => {
               </Link>
             )}
           </div>
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-1">
+            {user && <NotificationBell />}
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-blue-600 p-2">
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -254,6 +278,9 @@ const Navbar = () => {
               <Link to="/vitadev/hospitals" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
               <Link to="/vitadev/users" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
               <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to="/vitadev/support" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+                Soporte{pendingTickets > 0 && ` (${pendingTickets})`}
+              </Link>
               <Link to="/vitadev/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
               <Link to="/vitadev/catalog" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Gestión de datos</Link>
             </>

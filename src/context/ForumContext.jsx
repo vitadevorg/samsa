@@ -2,6 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { ForumContext, canModerate } from './forum-context';
 import { createId } from '../utils/ids';
 import { useClinicData } from '../pages/clinic/clinicDataContext';
+import { useNotifications } from './notifications-context';
+import { normalizeEmail } from '../utils/email';
 
 // Publicaciones del foro escritas por médicos, VitaDev y administradores de clínica u hospital, y avisos de moderación. Es un mock en memoria, como el resto de los
 // datos de la app: se conserva mientras la página esté abierta y se pierde al recargar.
@@ -9,8 +11,7 @@ import { useClinicData } from '../pages/clinic/clinicDataContext';
 // para que nadie edite notas ajenas y solo puedan borrarlas quienes moderan (con un motivo para el autor):
 // VitaDev, cualquier nota; la clínica o el hospital, las de sus propios médicos.
 
-const normalize = (email) => (email ?? '').trim().toLowerCase();
-const sameAuthor = (post, authorEmail) => Boolean(authorEmail) && post.authorEmail === normalize(authorEmail);
+const sameAuthor = (post, authorEmail) => Boolean(authorEmail) && post.authorEmail === normalizeEmail(authorEmail);
 
 // Nota de demostración de otra médica: sirve para comprobar que solo se pueden editar
 // o borrar las publicaciones propias.
@@ -44,6 +45,7 @@ export const ForumProvider = ({ children }) => {
   const [posts, setPosts] = useState(SEED_POSTS);
   // Médicos de cada institución (ForumProvider está dentro de ClinicDataProvider, ver App.jsx).
   const { allAssignments, findDoctor, institutions } = useClinicData();
+  const { push } = useNotifications();
   // Notas institucionales fijas (las del foro original) que VitaDev quitó. No tienen autor a quien avisar.
   const [hiddenNoteIds, setHiddenNoteIds] = useState(() => new Set());
   // Avisos para el autor de una nota borrada por moderación: { id, authorEmail, postTitle, moderatorName, reason, moderatedAt }.
@@ -53,7 +55,7 @@ export const ForumProvider = ({ children }) => {
     const post = {
       ...data,
       id: createId(),
-      authorEmail: normalize(author.email),
+      authorEmail: normalizeEmail(author.email),
       authorName: author.name,
       createdAt: new Date().toISOString(),
       updatedAt: null,
@@ -82,7 +84,7 @@ export const ForumProvider = ({ children }) => {
     if (!user || !post || sameAuthor(post, user.email)) return false;
     if (canModerate(user)) return true;
     if (!user.institutionId) return false;
-    return allAssignments.some((a) => a.institutionId === user.institutionId && normalize(findDoctor(a.doctorId)?.email) === post.authorEmail);
+    return allAssignments.some((a) => a.institutionId === user.institutionId && normalizeEmail(findDoctor(a.doctorId)?.email) === post.authorEmail);
   }, [allAssignments, findDoctor]);
 
   // Borrado de la nota de otro autor por moderación, con el motivo que verá el autor.
@@ -100,7 +102,15 @@ export const ForumProvider = ({ children }) => {
       reason: reason.trim(),
       moderatedAt: new Date().toISOString(),
     }]);
-  }, [posts, canModeratePost, institutions]);
+    // Además del aviso en el foro, el autor lo recibe en la campana.
+    push({
+      to: { email: target.authorEmail },
+      type: 'info',
+      title: 'Una de tus notas fue retirada del foro',
+      body: `"${target.title}": ${reason.trim()}`,
+      action: { type: 'link', to: '/news' },
+    });
+  }, [posts, canModeratePost, institutions, push]);
 
   // VitaDev quita una nota institucional fija del foro.
   const removeFixedNote = useCallback((noteId, moderator) => {
@@ -109,12 +119,12 @@ export const ForumProvider = ({ children }) => {
   }, []);
 
   const noticesFor = useCallback(
-    (authorEmail) => moderationNotices.filter((notice) => notice.authorEmail === normalize(authorEmail)),
+    (authorEmail) => moderationNotices.filter((notice) => notice.authorEmail === normalizeEmail(authorEmail)),
     [moderationNotices]
   );
 
   const dismissNotice = useCallback((noticeId, authorEmail) => {
-    setModerationNotices((prev) => prev.filter((notice) => !(notice.id === noticeId && notice.authorEmail === normalize(authorEmail))));
+    setModerationNotices((prev) => prev.filter((notice) => !(notice.id === noticeId && notice.authorEmail === normalizeEmail(authorEmail))));
   }, []);
 
   const value = useMemo(

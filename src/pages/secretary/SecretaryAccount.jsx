@@ -196,7 +196,7 @@ const SecretaryAccount = () => {
   }[confirming];
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
         <FadeIn><div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 sm:p-8 text-white shadow-lg mb-6 sm:mb-8">

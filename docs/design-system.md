@@ -91,7 +91,7 @@ Usado para acciones complementarias como *"Conocer más"*:
 
 ## 6. Reglas de Responsiveness (Mobile, Tablet y Desktop)
 
-1. **Sin desbordes horizontales:** El contenedor raíz de cada página debe incluir `overflow-x-hidden` cuando existan halos o elementos decorativos absolutos (`blur-3xl`).
+1. **Sin desbordes horizontales:** El contenedor raíz de cada página debe incluir `overflow-x-clip` (no `overflow-x-hidden`) cuando existan halos o elementos decorativos absolutos (`blur-3xl`). `overflow-x-hidden` convierte al contenedor en una zona de scroll propia y el `Navbar` (`sticky top-0`) deja de quedar fijo al recorrer la pantalla; `overflow-x-clip` recorta igual sin romper el header fijo.
 2. **Orden de lectura en Hero (Mobile y Tablet `< lg`):**
    * **1° (`order-1`):** Título principal + párrafo descriptivo centrados (`text-center lg:text-left`).
    * **2° (`order-2`):** Imagen principal debajo del texto.
