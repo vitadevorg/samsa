@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ShieldCheck, Calendar, Activity, Users, ArrowRight, Star, MapPin, CheckCircle, Smartphone, Building, TrendingUp, Clock, FileText, HeartPulse, UserCheck, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ProfessionalApplicationModal from './ProfessionalApplicationModal';
+import AdhesionModal from './adhesion/AdhesionModal';
 import Reveal from './Reveal';
+import { ScrollMaskReveal } from './ScrollImageReveal';
+import Marquee from './Marquee';
+import BorderBeam from './BorderBeam';
 import { useInView } from '../hooks/useInView';
 
 const AnimatedStepsFlow = () => {
-    const [domRef, isVisible] = useInView({ threshold: 0.5, minRatio: 0.5, startDelay: 800 });
+    const [domRef, isVisible] = useInView({ threshold: 0.15, minRatio: 0.15, startDelay: 200 });
 
     return (
-        <div ref={domRef} className="grid grid-cols-1 md:grid-cols-4 gap-8 relative mt-16 min-h-[200px]">
+        <div ref={domRef} className="grid grid-cols-1 md:grid-cols-4 gap-8 relative mt-12 md:mt-16 min-h-[200px]">
 
             <div className="hidden md:block absolute top-6 left-[12%] right-[12%] h-1 bg-slate-800 -z-10 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500 rounded-full" style={{ 
@@ -20,28 +23,38 @@ const AnimatedStepsFlow = () => {
                 }}></div>
             </div>
 
+            <div className="md:hidden absolute top-6 bottom-6 left-6 -translate-x-1/2 w-0.5 bg-slate-800 -z-10 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-blue-500 rounded-full" style={{ 
+                    transformOrigin: 'top', 
+                    animation: isVisible ? 'expand-y 2.4s ease-out forwards 200ms' : 'none',
+                    transform: isVisible ? 'none' : 'scaleY(0)'
+                }}></div>
+            </div>
+
             {[
                 { step: "01", title: "Enviá tu Solicitud", desc: "Completá tus datos y nuestro equipo evaluará tu perfil." },
                 { step: "02", title: "Definí Horarios", desc: "Indicá tu disponibilidad y modalidad de atención." },
                 { step: "03", title: "Recibí Pacientes", desc: "Aparecé en el mercado y recibí solicitudes de turnos." },
                 { step: "04", title: "Optimizá tu Día", desc: "Administrá tu agenda desde nuestra plataforma." }
             ].map((item, idx) => (
-                <div key={item.step} className="text-center relative opacity-0" style={{ animation: isVisible ? `fade-in-up-delay 0.6s forwards ${200 + (idx * 1200)}ms` : 'none' }}>
-                    <div className="relative w-12 h-12 rounded-full border-2 bg-slate-900 mx-auto mb-6 flex items-center justify-center overflow-hidden" style={{ animation: isVisible ? `step-border 0.6s forwards ${400 + (idx * 1200)}ms` : 'none', borderColor: '#334155' }}>
+                <div key={item.step} className="flex md:block items-start gap-4 text-left md:text-center relative opacity-0" style={{ animation: isVisible ? `fade-in-up-delay 0.6s forwards ${150 + (idx * 650)}ms` : 'none' }}>
+                    <div className="relative w-12 h-12 rounded-full border-2 bg-slate-900 shrink-0 md:mx-auto md:mb-6 flex items-center justify-center overflow-hidden" style={{ animation: isVisible ? `step-border 0.6s forwards ${250 + (idx * 650)}ms` : 'none', borderColor: '#334155' }}>
 
-                        <div className="absolute bottom-0 left-0 w-full bg-blue-500 h-0" style={{ animation: isVisible ? `fill-up 0.8s ease-out forwards ${400 + (idx * 1200)}ms` : 'none' }}></div>
-                        <span className="relative z-10 font-black text-slate-500" style={{ animation: isVisible ? `step-text 0.4s forwards ${800 + (idx * 1200)}ms` : 'none' }}>{item.step}</span>
+                        <div className="absolute bottom-0 left-0 w-full bg-blue-500 h-0" style={{ animation: isVisible ? `fill-up 0.7s ease-out forwards ${250 + (idx * 650)}ms` : 'none' }}></div>
+                        <span className="relative z-10 font-black text-slate-500" style={{ animation: isVisible ? `step-text 0.4s forwards ${550 + (idx * 650)}ms` : 'none' }}>{item.step}</span>
                     </div>
-                    <h4 className="text-white font-bold text-lg mb-2">{item.title}</h4>
-                    <p className="text-slate-400 text-sm">{item.desc}</p>
+                    <div className="pt-1 md:pt-0">
+                        <h4 className="text-white font-bold text-lg mb-1.5 md:mb-2">{item.title}</h4>
+                        <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                    </div>
                 </div>
             ))}
         </div>
     );
 };
 
-const AnimatedChartTrigger = ({ children, threshold = 0.5 }) => {
-    const [domRef, isVisible] = useInView({ threshold, minRatio: threshold * 0.8, startDelay: 500 });
+const AnimatedChartTrigger = ({ children, threshold = 0.25 }) => {
+    const [domRef, isVisible] = useInView({ threshold, minRatio: 0.2, startDelay: 250 });
 
     return (
         <div ref={domRef} className={isVisible ? "chart-visible" : "chart-hidden"}>
@@ -79,6 +92,7 @@ const AnimatedNumber = ({ end, duration = 1500, isVisible, suffix = "" }) => {
 
 const ProfessionalB2BSection = () => {
     const [showApplicationModal, setShowApplicationModal] = useState(false);
+    const closeApplicationModal = useCallback(() => setShowApplicationModal(false), []);
 
     return (
         <section className="relative bg-slate-950 overflow-hidden pt-24 pb-32 font-sans border-t border-slate-900">
@@ -101,7 +115,8 @@ const ProfessionalB2BSection = () => {
                             Llevá tu práctica profesional al <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">siguiente nivel.</span>
                         </h2>
                     </Reveal>
-                    <Reveal delay={200}>
+
+                <Reveal delay={200}>
                         <p className="text-lg md:text-xl text-slate-400 leading-relaxed">
                             Unite a la red médica más innovadora. Conectá con pacientes, centralizá tus agendas y reducí la carga administrativa en un ecosistema diseñado para potenciar tu tiempo.
                         </p>
@@ -145,12 +160,12 @@ const ProfessionalB2BSection = () => {
                                 </div>
                             </div>
 
-                            <button className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2 group">
+                            <Link to="/turns" className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2 group">
                                 Reservar Turno <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </button>
+                            </Link>
                         </div>
 
-                        <div className="absolute -bottom-6 -right-6 bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
+                        <div className="absolute -bottom-14 right-2 sm:-right-6 bg-slate-800 border border-slate-700 p-3 sm:p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
                             <div className="flex items-center gap-3">
                                 <div className="bg-green-500/20 p-2 rounded-full">
                                     <Activity className="w-5 h-5 text-green-400" />
@@ -162,7 +177,7 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        <div className="absolute -top-10 -left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
+                        <div className="absolute -top-16 left-2 sm:-left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-3 sm:p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
                             <div className="flex items-center gap-4">
                                 <div className="relative w-12 h-12">
                                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -178,7 +193,8 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        <div className="absolute top-1/2 -right-12 transform -translate-y-1/2 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10 hidden sm:block" style={{ animationDuration: '8s', animationDelay: '2s' }}>
+                        <div className="absolute top-1/2 -right-12 -translate-y-1/2 z-10 hidden xl:block">
+                            <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '8s', animationDelay: '2s' }}>
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
                                     <TrendingUp className="w-4 h-4 text-blue-400" />
@@ -190,6 +206,7 @@ const ProfessionalB2BSection = () => {
                                 <path d="M0,30 L10,25 L20,28 L30,20 L40,22 L50,15 L60,18 L70,10 L80,12 L100,5" fill="none" stroke="#3b82f6" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                             </svg>
                             <p className="text-emerald-400 text-xs font-bold mt-1 text-right">+24% este mes</p>
+                        </div>
                         </div>
                     </Reveal>
 
@@ -213,19 +230,107 @@ const ProfessionalB2BSection = () => {
                     </div>
                 </div>
 
+                <Reveal delay={150}>
+                    <div className="mb-20 sm:mb-24">
+                        <div className="text-center mb-8">
+                            <p className="text-xs font-bold tracking-widest uppercase text-blue-400 mb-2">Reseñas verificadas</p>
+                            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Lo que dicen los pacientes de nuestros profesionales</h3>
+                        </div>
+                        <div className="relative flex h-[340px] w-full flex-row items-center justify-center overflow-hidden gap-4">
+                            <Marquee pauseOnHover vertical className="[--duration:26s] w-full sm:w-1/2">
+                                {[
+                                    { name: "Lucía Fernández", doctor: "Dra. Elena Villarroel · Cardiología", quote: "Excelente atención y puntualidad. Saqué el turno en segundos desde la plataforma." },
+                                    { name: "Martín Sosa", doctor: "Dr. Jesús Zelarayan · Clínica Médica", quote: "Muy claro para explicar el diagnóstico y el seguimiento digital es súper práctico." },
+                                    { name: "Carolina Méndez", doctor: "Dra. Priscila Gómez · Dermatología", quote: "Me llegó el recordatorio automático y no tuve que esperar nada en recepción." },
+                                ].map((rev) => (
+                                    <div key={rev.name} className="bg-slate-900/70 backdrop-blur-md border border-slate-800/90 hover:border-blue-500/40 rounded-2xl p-5 text-left transition-colors">
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {rev.name.split(' ').map((n) => n[0]).join('')}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-white font-bold text-sm truncate">{rev.name}</p>
+                                                    <p className="text-blue-400 text-xs font-medium truncate">{rev.doctor}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-0.5 text-amber-400 shrink-0 pt-0.5">
+                                                {Array.from({ length: 5 }).map((_, idx) => (
+                                                    <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">"{rev.quote}"</p>
+                                    </div>
+                                ))}
+                            </Marquee>
+                            <Marquee reverse pauseOnHover vertical className="[--duration:26s] hidden sm:flex sm:w-1/2">
+                                {[
+                                    { name: "Diego Morales", doctor: "Dr. Mateo Cruz · Traumatología", quote: "Pude ver sus horarios disponibles en tiempo real y elegir la sede más cercana." },
+                                    { name: "Valentina Ruiz", doctor: "Dra. Sofía Rocha · Pediatría", quote: "Trato humano impecable. Tener el historial y los estudios en un solo lugar da tranquilidad." },
+                                    { name: "Gustavo Pereyra", doctor: "Dr. Luis Coronel · Neumonología", quote: "Atención ágil, profesional y sin trámites en papel. Totalmente recomendable." },
+                                ].map((rev) => (
+                                    <div key={rev.name} className="bg-slate-900/70 backdrop-blur-md border border-slate-800/90 hover:border-blue-500/40 rounded-2xl p-5 text-left transition-colors">
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {rev.name.split(' ').map((n) => n[0]).join('')}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-white font-bold text-sm truncate">{rev.name}</p>
+                                                    <p className="text-blue-400 text-xs font-medium truncate">{rev.doctor}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-0.5 text-amber-400 shrink-0 pt-0.5">
+                                                {Array.from({ length: 5 }).map((_, idx) => (
+                                                    <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">"{rev.quote}"</p>
+                                    </div>
+                                ))}
+                            </Marquee>
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-slate-950 to-transparent z-10" />
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950 to-transparent z-10" />
+                        </div>
+                    </div>
+                </Reveal>
+
                 <Reveal delay={200}>
-                    <div className="flex flex-wrap justify-center gap-8 md:gap-16 border-y border-slate-800 py-10 mb-28 bg-slate-900/30">
-                        <div className="text-center">
-                            <div className="text-3xl md:text-4xl font-black text-white mb-2">+ Múltiples</div>
-                            <div className="text-slate-400 font-semibold tracking-wide uppercase text-xs">Especialidades Médicas</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl md:text-4xl font-black text-white mb-2">Activos</div>
-                            <div className="text-slate-400 font-semibold tracking-wide uppercase text-xs">Pacientes buscando atención</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl md:text-4xl font-black text-white mb-2">100%</div>
-                            <div className="text-slate-400 font-semibold tracking-wide uppercase text-xs">Gestión Digital Integrada</div>
+                    <div className="mx-6 sm:mx-10 md:mx-0 border-y border-slate-800/80 py-2 sm:py-0 mb-20 sm:mb-28">
+                        <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-slate-800/80">
+                            {[
+                                {
+                                    title: "Todo en uno",
+                                    desc: "Agenda, estudios y facturación"
+                                },
+                                {
+                                    title: "Sin demoras",
+                                    desc: "Confirmación inmediata de turnos"
+                                },
+                                {
+                                    title: "Multi-institución",
+                                    desc: "Adaptable a tu estructura médica"
+                                }
+                            ].map((pillar, idx) => (
+                                <div key={pillar.title} className="relative">
+                                    {idx > 0 && (
+                                        <div className="md:hidden w-24 h-px bg-slate-800/80 mx-auto" />
+                                    )}
+                                    <div className="py-6 md:py-10 md:px-8 flex flex-col items-center text-center">
+                                        <div className="flex items-center justify-center gap-2.5 mb-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)] shrink-0" />
+                                            <h4 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                                                {pillar.title}
+                                            </h4>
+                                        </div>
+                                        <p className="text-slate-400 text-sm font-medium">
+                                            {pillar.desc}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </Reveal>
@@ -238,6 +343,10 @@ const ProfessionalB2BSection = () => {
                     <AnimatedStepsFlow />
 
                     <style>{`
+                        @keyframes expand-y {
+                            0% { transform: scaleY(0); }
+                            100% { transform: scaleY(1); }
+                        }
                         @keyframes fill-up {
                             0% { height: 0%; }
                             100% { height: 100%; }
@@ -256,27 +365,27 @@ const ProfessionalB2BSection = () => {
                 </div>
 
                 <div className="mb-28 mt-20">
-                    <Reveal>
+                    <ScrollMaskReveal mask="circle">
                         <div className="text-center mb-20">
                             <h3 className="text-3xl md:text-5xl font-black text-white mb-6">Un ecosistema que beneficia a todos</h3>
-                            <p className="text-slate-400 text-lg max-w-2xl mx-auto">Cuando la tecnología conecta cada parte del proceso médico, todos ganan tiempo, comodidad y calidad de vida.</p>
+                            <p className="text-slate-400 text-lg max-w-2xl mx-auto text-justify md:text-center px-3 sm:px-0">Cuando la tecnología conecta cada parte del proceso médico, todos ganan tiempo, comodidad y calidad de vida.</p>
                         </div>
-                    </Reveal>
+                    </ScrollMaskReveal>
 
                     <div className="space-y-24">
 
-                        <div className="flex flex-col md:flex-row items-center gap-12">
-                            <Reveal className="w-full md:w-1/2">
-                                <div className="bg-blue-500/20 text-blue-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                            <Reveal className="w-full md:w-1/2 text-center md:text-left">
+                                <div className="bg-blue-500/20 text-blue-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
                                     <UserCheck className="w-8 h-8" />
                                 </div>
                                 <h4 className="text-3xl font-black text-white mb-4">Especialistas Médicos</h4>
-                                <p className="text-slate-400 text-lg leading-relaxed mb-6">
+                                <p className="text-slate-400 text-lg leading-relaxed mb-6 text-justify md:text-left px-3 sm:px-0">
                                     Gestión de agenda 100% autónoma. Conectá con nuevos pacientes de manera directa, aumentando tu visibilidad sin depender de derivaciones, y reducí a casi cero el ausentismo gracias a nuestros recordatorios inteligentes.
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden flex items-center justify-center h-72">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[18rem]">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
                                     <div className="text-center relative z-10">
                                         <AnimatedChartTrigger threshold={0.5}>
@@ -297,17 +406,17 @@ const ProfessionalB2BSection = () => {
                         </div>
 
                         <div className="flex flex-col md:flex-row-reverse items-center gap-12">
-                            <Reveal className="w-full md:w-1/2">
-                                <div className="bg-emerald-500/20 text-emerald-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                            <Reveal className="w-full md:w-1/2 text-center md:text-left">
+                                <div className="bg-emerald-500/20 text-emerald-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
                                     <HeartPulse className="w-8 h-8" />
                                 </div>
                                 <h4 className="text-3xl font-black text-white mb-4">Pacientes</h4>
-                                <p className="text-slate-400 text-lg leading-relaxed mb-6">
+                                <p className="text-slate-400 text-lg leading-relaxed mb-6 text-justify md:text-left px-3 sm:px-0">
                                     Reservas 24/7 sin esperas al teléfono ni horarios limitados. Historial médico unificado y recordatorios automáticos al celular. Encontrar al profesional ideal y gestionar la salud familiar nunca fue tan rápido.
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden min-h-[18rem] flex flex-col justify-center">
                                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
                                     <h5 className="text-white font-bold mb-6 text-center">Tiempo promedio para reservar</h5>
                                     <AnimatedChartTrigger threshold={0.5}>
@@ -329,32 +438,32 @@ const ProfessionalB2BSection = () => {
                         </div>
 
                         <div className="flex flex-col md:flex-row items-center gap-12">
-                            <Reveal className="w-full md:w-1/2">
-                                <div className="bg-amber-500/20 text-amber-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                            <Reveal className="w-full md:w-1/2 text-center md:text-left">
+                                <div className="bg-amber-500/20 text-amber-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
                                     <Clock className="w-8 h-8" />
                                 </div>
                                 <h4 className="text-3xl font-black text-white mb-4">Personal Administrativo</h4>
-                                <p className="text-slate-400 text-lg leading-relaxed mb-6">
+                                <p className="text-slate-400 text-lg leading-relaxed mb-6 text-justify md:text-left px-3 sm:px-0">
                                     Adiós al papel y a las agendas desordenadas. El sistema unifica absolutamente todo en un solo lugar. Reducción drástica del volumen de llamadas y confirmaciones manuales, liberando tiempo para una atención presencial de calidad.
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden min-h-[18rem] flex flex-col justify-center">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-                                    <h5 className="text-white font-bold mb-8 text-center">Origen de los turnos</h5>
+                                    <h5 className="text-white font-bold mb-6 text-center">Origen de los turnos</h5>
 
                                     <AnimatedChartTrigger threshold={0.5}>
                                         {(isVisible) => (
-                                            <div className="flex items-end justify-center gap-16 h-32 border-b border-slate-700 pb-2 px-8">
+                                            <div className="flex items-end justify-center gap-8 sm:gap-16 min-h-[11rem] border-b border-slate-700 pb-2 px-2 sm:px-8">
                                                 <div className="flex flex-col items-center gap-2 group w-1/3">
                                                     <span className="text-amber-400 font-black text-xl"><AnimatedNumber end={85} isVisible={isVisible} suffix="%" /></span>
                                                     <div className="w-full bg-amber-500 rounded-t-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-[1500ms] ease-out" style={{ height: isVisible ? '6rem' : '0' }}></div>
-                                                    <span className="text-slate-400 text-xs font-bold uppercase">Online / App</span>
+                                                    <span className="text-slate-400 text-xs font-bold uppercase text-center">Online / App</span>
                                                 </div>
                                                 <div className="flex flex-col items-center gap-2 w-1/3">
                                                     <span className="text-slate-400 font-bold text-sm"><AnimatedNumber end={15} isVisible={isVisible} suffix="%" /></span>
                                                     <div className="w-full bg-slate-700 rounded-t-lg transition-all duration-[1500ms] ease-out delay-300" style={{ height: isVisible ? '1.5rem' : '0' }}></div>
-                                                    <span className="text-slate-400 text-xs font-bold uppercase">Recepción</span>
+                                                    <span className="text-slate-400 text-xs font-bold uppercase text-center">Recepción</span>
                                                 </div>
                                             </div>
                                         )}
@@ -364,19 +473,19 @@ const ProfessionalB2BSection = () => {
                         </div>
 
                         <div className="flex flex-col md:flex-row-reverse items-center gap-12">
-                            <Reveal className="w-full md:w-1/2">
-                                <div className="bg-purple-500/20 text-purple-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                            <Reveal className="w-full md:w-1/2 text-center md:text-left">
+                                <div className="bg-purple-500/20 text-purple-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto md:mx-0">
                                     <Building className="w-8 h-8" />
                                 </div>
                                 <h4 className="text-3xl font-black text-white mb-4">Directores de Clínicas</h4>
-                                <p className="text-slate-400 text-lg leading-relaxed mb-6">
+                                <p className="text-slate-400 text-lg leading-relaxed mb-6 text-justify md:text-left px-3 sm:px-0">
                                     Control total de las métricas de la institución. Reportes de desempeño, facturación centralizada y optimización del uso de consultorios físicos. Evitá los espacios vacíos y maximizá la rentabilidad de la clínica.
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden min-h-[18rem] flex flex-col justify-center">
                                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
-                                    <div className="flex justify-between items-center mb-6">
+                                    <div className="flex flex-wrap justify-between items-center gap-2 mb-6">
                                         <h5 className="text-white font-bold">Ocupación de Consultorios</h5>
                                         <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-lg border border-purple-500/30">ÓPTIMA: 92%</span>
                                     </div>
@@ -392,7 +501,7 @@ const ProfessionalB2BSection = () => {
 
                                         <div className="aspect-square bg-purple-500 rounded-md shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
                                         <div className="aspect-square bg-purple-500/80 rounded-md"></div>
-                                        <div className="aspect-square bg-slate-800 rounded-md relative flex items-center justify-center"><span className="text-[10px] text-slate-500">Mantenimiento</span></div>
+                                        <div className="aspect-square bg-slate-800 rounded-md relative flex items-center justify-center p-1 overflow-hidden"><span className="sm:hidden text-[10px] text-slate-500">Mant.</span><span className="hidden sm:inline text-[10px] text-slate-500">Mantenimiento</span></div>
                                         <div className="aspect-square bg-purple-500/90 rounded-md"></div>
                                         <div className="aspect-square bg-purple-500 rounded-md"></div>
                                     </div>
@@ -411,19 +520,20 @@ const ProfessionalB2BSection = () => {
                             Tu consultorio, tus reglas.<br />
                             <span className="text-blue-400">Nosotros ponemos la tecnología.</span>
                         </h3>
-                        <p className="text-slate-400 text-lg mb-10 max-w-2xl mx-auto relative z-10">
+                        <p className="text-slate-400 text-lg mb-10 max-w-2xl mx-auto relative z-10 text-justify md:text-center px-3 sm:px-0">
                             Sumate a SAMSA y llevá tu práctica profesional a una nueva forma de gestionar pacientes, sin fricciones.
                         </p>
 
-                        <button onClick={() => setShowApplicationModal(true)} className="px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-xl font-black text-lg transition-all shadow-lg hover:shadow-white/20 hover:-translate-y-1 group flex items-center gap-2 mx-auto relative z-10">
-                            Enviar Solicitud de Adhesión <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <button type="button" onClick={() => setShowApplicationModal(true)} className="relative overflow-hidden w-full sm:w-auto justify-center px-6 sm:px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-xl font-black text-base sm:text-lg transition-all shadow-lg hover:shadow-white/20 hover:-translate-y-1 group flex items-center gap-2 mx-auto z-10">
+                            <BorderBeam size={72} duration={4.5} colorFrom="#2563eb" colorTo="#4f46e5" borderWidth={2} />
+                            Enviar Solicitud de Adhesión <ArrowRight className="w-5 h-5 shrink-0 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
                 </Reveal>
 
             </div>
 
-            {showApplicationModal && <ProfessionalApplicationModal onClose={() => setShowApplicationModal(false)} />}
+            {showApplicationModal && <AdhesionModal onClose={closeApplicationModal} />}
         </section>
     );
 };

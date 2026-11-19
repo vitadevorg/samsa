@@ -4,6 +4,7 @@ import { EditConfirmModal, SuccessModal } from '../clinic/ClinicModals';
 import { useClinicData } from '../clinic/clinicDataContext';
 import {
   validateInstitutionName, validateAddress, validatePhone, validateEmail, validateName, validateNewPassword, errorBorder,
+  validateLegalName, refesDigits, validateRefes, validateInstitutionCuit,
 } from '../clinic/clinicValidation';
 import { getInstitutionUnits } from '../../data/institutions';
 import { resetPassword, setPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
@@ -11,7 +12,7 @@ import { ROLES } from '../../constants/roles';
 import { createId } from '../../utils/ids';
 import { useCatalog } from '../../context/catalog-context';
 import CheckboxDropdown from '../../components/CheckboxDropdown';
-import { cuilDigits, formatCuil, isValidCuil } from '../../utils/cuil';
+import { cuilDigits, formatCuil } from '../../utils/cuil';
 import AccountStatusBadge from './AccountStatusBadge';
 import { buildUserDirectory } from './userDirectory';
 import { useSuccessModal } from './useSuccessModal';
@@ -47,36 +48,6 @@ const toForm = (institution) => ({
 });
 
 const clean = (text) => text.trim().replace(/\s+/g, ' ');
-
-// Razón social: obligatoria, entre 3 y 120 caracteres.
-const validateLegalName = (value) => {
-  const text = value.trim();
-  if (!text) return 'Ingresá la razón social.';
-  if (text.length < 3) return 'La razón social es demasiado corta.';
-  if (text.length > 120) return 'La razón social no puede superar los 120 caracteres.';
-  return '';
-};
-
-// Código REFES (Registro Federal de Establecimientos de Salud): 14 dígitos.
-const refesDigits = (value) => value.replace(/\D/g, '');
-const validateRefes = (value, taken) => {
-  const digits = refesDigits(value);
-  if (!digits) return 'Ingresá el código REFES.';
-  if (digits.length !== 14) return 'El código REFES tiene que tener 14 dígitos.';
-  if (taken.includes(digits)) return 'Ya hay una institución con ese código REFES.';
-  return '';
-};
-
-// CUIT de la institución: XX-XXXXXXXX-X, de persona jurídica (30, 33 o 34) y con dígito verificador válido.
-const validateInstitutionCuit = (value, taken) => {
-  const digits = cuilDigits(value);
-  if (!digits) return 'Ingresá el CUIT.';
-  if (digits.length !== 11) return 'El CUIT tiene que tener 11 dígitos (XX-XXXXXXXX-X).';
-  if (!['30', '33', '34'].includes(digits.slice(0, 2))) return 'El CUIT de una institución empieza con 30, 33 o 34.';
-  if (!isValidCuil(digits)) return 'CUIT inválido: revisá el último dígito.';
-  if (taken.includes(digits)) return 'Ya hay una institución con ese CUIT.';
-  return '';
-};
 
 // Pantalla del administrador de VitaDev: clínicas (`kind="clinic"`) u hospitales (`kind="hospital"`).
 // Puede asociar una institución nueva (con su administrador), corregir sus datos, crearle áreas o

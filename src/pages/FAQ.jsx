@@ -148,7 +148,7 @@ const FAQ = () => {
           </div>
         </FadeIn>
       </div>
-      <Footer theme="light" />
+      <Footer />
     </div>
   );
 };

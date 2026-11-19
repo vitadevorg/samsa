@@ -26,10 +26,17 @@ const Navbar = () => {
     navigate('/');
   };
   const getLinkClass = (path) => {
-    const isActive = location.pathname === path;
+    const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
     return isActive 
       ? "text-blue-700 font-bold flex items-center gap-1 whitespace-nowrap bg-blue-50/80 px-3 xl:px-4 py-2 rounded-xl transition-colors text-sm xl:text-base" 
       : "text-slate-600 hover:text-blue-700 font-medium flex items-center gap-1 whitespace-nowrap hover:bg-slate-50 px-3 xl:px-4 py-2 rounded-xl transition-all text-sm xl:text-base";
+  };
+
+  const getMobileLinkClass = (path) => {
+    const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
+    return isActive
+      ? "block px-3.5 py-2.5 rounded-xl text-base font-bold text-blue-700 bg-blue-50/90 border border-blue-100/80 transition-all duration-200"
+      : "block px-3.5 py-2.5 rounded-xl text-base font-medium text-slate-600 hover:text-blue-700 hover:bg-blue-50/70 hover:translate-x-0.5 active:bg-blue-50 active:scale-[0.99] transition-all duration-200";
   };
   const getFirstName = (fullName) => {
     if (!fullName) return '';
@@ -252,69 +259,84 @@ const Navbar = () => {
           </div>
           <div className="lg:hidden flex items-center gap-1">
             {user && <NotificationBell />}
-            <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-blue-600 p-2">
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-expanded={isOpen}
+              aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+              className="text-slate-600 hover:text-blue-600 hover:bg-slate-100 active:scale-95 p-2.5 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            >
+              <span className="relative flex flex-col justify-between w-5 h-4" aria-hidden="true">
+                <span className={`block h-0.5 w-full bg-current rounded-full transition-all duration-300 ease-out origin-center ${isOpen ? 'translate-y-[7px] rotate-45' : ''}`} />
+                <span className={`block h-0.5 w-full bg-current rounded-full transition-all duration-200 ease-out ${isOpen ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'}`} />
+                <span className={`block h-0.5 w-full bg-current rounded-full transition-all duration-300 ease-out origin-center ${isOpen ? '-translate-y-[7px] -rotate-45' : ''}`} />
+              </span>
             </button>
           </div>
         </div>
       </div>
-      {isOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
+      <div
+        className={`lg:hidden grid transition-all duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100 border-t border-gray-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'}`}
+        aria-hidden={!isOpen}
+      >
+        <div className="overflow-hidden bg-white">
+          <div className="px-3 pt-2 pb-4 space-y-1">
           {institutionBase ? (
             <>
-              <Link to={`${institutionBase}/doctors`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to={`${institutionBase}/secretaries`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
-              <Link to={`${institutionBase}/requests`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+              <Link to={`${institutionBase}/doctors`} onClick={() => setIsOpen(false)} className={getMobileLinkClass(`${institutionBase}/doctors`)}>Médicos</Link>
+              <Link to={`${institutionBase}/secretaries`} onClick={() => setIsOpen(false)} className={getMobileLinkClass(`${institutionBase}/secretaries`)}>Secretarias</Link>
+              <Link to={`${institutionBase}/requests`} onClick={() => setIsOpen(false)} className={getMobileLinkClass(`${institutionBase}/requests`)}>
                 Solicitudes{pendingRequests > 0 && ` (${pendingRequests})`}
               </Link>
-              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
-              <Link to={`${institutionBase}/account`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
-              <Link to={`${institutionBase}/settings`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">{isHospitalAdmin ? 'Datos del hospital' : 'Datos de la clínica'}</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/news')}>Foro</Link>
+              <Link to={`${institutionBase}/account`} onClick={() => setIsOpen(false)} className={getMobileLinkClass(`${institutionBase}/account`)}>Mi cuenta</Link>
+              <Link to={`${institutionBase}/settings`} onClick={() => setIsOpen(false)} className={getMobileLinkClass(`${institutionBase}/settings`)}>{isHospitalAdmin ? 'Datos del hospital' : 'Datos de la clínica'}</Link>
             </>
           ) : isVitadevAdmin ? (
             <>
-              <Link to="/vitadev/doctors" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Particulares</Link>
-              <Link to="/vitadev/clinics" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
-              <Link to="/vitadev/hospitals" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
-              <Link to="/vitadev/users" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
-              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
-              <Link to="/vitadev/support" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+              <Link to="/vitadev/doctors" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/doctors')}>Particulares</Link>
+              <Link to="/vitadev/clinics" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/clinics')}>Clínicas</Link>
+              <Link to="/vitadev/hospitals" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/hospitals')}>Hospitales</Link>
+              <Link to="/vitadev/users" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/users')}>Usuarios</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/news')}>Foro</Link>
+              <Link to="/vitadev/support" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/support')}>
                 Soporte{pendingTickets > 0 && ` (${pendingTickets})`}
               </Link>
-              <Link to="/vitadev/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
-              <Link to="/vitadev/catalog" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Gestión de datos</Link>
+              <Link to="/vitadev/account" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/account')}>Mi cuenta</Link>
+              <Link to="/vitadev/catalog" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/vitadev/catalog')}>Gestión de datos</Link>
             </>
           ) : isDoctor ? (
             <>
-              <Link to="/doctor/profile" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Perfil Profesional</Link>
-              <Link to="/doctor/turns" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos Asignados</Link>
-              <Link to="/doctor/patients" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
-              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to="/doctor/profile" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/doctor/profile')}>Perfil Profesional</Link>
+              <Link to="/doctor/turns" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/doctor/turns')}>Turnos Asignados</Link>
+              <Link to="/doctor/patients" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/doctor/patients')}>Pacientes</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/news')}>Foro</Link>
             </>
           ) : isSecretary ? (
             <>
-              <Link to="/secretary/dashboard" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Agenda Diaria</Link>
-              <Link to="/secretary/patients" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Directorio Pacientes</Link>
-              <Link to="/secretary/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/secretary/dashboard" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/secretary/dashboard')}>Agenda Diaria</Link>
+              <Link to="/secretary/patients" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/secretary/patients')}>Directorio Pacientes</Link>
+              <Link to="/secretary/account" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/secretary/account')}>Mi cuenta</Link>
             </>
           ) : (
             <>
-              <Link to="/turns" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Turnos</Link>
-              <Link to="/professionals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Profesionales</Link>
-              <Link to="/news" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
-              <Link to="/faq" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Preguntas Frecuentes</Link>
-              <Link to="/about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Acerca de Nosotros</Link>
+              <Link to="/turns" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/turns')}>Turnos</Link>
+              <Link to="/professionals" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/professionals')}>Profesionales</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/news')}>Foro</Link>
+              <Link to="/faq" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/faq')}>Preguntas Frecuentes</Link>
+              <Link to="/about" onClick={() => setIsOpen(false)} className={getMobileLinkClass('/about')}>Acerca de Nosotros</Link>
             </>
           )}
           <div className="border-t border-gray-100 mt-4 pt-4">
              {user ? (
-                <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 font-bold">Cerrar Sesión</button>
+                <button onClick={handleLogout} className="w-full text-left px-3.5 py-2.5 rounded-xl text-red-600 font-bold hover:bg-red-50 active:scale-[0.99] transition-all duration-200">Cerrar Sesión</button>
              ) : (
-                <Link to="/login" className="block px-3 py-2 text-center bg-blue-600 text-white rounded-lg font-bold">Iniciar Sesión</Link>
+                <Link to="/login" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.99] transition-all duration-200">Iniciar Sesión</Link>
              )}
           </div>
         </div>
-      )}
+        </div>
+      </div>
     </nav>
   );
 };

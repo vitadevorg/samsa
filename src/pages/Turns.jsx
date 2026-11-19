@@ -39,14 +39,8 @@ const Turns = () => {
   return (
     <div className="font-sans text-slate-800 bg-white selection:bg-blue-100 selection:text-blue-900 min-h-screen">
       <Navbar />
-      <div className="relative pt-32 pb-12 lg:pt-40 lg:pb-20 bg-gradient-to-b from-blue-50/50 to-white">
+      <div className="relative pt-10 pb-10 lg:pt-14 lg:pb-16 bg-gradient-to-b from-blue-50/50 to-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <FadeIn>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/50 border border-blue-200 mb-8 mx-auto">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-              <span className="text-blue-800 font-medium text-xs tracking-wide uppercase">Turnos Online</span>
-            </div>
-          </FadeIn>
           <FadeIn delay={100}>
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-6">
               Encuentra a tu <br className="hidden md:block"/>
@@ -74,9 +68,6 @@ const Turns = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <button className="hidden sm:flex items-center justify-center w-10 h-10 bg-gray-900 rounded-full text-white hover:bg-blue-600 transition-colors duration-300">
-                  <Filter className="w-4 h-4" />
-                </button>
               </div>
             </div>
           </FadeIn>

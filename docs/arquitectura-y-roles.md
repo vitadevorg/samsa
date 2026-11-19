@@ -52,7 +52,8 @@ El sistema define 6 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 * **Médico (`ROLES.DOCTOR`):**
   * `/doctor/turns` → `DoctorTurns.jsx`
   * `/doctor/patients` → `DoctorPatients.jsx`
-  * `/doctor/profile` → `DoctorProfile.jsx`
+  * `/doctor/patients/:historyId` → `hce/PatientRecord.jsx` (Historia Clínica Electrónica y seguimiento del paciente)
+  * `/doctor/profile` → `DoctorAccount.jsx` (Perfil Profesional: cuenta, datos profesionales y dónde atiende)
   * `/doctor/protocols` → `DoctorProtocols.jsx`
   * `/doctor/support` → `DoctorSupport.jsx`
 * **Secretaria (`ROLES.SECRETARY`):**

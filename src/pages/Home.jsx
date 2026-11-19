@@ -6,6 +6,11 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ProfessionalB2BSection from '../components/ProfessionalB2BSection';
 import SharedReveal from '../components/Reveal';
+import ScrollImageReveal, { ScrollMaskReveal } from '../components/ScrollImageReveal';
+import PixelImage from '../components/PixelImage';
+import SamsaLogoAnimation from '../components/SamsaLogoAnimation';
+import BorderBeam from '../components/BorderBeam';
+import { RevealGateContext } from '../context/reveal-gate-context';
 const homeStyles = `
   html {
     scroll-behavior: smooth;
@@ -55,7 +60,7 @@ const IntroOverlay = ({ onComplete }) => {
   const [stage, setStage] = useState(0);
   useEffect(() => {
     const t1 = setTimeout(() => setStage(1), 2800); 
-    const t2 = setTimeout(() => onComplete(), 3600); 
+    const t2 = setTimeout(() => onComplete(), 3900); 
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onComplete]);
   return (
@@ -98,7 +103,8 @@ const Home = () => {
   ];
   return (
     <>
-      {showIntro && <IntroOverlay onComplete={handleIntroComplete} />}
+      {showIntro && <SamsaLogoAnimation autoPlay onComplete={handleIntroComplete} />}
+      <RevealGateContext.Provider value={!showIntro}>
       <div className={`font-sans text-slate-800 bg-slate-50 selection:bg-blue-100 selection:text-blue-900 ${showIntro ? 'h-screen overflow-hidden' : ''}`}>
         <style>{homeStyles}</style>
       <Navbar />
@@ -108,20 +114,27 @@ const Home = () => {
             <div className="absolute top-[40%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-tr from-cyan-100/50 to-blue-100/50 rounded-full blur-3xl animate-float" style={{animationDuration: '15s', animationDelay: '1s'}}></div>
         </div>
         <div className="max-w-7xl mx-auto">
-          <div className="relative z-10 pb-8 bg-white/0 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-20 px-4 sm:px-6 lg:px-8">
-            <main className="mt-10 mx-auto max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
+          <div className="relative z-10 pb-8 bg-white/0 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-8 sm:pt-10 lg:pt-14 px-4 sm:px-6 lg:px-8">
+            <main className="mt-2 mx-auto max-w-7xl sm:mt-4 lg:mt-6">
               <div className="sm:text-center lg:text-left">
-                <Reveal delay={100}>
-                    <span className="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-wider uppercase mb-4 border border-blue-100 shadow-sm">
-                        S.A.M.S.A Salud Digital
-                    </span>
-                </Reveal>
                 <Reveal delay={200}>
                     <h1 className="text-5xl tracking-tighter font-extrabold text-slate-900 sm:text-6xl md:text-7xl mb-6">
                     Tu salud <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">primero.</span>
                     <br />
                     <span className="block text-slate-800 text-4xl sm:text-5xl md:text-6xl mt-2">Sin filas, sin demoras.</span>
                     </h1>
+                </Reveal>
+                <Reveal delay={300} className="lg:hidden">
+                  <div className="relative w-full h-64 sm:h-72 md:h-96 my-6 rounded-2xl overflow-hidden pointer-events-none animate-float">
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent z-10"></div>
+                    <PixelImage
+                      src="/img/claudioMoya.png"
+                      alt="Equipo Médico SAMSA"
+                      grid="6x4"
+                      className="w-full h-full"
+                      imgClassName="object-top"
+                    />
+                  </div>
                 </Reveal>
                 <Reveal delay={400}>
                     <p className="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0 leading-relaxed">
@@ -130,7 +143,8 @@ const Home = () => {
                 </Reveal>
                 <div className="mt-10 sm:mt-12 sm:flex sm:justify-center lg:justify-start gap-4">
                   <Reveal delay={600} className="w-full sm:w-auto">
-                    <Link to="/turns" className="w-full flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 md:text-lg transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-500/30 group">
+                    <Link to="/turns" className="relative overflow-hidden w-full flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 md:text-lg transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-500/30 group">
+                      <BorderBeam size={64} duration={4.5} colorFrom="#93c5fd" colorTo="#4f46e5" borderWidth={2} />
                       Solicitar turno
                       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"/>
                     </Link>
@@ -143,12 +157,17 @@ const Home = () => {
                 </div>
                 <Reveal delay={900}>
                     <div className="mt-10 inline-flex flex-col sm:flex-row items-center gap-4 bg-white px-5 py-4 rounded-2xl sm:rounded-full border border-blue-100 shadow-[0_8px_30px_rgb(37,99,235,0.06)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.12)] transition-all duration-300">
-                        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shrink-0 shadow-inner">
-                            <ShieldCheck className="w-7 h-7" strokeWidth={1.5} />
+                        <div className="flex items-center justify-center w-14 h-14 rounded-full overflow-hidden border border-sky-200 shrink-0 shadow-sm" aria-hidden="true">
+                            <svg viewBox="0 0 36 36" className="w-full h-full">
+                                <rect width="36" height="12" y="0" fill="#75AADB" />
+                                <rect width="36" height="12" y="12" fill="#FFFFFF" />
+                                <rect width="36" height="12" y="24" fill="#75AADB" />
+                                <circle cx="18" cy="18" r="3.6" fill="#F6B40E" />
+                            </svg>
                         </div>
                         <div className="text-center sm:text-left pr-3">
                             <p className="text-base font-bold text-slate-800">
-                                Comprometidos con la salud de Argentina
+                                Comprometidos con la salud Argentina
                             </p>
                             <p className="text-sm text-slate-500 mt-0.5">
                                 Más de <span className="font-semibold text-blue-600">50.000 pacientes</span> confían en nuestra atención.
@@ -160,14 +179,16 @@ const Home = () => {
             </main>
           </div>
         </div>
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-full flex items-center justify-center pointer-events-none">
+        <div className="hidden lg:flex lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-full items-center justify-center pointer-events-none">
              <div className="relative w-full h-64 sm:h-72 md:h-96 lg:h-full animate-float">
                  <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent z-10 lg:via-white/20"></div>
                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 lg:hidden"></div>
-                 <img 
-                    className="w-full h-full object-cover object-center lg:object-left-top" 
-                    src="/img/claudioMoya.png" 
-                    alt="Equipo Médico SAMSA" 
+                 <PixelImage
+                    className="w-full h-full"
+                    imgClassName="object-center lg:object-left-top"
+                    src="/img/claudioMoya.png"
+                    alt="Equipo Médico SAMSA"
+                    grid="8x8"
                 />
              </div>
         </div>
@@ -187,27 +208,27 @@ const Home = () => {
                 <div className="w-24 h-1.5 bg-blue-600 mx-auto mt-6 rounded-full"></div>
             </Reveal>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Reveal key={service.title} delay={index * 100} className="h-full">
-                  <Link to={`/professionals?specialty=${encodeURIComponent(service.title)}`} className="block group relative bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 h-full hover:-translate-y-2 overflow-hidden">
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${service.color} opacity-0 group-hover:opacity-5 rounded-bl-[100%] transition-all duration-500 translate-x-10 -translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0`}></div>
-                    <div className={`inline-flex items-center justify-center p-4 ${service.color} rounded-2xl shadow-lg shadow-${service.color}/30 mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                        {service.icon}
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
-                        {service.title}
-                    </h3>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                        {service.desc}
-                    </p>
-                    <div className="flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                        Consultar <ArrowRight className="ml-2 w-4 h-4"/>
-                    </div>
-                  </Link>
-              </Reveal>
-            ))}
-          </div>
+          <ScrollMaskReveal mask="wipe">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {services.map((service) => (
+                <Link key={service.title} to={`/professionals?specialty=${encodeURIComponent(service.title)}`} className="block group relative bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 h-full hover:-translate-y-2 overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-32 h-32 ${service.color} opacity-0 group-hover:opacity-5 rounded-bl-[100%] transition-all duration-500 translate-x-10 -translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0`}></div>
+                  <div className={`inline-flex items-center justify-center p-4 ${service.color} rounded-2xl shadow-lg shadow-${service.color}/30 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                      {service.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                      {service.title}
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                      {service.desc}
+                  </p>
+                  <div className="flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                      Consultar <ArrowRight className="ml-2 w-4 h-4"/>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </ScrollMaskReveal>
         </div>
       </section>
       <section className="py-20 relative overflow-hidden">
@@ -216,24 +237,26 @@ const Home = () => {
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-900/80 to-slate-900/80"></div>
           </div>
           <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-              <Reveal>
+              <ScrollMaskReveal mask="curtain">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">¿Listo para cuidar tu salud?</h2>
                   <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto">
                       Unite a los miles de pacientes que ya gestionan sus turnos de forma rápida y segura con S.A.M.S.A.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/register">
-                          <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-900/50 hover:scale-105">
+                          <button className="relative overflow-hidden px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-900/50 hover:scale-105">
+                              <BorderBeam size={64} duration={4.5} colorFrom="#93c5fd" colorTo="#4f46e5" borderWidth={2} />
                               Crear mi cuenta ahora
                           </button>
                       </Link>
                   </div>
-              </Reveal>
+              </ScrollMaskReveal>
           </div>
       </section>
       <ProfessionalB2BSection />
       <Footer />
     </div>
+      </RevealGateContext.Provider>
     </>
   );
 };

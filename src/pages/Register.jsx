@@ -200,21 +200,21 @@ const Register = () => {
       navigate('/login');
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 flex items-center justify-center pt-16 pb-6 px-3 sm:p-4 relative overflow-hidden font-sans">
       <SuccessModal isOpen={showSuccess} onNavigate={handleLoginRedirect} />
-      <Link to="/login" className="absolute top-6 left-6 z-50 group flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition border border-white/10 shadow-lg">
+      <Link to="/login" className="absolute top-4 left-3 sm:top-6 sm:left-6 z-50 group flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition border border-white/10 shadow-lg">
          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
          <span className="text-sm font-medium">Volver</span>
       </Link>
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 relative z-10 my-4 flex flex-col md:flex-row min-h-[650px]">
-          <div className="w-full md:w-5/12 bg-blue-50 relative flex flex-col justify-start items-center p-6 border-r border-blue-100 pt-16">
+      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 relative z-10 my-2 sm:my-4 flex flex-col md:flex-row md:min-h-[650px]">
+          <div className="w-full md:w-5/12 bg-blue-50 relative flex flex-col justify-start items-center px-6 pb-6 pt-8 md:pt-16 border-b md:border-b-0 md:border-r border-blue-100">
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
-              <div className="mb-6 z-20">
+              <div className="mb-4 md:mb-6 z-20">
                 <RegistrationAvatar currentState={avatarState} />
               </div>
-              <div className="text-center z-10 relative mt-4">
+              <div className="text-center z-10 relative mt-2 md:mt-4">
                 <h2 className="text-2xl font-bold text-slate-800 mb-2">Registrarme</h2>
                 <p className="text-slate-500 text-sm px-4 leading-relaxed">
                     Completá tus datos para generar tu cuenta en S.A.M.S.A.
@@ -222,12 +222,12 @@ const Register = () => {
               </div>
           </div>
           <div className="w-full md:w-7/12 bg-white flex flex-col relative z-30">
-             <div className="p-8 md:p-10 overflow-y-auto custom-scrollbar h-full">
+             <div className="p-5 sm:p-8 md:p-10 overflow-y-auto custom-scrollbar h-full">
                 <div className="mb-6 md:hidden text-center">
                    <h2 className="text-2xl font-bold text-slate-800">Crear Cuenta</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div className="space-y-1">
                           <input type="text" name="name" placeholder="Nombre(s)" value={formData.name} onChange={handleChange}
                             className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm outline-none transition focus:bg-white ${errors.name ? 'border-red-300 ring-1 ring-red-100' : 'border-slate-200 focus:border-blue-500'}`} />
@@ -237,13 +237,13 @@ const Register = () => {
                             className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm outline-none transition focus:bg-white ${errors.lastname ? 'border-red-300 ring-1 ring-red-100' : 'border-slate-200 focus:border-blue-500'}`} />
                       </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <input type="number" name="dni" placeholder="DNI" value={formData.dni} onChange={handleChange}
                         className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm outline-none transition focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${errors.dni ? 'border-red-300 ring-1 ring-red-100' : 'border-slate-200 focus:border-blue-500'}`} />
                       <input type="number" name="cuil" placeholder="CUIL (Opcional)" value={formData.cuil} onChange={handleChange}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none transition focus:bg-white focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <input type="date" name="dob" value={formData.dob} onChange={handleChange}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none transition text-slate-600 focus:bg-white focus:border-blue-500" />
                       <input type="tel" name="phone" placeholder="Teléfono" value={formData.phone} onChange={handleChange}

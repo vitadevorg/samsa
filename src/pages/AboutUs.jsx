@@ -3,6 +3,7 @@ import { Clock, Users, Activity, ArrowRight, CheckCircle, CalendarCheck, Sparkle
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import PixelImage from '../components/PixelImage';
 import BaseFadeIn from '../components/FadeIn';
 import { useInView } from '../hooks/useInView';
 
@@ -327,16 +328,14 @@ const AboutUs = () => {
             </div>
             <div className="relative order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 aspect-[4/3] w-full max-w-xl mx-auto lg:max-w-none lg:aspect-auto lg:h-[600px] flex items-center justify-center">
               <FadeIn delay={300} className="w-full h-full">
-                <div className="relative w-full h-full rounded-3xl sm:rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10 group">
-                   <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/10 to-transparent z-10 mix-blend-multiply transition-opacity group-hover:opacity-75"></div>
-                   <img 
-                    src="/img/matarSoto.png" 
-                    alt="Doctor Matar y Soto" 
-                    className="w-full h-full object-cover object-top scale-100 lg:scale-105 transition-transform duration-[2s] ease-out group-hover:scale-105 lg:group-hover:scale-110"
-                    onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.parentNode.style.backgroundColor = '#e2e8f0'; 
-                    }}
+                <div className="relative w-full h-full rounded-3xl sm:rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10">
+                   <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/10 to-transparent z-10 mix-blend-multiply pointer-events-none"></div>
+                   <PixelImage
+                    src="/img/matarSoto.png"
+                    alt="Doctor Matar y Soto"
+                    grid="8x8"
+                    className="w-full h-full"
+                    imgClassName="object-top"
                   />
                 </div>
               </FadeIn>
@@ -403,14 +402,15 @@ const AboutUs = () => {
               { icon: Users, title: "Trato Humano", desc: "Profesionales que valoran tu tiempo y bienestar." }
             ].map((feature, i) => (
               <FadeIn key={feature.title} delay={i * 150} className="h-full">
-                <div className="group h-full p-6 sm:p-8 rounded-3xl bg-white border border-gray-100 hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 cursor-pointer flex flex-col items-center text-center sm:items-start sm:text-left">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-5 sm:mb-8 group-hover:bg-blue-600 transition-colors duration-500">
-                    <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900 group-hover:text-white transition-colors duration-500" />
+                <div className="group relative overflow-hidden h-full p-6 sm:p-8 rounded-3xl bg-white border border-gray-100 hover:border-blue-200 hover:-translate-y-2 hover:scale-[1.01] hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 ease-out cursor-pointer flex flex-col items-center text-center sm:items-start sm:text-left">
+                  <div className="absolute top-0 right-0 w-28 h-28 bg-blue-600 opacity-0 group-hover:opacity-5 rounded-bl-[100%] transition-all duration-300 translate-x-8 -translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 pointer-events-none" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-5 sm:mb-8 group-hover:bg-blue-600 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
+                    <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900 group-hover:text-white transition-colors duration-300" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2.5 sm:mb-4">{feature.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors duration-300 mb-2.5 sm:mb-4">{feature.title}</h3>
                   <p className="text-gray-500 text-sm sm:text-base leading-relaxed flex-grow">{feature.desc}</p>
-                  <div className="mt-4 sm:mt-6 flex items-center text-blue-600 text-sm font-medium opacity-100 translate-x-0 sm:opacity-0 sm:-translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
-                    Saber más <ArrowRight className="w-4 h-4 ml-2" />
+                  <div className="mt-4 sm:mt-6 flex items-center text-blue-600 text-sm font-medium opacity-100 translate-x-0 sm:opacity-0 sm:-translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                    Saber más <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </div>
               </FadeIn>
@@ -419,7 +419,7 @@ const AboutUs = () => {
         </div>
       </section>
       <CareFlowSection />
-      <Footer theme="light" />
+      <Footer />
     </div>
   );
 };

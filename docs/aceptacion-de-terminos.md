@@ -16,7 +16,10 @@ Rama: `feature/aceptacion-de-terminos`
 |----------|---------------|----------------------------------------|-------------|
 | Registro de usuario | `/register` (`Register.jsx`) | `registro` | Botón "Crear Cuenta" |
 | Reserva de turno sin registro (paso 2 "Datos del Paciente") | `/book-appointment/:id` (`BookAppointment.jsx`) | `turno-invitado` | Botón "Continuar" |
-| Solicitud de adhesión profesional (paso 1 "Datos Personales y Contacto") | Modal `ProfessionalApplicationModal.jsx`, desde la sección B2B de la Home | `profesional` | Botón "Siguiente" |
+| Solicitud de adhesión de médico particular (último paso "Documentación") | Modal `adhesion/AdhesionModal.jsx`, desde la sección B2B de la Home | `profesional` | Botón "Enviar solicitud" |
+| Solicitud de adhesión de institución (último paso "Administrador") | Modal `adhesion/AdhesionModal.jsx`, desde la sección B2B de la Home | `institucion` | Botón "Enviar solicitud" |
+
+> Actualizado en [`solicitud-de-adhesion.md`](./solicitud-de-adhesion.md): la solicitud se divide en institución y médico particular, y el check pasó al último paso de cada camino.
 
 ### Pantallas revisadas y no modificadas
 
