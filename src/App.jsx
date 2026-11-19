@@ -23,6 +23,7 @@ import NewsForum from './pages/NewsForum';
 import MyReviews from './pages/MyReviews';
 
 import DoctorTurns from './pages/doctor/DoctorTurns';
+import PatientRecord from './pages/doctor/hce/PatientRecord';
 import DoctorPatients from './pages/doctor/DoctorPatients';
 import DoctorProtocols from './pages/doctor/DoctorProtocols';
 import DoctorSupport from './pages/doctor/DoctorSupport';
@@ -104,6 +105,7 @@ function App() {
           <Route element={<ProtectedRoute roles={[ROLES.DOCTOR]} />}>
             <Route path="/doctor/turns" element={<DoctorTurns />} />
             <Route path="/doctor/patients" element={<DoctorPatients />} />
+            <Route path="/doctor/patients/:historyId" element={<PatientRecord />} />
             <Route path="/doctor/profile" element={<DoctorProfile />} />
             <Route path="/doctor/protocols" element={<DoctorProtocols />} />
             <Route path="/doctor/support" element={<DoctorSupport />} />

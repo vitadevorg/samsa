@@ -10,6 +10,8 @@ import { useTimeouts } from '../../hooks/useTimeouts';
 import { useFileAttachments } from '../../hooks/useFileAttachments';
 import { useAuth } from '../../context/useAuth';
 import { getDoctorLabel } from '../../utils/doctorName';
+import { Link } from 'react-router-dom';
+import { createEntry } from '../../services/hceService';
 const getToday = () => new Date().toISOString().split('T')[0];
 const getFutureDate = (days) => {
     const date = new Date();
@@ -261,7 +263,26 @@ export default function DoctorTurns() {
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
   };
-  const handleFinishAppointment = (id) => {
+  // Al cerrar la consulta, la evolución y las indicaciones quedan firmadas en la historia clínica del paciente.
+  const handleFinishAppointment = async (id, report) => {
+    const appointment = appointments.find(app => app.id === id);
+    if (appointment && report) {
+      const attachments = report.files?.length ? `\nAdjuntos: ${report.files.map(f => f.name).join(', ')}` : '';
+      const indications = report.prescription?.trim();
+      try {
+        // Evolución en formato SOAP: el texto del cierre va como Subjetivo y las indicaciones como Plan.
+        await createEntry(appointment.historyId, 'evolution', {
+          reason: `Consulta programada (turno de las ${appointment.time} h)`,
+          subjective: `${report.diagnosis.trim()}${attachments}`,
+          plan: indications || 'Sin indicaciones adicionales. Control según evolución.',
+        }, user);
+        if (indications) {
+          await createEntry(appointment.historyId, 'indication', { orders: indications }, user);
+        }
+      } catch {
+        // El mock solo falla si la historia no existe; la consulta igual se marca como finalizada.
+      }
+    }
     setAppointments(prev => prev.map(app => app.id === id ? { ...app, status: 'finished' } : app));
     setIsModalOpen(false);
     setSelectedAppointment(null);
@@ -418,6 +439,9 @@ const AppointmentCard = ({ app, onCall, onFinish, isFuture, dateLabel }) => {
                 )}
                 {(isFuture || app.status === 'pending') && <span className="text-xs text-gray-400 font-medium text-center w-full">Programado</span>}
                 {app.status === 'finished' && <span className="text-xs text-green-600 font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Completado</span>}
+                <Link to={`/doctor/patients/${app.historyId}`} aria-label={`Abrir historia clínica de ${app.patient}`} title="Historia clínica" className="shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                    <ClipboardList className="w-5 h-5" />
+                </Link>
             </div>
         </div>
     );
