@@ -26,14 +26,14 @@ const Navbar = () => {
     navigate('/');
   };
   const getLinkClass = (path) => {
-    const isActive = location.pathname === path;
+    const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
     return isActive 
       ? "text-blue-700 font-bold flex items-center gap-1 whitespace-nowrap bg-blue-50/80 px-3 xl:px-4 py-2 rounded-xl transition-colors text-sm xl:text-base" 
       : "text-slate-600 hover:text-blue-700 font-medium flex items-center gap-1 whitespace-nowrap hover:bg-slate-50 px-3 xl:px-4 py-2 rounded-xl transition-all text-sm xl:text-base";
   };
 
   const getMobileLinkClass = (path) => {
-    const isActive = location.pathname === path;
+    const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
     return isActive
       ? "block px-3.5 py-2.5 rounded-xl text-base font-bold text-blue-700 bg-blue-50/90 border border-blue-100/80 transition-all duration-200"
       : "block px-3.5 py-2.5 rounded-xl text-base font-medium text-slate-600 hover:text-blue-700 hover:bg-blue-50/70 hover:translate-x-0.5 active:bg-blue-50 active:scale-[0.99] transition-all duration-200";
