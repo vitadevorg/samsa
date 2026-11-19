@@ -6,16 +6,18 @@ import { getInstitutionById } from '../../../data/institutions';
 // Médicos cuyas agendas maneja la secretaria (los que le asignó el admin de su
 // clínica), con los datos que usa el panel:
 // { id (el de doctors.js), name, specialty (su área en la clínica), location, schedule }
-// `assignments` son las vinculaciones actuales (del estado compartido).
-export const buildSecretaryDoctors = (secretary, assignments) =>
+// `assignments` son las vinculaciones actuales (del estado compartido). `findDoctor` busca los datos del
+// médico (el del contexto también conoce a los que dio de alta la institución).
+const findStaticDoctor = (doctorId) => doctorsData.find((d) => d.id === doctorId);
+export const buildSecretaryDoctors = (secretary, assignments, findDoctor = findStaticDoctor) =>
   (secretary?.doctorIds ?? [])
     .map((doctorId) => {
-      const doctor = doctorsData.find((d) => d.id === doctorId);
+      const doctor = findDoctor(doctorId);
       const assignment = assignments.find(
         (a) => a.doctorId === doctorId && a.institutionId === secretary.institutionId
       );
-      // Si el médico ya no está vinculado a la clínica, no se muestra.
-      if (!doctor || !assignment) return null;
+      // Si el médico ya no está vinculado a la clínica, o la clínica lo inhabilitó, no se muestra.
+      if (!doctor || !assignment || assignment.status === 'disabled') return null;
       return {
         id: doctorId,
         name: doctor.name,

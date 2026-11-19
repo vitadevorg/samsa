@@ -3,13 +3,16 @@ import {
   ChevronDown, HelpCircle, Phone, Calendar, Mail, 
   MessageCircle, ArrowRight, Search, FileText 
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FadeIn from '../components/FadeIn';
+import { useAuth } from '../context/useAuth';
+import { useSupport } from '../context/support-context';
 
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const { user } = useAuth();
+  const { openSupport } = useSupport();
 
   const toggleQuestion = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
@@ -54,7 +57,7 @@ const FAQ = () => {
   ];
 
   return (
-    <div className="font-sans text-slate-800 bg-white min-h-screen selection:bg-blue-100 selection:text-blue-900 flex flex-col overflow-x-hidden">
+    <div className="font-sans text-slate-800 bg-white min-h-screen selection:bg-blue-100 selection:text-blue-900 flex flex-col overflow-x-clip">
       <Navbar />
       <div className="relative pt-8 pb-10 sm:pt-12 sm:pb-14 lg:pt-16 lg:pb-20 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -133,14 +136,14 @@ const FAQ = () => {
               Nuestro equipo de soporte está disponible para ayudarte con cualquier consulta adicional.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-              <button className="w-full sm:w-auto justify-center bg-gray-900 text-white px-7 py-3.5 sm:px-8 sm:py-3 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-gray-900/20 active:scale-95 flex items-center gap-2">
+              {/* Sin sesión se abre el reporte de invitado (nombre y correo); con sesión, el ticket normal. */}
+              <button
+                type="button"
+                onClick={() => openSupport(null, { guest: !user })}
+                className="w-full sm:w-auto justify-center bg-gray-900 text-white px-7 py-3.5 sm:px-8 sm:py-3 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-gray-900/20 active:scale-95 flex items-center gap-2"
+              >
                 <Mail className="w-4 h-4" /> Contactar Soporte
               </button>
-              <Link to="/about" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto bg-white text-gray-700 px-7 py-3.5 sm:px-8 sm:py-3 rounded-xl font-bold border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all active:scale-95">
-                  Ver más info
-                </button>
-              </Link>
             </div>
           </div>
         </FadeIn>

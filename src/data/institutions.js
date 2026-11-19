@@ -12,6 +12,13 @@ export const CLINICS = [
     address: 'Av. Aconquija 1200, Yerba Buena, Tucumán',
     phone: '381 425-1200',
     email: 'contacto@clinicadelnorte.samsa.med',
+    // Código REFES (Registro Federal de Establecimientos de Salud, 14 dígitos) y CUIT: datos ficticios.
+    legalName: 'Clínica del Norte S.A.',
+    refes: '10900012345678',
+    insurances: ['OSDE', 'Swiss Medical', 'Galeno', 'Subsidio de Salud'],
+    studies: ['Análisis clínicos', 'Ecografía', 'Electrocardiograma', 'Ergometría', 'Holter'],
+    arcaVerified: true,
+    cuit: '30-71234567-1',
     areas: ['Cardiología', 'Clínica Médica', 'Nutrición', 'Pediatría'],
   },
   {
@@ -21,6 +28,12 @@ export const CLINICS = [
     address: 'Calle 25 de Mayo 850, San Miguel de Tucumán',
     phone: '381 431-0850',
     email: 'contacto@dermatologico.samsa.med',
+    legalName: 'Centro Dermatológico del Jardín S.R.L.',
+    refes: '10900012345679',
+    insurances: ['OSDE', 'Prensa', 'OSECAC'],
+    studies: ['Análisis clínicos'],
+    arcaVerified: true,
+    cuit: '30-69876543-3',
     areas: ['Dermatología'],
   },
 ];
@@ -35,6 +48,12 @@ export const HOSPITALS = [
     address: 'Av. Mate de Luna 2500, San Miguel de Tucumán',
     phone: '381 424-2500',
     email: 'contacto@hospitalcentral.samsa.med',
+    legalName: 'Hospital Central SAMSA S.A.',
+    refes: '10900054321098',
+    // El hospital es público: no trabaja con obras sociales.
+    studies: ['Análisis clínicos', 'Ecografía', 'Radiografía', 'Tomografía computada', 'Resonancia magnética', 'Mamografía', 'Electrocardiograma', 'Endoscopía'],
+    arcaVerified: true,
+    cuit: '30-70112233-6',
     sectors: ['Pediatría', 'Cardiología', 'Medicina General'],
   },
 ];
@@ -86,9 +105,10 @@ export const SECRETARIES = [
 // Son solo datos de administración: nada clínico.
 // ---------------------------------------------------------------------------
 export const PARTICULAR_DOCTORS = [
-  { id: 'luis-coronel', name: 'Dr. Luis Coronel', specialty: 'Neurología', email: 'luis.coronel@samsa.med', phone: '381 450-3001', address: 'Av. Sarmiento 450, San Miguel de Tucumán' },
-  { id: 'priscila-gomez', name: 'Dra. Priscila Gómez', specialty: 'Ginecología', email: 'priscila.gomez@samsa.med', phone: '381 450-3002', address: 'Calle Laprida 780, San Miguel de Tucumán' },
-  { id: 'augusto-fernandez', name: 'Dr. Augusto Fernández', specialty: 'Traumatología', email: 'augusto.fernandez@samsa.med', phone: '381 450-3003', address: 'Av. Belgrano 1320, Yerba Buena, Tucumán' },
+  // `days`, `startTime` y `endTime`: cuándo atiende. `insurances`: obras sociales que acepta (vacío = solo particular).
+  { id: 'luis-coronel', name: 'Dr. Luis Coronel', specialty: 'Neurología', email: 'luis.coronel@samsa.med', phone: '381 450-3001', address: 'Av. Sarmiento 450, San Miguel de Tucumán', days: ['Lun', 'Mié', 'Vie'], startTime: '09:00', endTime: '13:00', insurances: ['OSDE', 'Swiss Medical'] },
+  { id: 'priscila-gomez', name: 'Dra. Priscila Gómez', specialty: 'Ginecología', email: 'priscila.gomez@samsa.med', phone: '381 450-3002', address: 'Calle Laprida 780, San Miguel de Tucumán', days: ['Mar', 'Jue'], startTime: '15:00', endTime: '19:00', insurances: ['Subsidio de Salud', 'PAMI', 'Galeno'] },
+  { id: 'augusto-fernandez', name: 'Dr. Augusto Fernández', specialty: 'Traumatología', email: 'augusto.fernandez@samsa.med', phone: '381 450-3003', address: 'Av. Belgrano 1320, Yerba Buena, Tucumán', days: ['Lun', 'Mar', 'Jue'], startTime: '08:00', endTime: '12:00', insurances: [] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -195,7 +215,7 @@ export const formatSchedule = ({ days, startTime, endTime }) =>
 
 // ---------------------------------------------------------------------------
 // Documentación de cada médico vinculado
-// `status`: 'vigente' | 'vencido' | 'pendiente' (todavía no se recibió).
+// `status`: 'vigente' | 'vencido' | 'pendiente' (todavía no se recibió). 'por_vencer' se calcula en getDocumentStatus.
 // `expiresAt`: fecha de vencimiento "AAAA-MM-DD", o null si no vence (Título)
 // o si todavía no se recibió.
 // ---------------------------------------------------------------------------
@@ -205,30 +225,60 @@ export const DOCUMENT_TYPES = ['Contrato', 'Matrícula', 'Seguro de mala praxis'
 export const pendingDocuments = () =>
   DOCUMENT_TYPES.map((type) => ({ type, status: 'pendiente', expiresAt: null }));
 
-// Documentación de los médicos de Clínica del Norte (la clave es el id de la vinculación).
+// Documentación de los médicos vinculados (la clave es el id de la vinculación): todo al día.
 const DOCTOR_DOCUMENTS = {
   'asig-1': [
-    { type: 'Contrato', status: 'vigente', expiresAt: '2027-03-31' },
-    { type: 'Matrícula', status: 'vigente', expiresAt: '2027-12-31' },
-    { type: 'Seguro de mala praxis', status: 'vencido', expiresAt: '2026-08-31' },
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-06-30' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-06-30' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-08-31' },
     { type: 'Título', status: 'vigente', expiresAt: null },
   ],
   'asig-2': [
-    { type: 'Contrato', status: 'vigente', expiresAt: '2027-01-31' },
-    { type: 'Matrícula', status: 'vencido', expiresAt: '2026-06-30' },
-    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-05-15' },
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-09-30' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-02-28' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-04-30' },
     { type: 'Título', status: 'vigente', expiresAt: null },
   ],
   'asig-3': [
-    { type: 'Contrato', status: 'vigente', expiresAt: '2026-12-31' },
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-12-31' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2027-10-31' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-11-30' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'asig-4': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2028-03-31' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-09-30' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2028-01-31' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'asig-5': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-03-31' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2027-12-31' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-05-15' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'asig-6': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-06-30' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-06-30' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-08-31' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'asig-7': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-09-30' },
     { type: 'Matrícula', status: 'vigente', expiresAt: '2028-02-28' },
-    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-02-28' },
-    { type: 'Título', status: 'pendiente', expiresAt: null },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-04-30' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'asig-8': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-12-31' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2027-10-31' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-11-30' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
   ],
   'asig-9': [
-    { type: 'Contrato', status: 'pendiente', expiresAt: null },
-    { type: 'Matrícula', status: 'vigente', expiresAt: '2027-09-30' },
-    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-04-30' },
+    { type: 'Contrato', status: 'vigente', expiresAt: '2028-03-31' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-09-30' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2028-01-31' },
     { type: 'Título', status: 'vigente', expiresAt: null },
   ],
 };
@@ -237,13 +287,51 @@ const DOCTOR_DOCUMENTS = {
 export const getAssignmentDocuments = (assignmentId) =>
   DOCTOR_DOCUMENTS[assignmentId] ?? pendingDocuments();
 
+// Documentación de los médicos particulares (la clave es el id del médico). Los mismos documentos
+// que pide una clínica; los registra el administrador de VitaDev, que administra a los particulares.
+const PARTICULAR_DOCTOR_DOCUMENTS = {
+  'luis-coronel': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-03-31' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2027-12-31' },
+    // Por vencer: vence dentro de los próximos 30 días (aviso de peligro).
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2026-12-05' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'priscila-gomez': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-06-30' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-06-30' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-08-31' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+  'augusto-fernandez': [
+    { type: 'Contrato', status: 'vigente', expiresAt: '2027-09-30' },
+    { type: 'Matrícula', status: 'vigente', expiresAt: '2028-02-28' },
+    { type: 'Seguro de mala praxis', status: 'vigente', expiresAt: '2027-04-30' },
+    { type: 'Título', status: 'vigente', expiresAt: null },
+  ],
+};
+
+export const getParticularDoctorDocuments = (doctorId) =>
+  PARTICULAR_DOCTOR_DOCUMENTS[doctorId] ?? pendingDocuments();
+
 // Documentos que no vencen (no piden fecha de vencimiento).
 export const NON_EXPIRING_DOCUMENTS = ['Título'];
 
 // Estado real de un documento: si figura "vigente" pero su fecha ya pasó, está vencido.
 // `today` es la fecha de hoy "AAAA-MM-DD" (las fechas así se comparan como texto).
-export const getDocumentStatus = (doc, today) =>
-  doc.status === 'vigente' && doc.expiresAt && doc.expiresAt < today ? 'vencido' : doc.status;
+// Si vence dentro de los próximos DAYS_TO_EXPIRE días, está "por vencer".
+export const DAYS_TO_EXPIRE = 30;
+const addDays = (date, days) => {
+  const d = new Date(`${date}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+export const getDocumentStatus = (doc, today) => {
+  if (doc.status !== 'vigente' || !doc.expiresAt) return doc.status;
+  if (doc.expiresAt < today) return 'vencido';
+  if (doc.expiresAt <= addDays(today, DAYS_TO_EXPIRE)) return 'por_vencer';
+  return 'vigente';
+};
 
 // ---------------------------------------------------------------------------
 // Solicitudes de cambio de horario que los médicos le hacen a la institución.

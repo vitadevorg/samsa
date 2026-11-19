@@ -6,6 +6,8 @@ import { useAuth } from '../context/useAuth';
 import PrintReceipt from '../components/PrintReceipt';
 import { generateTransactionId } from '../utils/ids';
 import { useTimeouts } from '../hooks/useTimeouts';
+import { useClinicData } from './clinic/clinicDataContext';
+import { useNotifications } from '../context/notifications-context';
 // Se monta solo mientras está abierto, así el estado arranca siempre desde los valores iniciales.
 const ReviewModal = ({ onClose, onSubmit, doctorName, initialRating = 0, initialComment = "" }) => {
     const [rating, setRating] = useState(initialRating);
@@ -92,6 +94,8 @@ const ReviewModal = ({ onClose, onSubmit, doctorName, initialRating = 0, initial
 const MyTurns = () => {
   const { schedule } = useTimeouts();
   const { user } = useAuth();
+  const { findDoctor } = useClinicData();
+  const { push } = useNotifications();
   const [filter, setFilter] = useState("all"); 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedTurnForReview, setSelectedTurnForReview] = useState(null);
@@ -171,6 +175,11 @@ const MyTurns = () => {
   };
   const confirmCancelTurn = () => {
       if (selectedTurnForCancel) {
+          const cancelled = appointments.find(app => app.id === selectedTurnForCancel);
+          const doctorEmail = findDoctor(cancelled?.doctorId)?.email;
+          if (doctorEmail) {
+              push({ to: { email: doctorEmail }, type: 'turn', title: 'Turno cancelado por el paciente', body: `${user?.name ?? 'Un paciente'} canceló el turno del ${cancelled.date} a las ${cancelled.time}.`, action: { type: 'link', to: '/doctor/turns' } });
+          }
           setAppointments(prev => prev.map(app => 
               app.id === selectedTurnForCancel ? { ...app, status: 'cancelled' } : app
           ));

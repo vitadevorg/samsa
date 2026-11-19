@@ -24,11 +24,6 @@ const DEMO_ACCOUNTS = [
     user: { name: 'Jesús Zelarayan', title: 'Dr.', role: ROLES.DOCTOR, img: '/img/UTN-Jesus.jpg' },
   },
   {
-    email: 'admin@samsa.med',
-    password: 'admin',
-    user: { name: 'Administrador', role: ROLES.ADMIN },
-  },
-  {
     email: 'secretaria@samsa.med',
     password: '12345',
     user: {
@@ -51,10 +46,10 @@ const DEMO_ACCOUNTS = [
     user: { name: 'Gustavo Ibáñez', role: ROLES.HOSPITAL_ADMIN, institutionId: 'hospital-central' },
   },
   {
-    email: 'vitadev@samsa.med',
+    email: 'admin.samsa@samsa.med',
     password: '12345',
     // Contacto de recuperación de la cuenta (lo edita el propio administrador en Mi cuenta).
-    user: { name: 'VitaDev', role: ROLES.VITADEV_ADMIN, recoveryEmail: 'recuperacion.vitadev@samsa.med', recoveryPhone: '381 400-9000' },
+    user: { name: 'Admin', role: ROLES.VITADEV_ADMIN, recoveryEmail: 'recuperacion.vitadev@samsa.med', recoveryPhone: '381 400-9000' },
   },
   // Secretaria de Clínica del Norte (figura en src/data/institutions.js como sec-1).
   {
@@ -100,6 +95,23 @@ export const getRegisteredEmails = () => [
   ...DEMO_ACCOUNTS.map((acc) => acc.email),
   ...createdAccounts.keys(),
 ].filter((email) => !retiredEmails.has(email));
+
+// Cuentas de pacientes para el directorio de VitaDev. Devuelve solo identidad y contacto
+// (nombre, email y teléfono): nunca contraseñas ni datos clínicos o de afiliación.
+export const getPatientAccounts = () => {
+  const byEmail = new Map();
+  [...DEMO_ACCOUNTS, ...createdAccounts.values()].forEach((account) => {
+    if (account.user?.role !== ROLES.PATIENT || retiredEmails.has(account.email)) return;
+    byEmail.set(account.email, account); // las cuentas editadas en runtime reemplazan a la demo
+  });
+  return [...byEmail.values()].map(({ email, user }) => ({
+    email,
+    firstName: user.name ?? '',
+    lastName: user.lastname ?? '',
+    name: [user.name, user.lastname].filter(Boolean).join(' '),
+    phone: user.phone ?? '',
+  }));
+};
 
 // Emails de cuentas dadas de baja por su institución. Es un Set (un conjunto:
 // no guarda repetidos) que vive en memoria mientras la página esté abierta;

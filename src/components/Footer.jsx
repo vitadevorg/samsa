@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Calendar, Mail } from 'lucide-react';
+import { Phone, Calendar, Mail, LifeBuoy } from 'lucide-react';
 import SamsaLogo from './SamsaLogo';
 import { useAuth } from '../context/useAuth';
+import { useSupport, useCanReportSupport } from '../context/support-context';
+import { useRegisterFooter } from './support/footer-presence';
 
 const CONTACT_EMAIL = 'vitadev.org@gmail.com';
 const INSTAGRAM_URL = 'https://www.instagram.com/vitadev.ar?utm_source=ig_web_button_share_sheet&psln=ZDNlZDc0MzIxNw==';
@@ -23,9 +25,12 @@ const ChevronRight = ({className}) => (
 
 const Footer = ({ theme = 'dark' }) => {
   const { user } = useAuth();
+  const { openSupport } = useSupport();
+  // Cualquier usuario con sesión puede reportar un problema (el admin SAMSA recibe los tickets).
+  const canReport = useCanReportSupport();
+  useRegisterFooter();
   const isLight = theme === 'light';
 
-  const isAdmin = user?.role === 'admin';
   const isDoctor = user?.role === 'doctor';
 
   const bgClass = isLight ? 'bg-white border-t border-gray-100' : 'bg-slate-950 border-t border-slate-800';
@@ -54,15 +59,9 @@ const Footer = ({ theme = 'dark' }) => {
           </div>
 
           <div>
-              <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>{isDoctor || isAdmin ? 'Accesos de Gestión' : 'Navegación'}</h4>
+              <h4 className={`font-bold mb-6 ${textTitleClass} uppercase text-xs tracking-widest`}>{isDoctor ? 'Accesos de Gestión' : 'Navegación'}</h4>
               <ul className={`space-y-3 ${textMutedClass} text-sm`}>
-                  {isAdmin ? (
-                      <>
-                          <li><Link to="/admin/doctors" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Gestión Médicos</Link></li>
-                          <li><Link to="/admin/patients" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Gestión Pacientes</Link></li>
-                          <li><Link to="/admin/offices" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Consultorios</Link></li>
-                      </>
-                  ) : isDoctor ? (
+                  {isDoctor ? (
                       <>
                           <li><Link to="/doctor/turns" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Turnos Asignados</Link></li>
                           <li><Link to="/doctor/patients" className="hover:text-blue-500 transition-colors flex items-center gap-2"><ChevronRight className="w-3 h-3"/> Mis Pacientes</Link></li>
@@ -103,6 +102,17 @@ const Footer = ({ theme = 'dark' }) => {
                       </div>
                       Lunes a Viernes 8-20hs
                   </li>
+                  {canReport && (
+                      <li>
+                          <button
+                              type="button"
+                              onClick={() => openSupport()}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors"
+                          >
+                              <LifeBuoy className="w-4 h-4" /> Contactar soporte
+                          </button>
+                      </li>
+                  )}
               </ul>
           </div>
 

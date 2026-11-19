@@ -30,3 +30,15 @@ export const validatePost = ({ title, category, body }) => {
 // "2026-11-15T..." -> "15 de noviembre de 2026"
 export const formatPostDate = (iso) =>
   new Date(iso).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+// Motivo que escribe VitaDev al borrar la nota de otro autor (lo ve el autor).
+export const REASON_MIN = 10;
+export const REASON_MAX = 300;
+
+export const validateReason = (reason) => {
+  const clean = reason.trim();
+  if (!clean) return 'Escribí el motivo: el autor lo va a ver.';
+  if (clean.length < REASON_MIN) return `El motivo tiene que tener al menos ${REASON_MIN} caracteres.`;
+  if (clean.length > REASON_MAX) return `El motivo no puede superar los ${REASON_MAX} caracteres.`;
+  return '';
+};

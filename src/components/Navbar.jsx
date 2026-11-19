@@ -1,10 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogOut, ChevronDown, Menu, X,
-  Building, Building2, Hospital, UserCog, KeyRound, Stethoscope, Tag, Users, User, Calendar, FileText, Wallet, Shield, Star, Inbox, Contact
-} from 'lucide-react';
+  Building2, Hospital, UserCog, KeyRound, Stethoscope, Users, User, Calendar, FileText, Star, Inbox, Newspaper, UserRound, Database, LifeBuoy } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
+import { useSupport } from '../context/support-context';
+import { useDismissOnOutside } from '../hooks/useDismissOnOutside';
+import NotificationBell from './NotificationBell';
 import { ROLES, getHomeForRole, INSTITUTION_ADMIN_PATHS } from '../constants/roles';
 import { ClinicDataContext } from '../pages/clinic/clinicDataContext';
 import { getDoctorLabel } from '../utils/doctorName';
@@ -15,6 +17,10 @@ const Navbar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const accountMenuRef = useRef(null);
+  // El menú de cuenta se cierra al hacer click afuera o con Escape.
+  const closeAccountMenu = useCallback(() => setIsDropdownOpen(false), []);
+  useDismissOnOutside(accountMenuRef, isDropdownOpen, closeAccountMenu);
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -34,13 +40,13 @@ const Navbar = () => {
     return parts[0];
   };
   const displayName = getFirstName(user?.name);
-  const userInitial = displayName ? displayName.charAt(0) : '';
-  const isAdmin = user?.role === ROLES.ADMIN;
   const isDoctor = user?.role === ROLES.DOCTOR;
   const isSecretary = user?.role === ROLES.SECRETARY;
   const isClinicAdmin = user?.role === ROLES.CLINIC_ADMIN;
   const isHospitalAdmin = user?.role === ROLES.HOSPITAL_ADMIN;
   const isVitadevAdmin = user?.role === ROLES.VITADEV_ADMIN;
+  // El administrador de SAMSA siempre se muestra como "Admin" (inicial A), aunque la sesión guardada tenga otro nombre.
+  const userInitial = isVitadevAdmin ? 'A' : displayName ? displayName.charAt(0) : '';
   // Los administradores de institución usan el mismo estilo oscuro que el admin general.
   const isInstitutionAdmin = isClinicAdmin || isHospitalAdmin || isVitadevAdmin;
   // Ruta base de las pantallas de administración: '/clinic', '/hospital' o undefined.
@@ -49,6 +55,9 @@ const Navbar = () => {
   // las solicitudes; en el resto del sitio el contexto es null y el contador queda en 0.
   const clinicData = useContext(ClinicDataContext);
   const pendingRequests = clinicData?.requests.filter((r) => r.status === 'pendiente').length ?? 0;
+  // Tickets de soporte sin resolver (solo los ve el admin SAMSA).
+  const { openCount } = useSupport();
+  const pendingTickets = isVitadevAdmin ? openCount : 0;
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,25 +69,7 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="hidden lg:flex space-x-2 xl:space-x-6 items-center">
-            {isAdmin ? (
-              <>
-                <Link to="/admin/offices" className={getLinkClass('/admin/offices')}>
-                  <Building className="w-4 h-4"/> Consultorios
-                </Link>
-                <Link to="/admin/specialties" className={getLinkClass('/admin/specialties')}>
-                  <Tag className="w-4 h-4"/> Especialidades
-                </Link>
-                <Link to="/admin/doctors" className={getLinkClass('/admin/doctors')}>
-                  <Stethoscope className="w-4 h-4"/> Médicos
-                </Link>
-                <Link to="/admin/patients" className={getLinkClass('/admin/patients')}>
-                  <Users className="w-4 h-4"/> Pacientes
-                </Link>
-                <Link to="/admin/insurances" className={getLinkClass('/admin/insurances')}>
-                  <Wallet className="w-4 h-4"/> Obras Sociales
-                </Link>
-              </>
-            ) : institutionBase ? (
+            {institutionBase ? (
               <>
                 <Link to={`${institutionBase}/doctors`} className={getLinkClass(`${institutionBase}/doctors`)}>
                   <Stethoscope className="w-4 h-4"/> Médicos
@@ -86,25 +77,22 @@ const Navbar = () => {
                 <Link to={`${institutionBase}/secretaries`} className={getLinkClass(`${institutionBase}/secretaries`)}>
                   <Users className="w-4 h-4"/> Secretarias
                 </Link>
-                <Link to={`${institutionBase}/staff`} className={getLinkClass(`${institutionBase}/staff`)}>
-                  <Contact className="w-4 h-4"/> Personal
-                </Link>
                 <Link to={`${institutionBase}/requests`} className={getLinkClass(`${institutionBase}/requests`)}>
                   <Inbox className="w-4 h-4"/> Solicitudes
                   {pendingRequests > 0 && (
-                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingRequests} pendientes`}>
+                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingRequests} pendientes`}>
                       {pendingRequests}
                     </span>
                   )}
                 </Link>
+                <Link to="/news" className={getLinkClass('/news')}>
+                  <Newspaper className="w-4 h-4"/> Foro
+                </Link>
               </>
             ) : isVitadevAdmin ? (
-              <>
-                <Link to="/vitadev/dashboard" className={getLinkClass('/vitadev/dashboard')}>
-                  <Shield className="w-4 h-4"/> Resumen
-                </Link>
+              <div className="flex items-center gap-1 xl:gap-2 [&>a]:px-2 xl:[&>a]:px-4">
                 <Link to="/vitadev/doctors" className={getLinkClass('/vitadev/doctors')}>
-                  <Stethoscope className="w-4 h-4"/> Médicos
+                  <UserRound className="w-4 h-4"/> Particulares
                 </Link>
                 <Link to="/vitadev/clinics" className={getLinkClass('/vitadev/clinics')}>
                   <Building2 className="w-4 h-4"/> Clínicas
@@ -115,7 +103,20 @@ const Navbar = () => {
                 <Link to="/vitadev/users" className={getLinkClass('/vitadev/users')}>
                   <UserCog className="w-4 h-4"/> Usuarios
                 </Link>
-              </>
+                {/* Gestión de cuentas e instituciones a la izquierda; comunicación (foro y soporte) a la derecha. */}
+                <span className="mx-1 h-6 w-px bg-slate-200" aria-hidden="true" />
+                <Link to="/news" className={getLinkClass('/news')}>
+                  <Newspaper className="w-4 h-4"/> Foro
+                </Link>
+                <Link to="/vitadev/support" className={getLinkClass('/vitadev/support')}>
+                  <LifeBuoy className="w-4 h-4"/> Soporte
+                  {pendingTickets > 0 && (
+                    <span className="ml-1 min-w-5 h-5 px-1.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center" aria-label={`${pendingTickets} tickets sin resolver`}>
+                      {pendingTickets}
+                    </span>
+                  )}
+                </Link>
+              </div>
             ) : isDoctor ? (
               <>
                 <Link to="/doctor/turns" className={getLinkClass('/doctor/turns')}>
@@ -147,23 +148,25 @@ const Navbar = () => {
               </>
             )}
             {user ? (
-              <div className="relative ml-2 xl:ml-4 shrink-0">
-                <button 
+              <div className="flex items-center gap-2 xl:gap-3 ml-2 xl:ml-4 shrink-0">
+              <div ref={accountMenuRef} className="relative shrink-0">
+                <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none ${isAdmin || isInstitutionAdmin ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-2xl border transition-all shadow-sm hover:shadow-md focus:outline-none bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                 >
                   <div 
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isAdmin || isInstitutionAdmin ? 'bg-blue-500 text-white' : isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
-                    style={{
-                      backgroundImage: user.img ? `url(${user.img})` : 'none',
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${isSecretary ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
+                    // Sin foto no se fija `backgroundImage`: pisaría el degradado de Tailwind y la inicial blanca quedaría sobre fondo blanco.
+                    style={user.img ? {
+                      backgroundImage: `url(${user.img})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center'
-                    }}
+                    } : undefined}
                   >
                     {!user.img && userInitial}
                   </div>
-                  <span className="text-sm font-bold px-1 tracking-wide whitespace-nowrap">
-                    {isAdmin ? 'Admin' : isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'VitaDev' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
+                  <span className={`text-sm font-bold px-1 tracking-wide whitespace-nowrap ${isInstitutionAdmin ? 'hidden xl:inline' : ''}`}>
+                    {isClinicAdmin ? 'Admin Clínica' : isHospitalAdmin ? 'Admin Hospital' : isVitadevAdmin ? 'Admin' : isDoctor ? getDoctorLabel(user) : isSecretary ? `Sec. ${displayName}` : displayName}
                   </span>
                   <ChevronDown className="w-4 h-4 opacity-50 mr-1" />
                 </button>
@@ -171,30 +174,32 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 z-50">
                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
                       <p className="text-xs font-bold text-gray-400 uppercase">Cuenta</p>
-                      <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
+                      <p className="text-sm font-bold text-gray-800 truncate">{isVitadevAdmin ? 'Admin' : user.name}</p>
                     </div>
-                    {isAdmin ? (
-                       <>
-                         <Link to="/admin/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                           <Shield className="w-4 h-4" /> Mi Perfil
-                         </Link>
-                         <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
-                            Modo Gestión
-                         </div>
-                       </>
-                    ) : isVitadevAdmin ? (
+                    {isVitadevAdmin ? (
                        <>
                          <Link to="/vitadev/account" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                            <KeyRound className="w-4 h-4" /> Mi cuenta
+                         </Link>
+                         <Link to="/vitadev/catalog" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <Database className="w-4 h-4" /> Gestión de datos
                          </Link>
                          <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
                             Modo Gestión
                          </div>
                        </>
                     ) : isInstitutionAdmin ? (
-                       <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
-                          Modo Gestión
-                       </div>
+                       <>
+                         <Link to={`${institutionBase}/account`} onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           <KeyRound className="w-4 h-4" /> Mi cuenta
+                         </Link>
+                         <Link to={`${institutionBase}/settings`} onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                           {isHospitalAdmin ? <Hospital className="w-4 h-4" /> : <Building2 className="w-4 h-4" />} {isHospitalAdmin ? 'Datos del hospital' : 'Datos de la clínica'}
+                         </Link>
+                         <div className="px-4 py-2 text-xs text-center text-gray-400 italic bg-gray-50 mx-2 rounded mt-1">
+                            Modo Gestión
+                         </div>
+                       </>
                     ) : isDoctor ? (
                       <>
                         <Link to="/doctor/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
@@ -232,7 +237,8 @@ const Navbar = () => {
                     </button>
                   </div>
                 )}
-                {isDropdownOpen && <div className="fixed inset-0 z-30 cursor-default" onClick={() => setIsDropdownOpen(false)}></div>}
+              </div>
+              <NotificationBell />
               </div>
             ) : (
               <Link to="/login" className="ml-2 xl:ml-4 shrink-0">
@@ -244,7 +250,8 @@ const Navbar = () => {
               </Link>
             )}
           </div>
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-1">
+            {user && <NotificationBell />}
             <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-blue-600 p-2">
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -253,32 +260,29 @@ const Navbar = () => {
       </div>
       {isOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1">
-          {isAdmin ? (
+          {institutionBase ? (
             <>
-              <Link to="/admin/offices" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Consultorios</Link>
-              <Link to="/admin/specialties" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Especialidades</Link>
-              <Link to="/admin/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to="/admin/patients" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Pacientes</Link>
-              <Link to="/admin/insurances" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Obras Sociales</Link>
-              <Link to="/admin/profile" className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 bg-blue-50">Mi Perfil Admin</Link>
-            </>
-            ) : institutionBase ? (
-            <>
-              <Link to={`${institutionBase}/doctors`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to={`${institutionBase}/secretaries`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
-              <Link to={`${institutionBase}/staff`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Personal</Link>
-              <Link to={`${institutionBase}/requests`} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+              <Link to={`${institutionBase}/doctors`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
+              <Link to={`${institutionBase}/secretaries`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Secretarias</Link>
+              <Link to={`${institutionBase}/requests`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
                 Solicitudes{pendingRequests > 0 && ` (${pendingRequests})`}
               </Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to={`${institutionBase}/account`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to={`${institutionBase}/settings`} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">{isHospitalAdmin ? 'Datos del hospital' : 'Datos de la clínica'}</Link>
             </>
           ) : isVitadevAdmin ? (
             <>
-              <Link to="/vitadev/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Resumen</Link>
-              <Link to="/vitadev/doctors" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Médicos</Link>
-              <Link to="/vitadev/clinics" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
-              <Link to="/vitadev/hospitals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
-              <Link to="/vitadev/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
-              <Link to="/vitadev/account" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/vitadev/doctors" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Particulares</Link>
+              <Link to="/vitadev/clinics" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Clínicas</Link>
+              <Link to="/vitadev/hospitals" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Hospitales</Link>
+              <Link to="/vitadev/users" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Usuarios</Link>
+              <Link to="/news" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Foro</Link>
+              <Link to="/vitadev/support" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+                Soporte{pendingTickets > 0 && ` (${pendingTickets})`}
+              </Link>
+              <Link to="/vitadev/account" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Mi cuenta</Link>
+              <Link to="/vitadev/catalog" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Gestión de datos</Link>
             </>
           ) : isDoctor ? (
             <>

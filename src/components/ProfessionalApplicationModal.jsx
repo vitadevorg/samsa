@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
-import { SPECIALTIES } from '../constants/catalog';
+import { useCatalog } from '../context/catalog-context';
 import { generateTransactionId } from '../utils/ids';
 import { formatCuil, isValidCuil, dniFromCuil, formatDni } from '../utils/cuil';
 import TermsCheckbox from './TermsCheckbox';
@@ -14,6 +14,8 @@ const EMPTY_APPLICATION = {
 
 // Se monta solo mientras está abierto, así cada apertura arranca con el formulario vacío.
 const ProfessionalApplicationModal = ({ onClose }) => {
+  // Catálogo del sistema (lo administra Gestión de datos).
+  const { specialties: SPECIALTIES } = useCatalog();
     const fieldId = useId();
     const [step, setStep] = useState(1);
     const progress = (step - 1) * 50;

@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import Navbar from '../../components/Navbar';
+import FadeIn from '../../components/FadeIn';
 import Footer from '../../components/Footer';
 import { createId } from '../../utils/ids';
 import { useAuth } from '../../context/useAuth';
 import { useClinicData } from '../clinic/clinicDataContext';
+import { useNotifications } from '../../context/notifications-context';
 import { useAgenda } from './dashboard/useAgenda';
 import { buildSecretaryDoctors, findPatientByName } from './dashboard/mockData';
 import { filterAgenda } from './dashboard/agenda';
@@ -27,9 +29,17 @@ const SecretaryDashboard = () => {
   // Médicos de esta secretaria: los que le asignó el admin de su clínica.
   // Se la busca por su email entre las secretarias del estado compartido.
   const { user } = useAuth();
-  const { allSecretaries, allAssignments } = useClinicData();
+  const { allSecretaries, allAssignments, findDoctor: findStaffDoctor } = useClinicData();
+  const { push } = useNotifications();
+  // Avisa en la campana al médico del turno y, si es un paciente con cuenta, también a él.
+  const notifyTurnChange = (doctorId, appointment, title, body) => {
+    const doctorEmail = findStaffDoctor(doctorId)?.email;
+    if (doctorEmail) push({ to: { email: doctorEmail }, type: 'turn', title, body: `${appointment.patient}: ${body}`, action: { type: 'link', to: '/doctor/turns' } });
+    const patientEmail = findPatientByName(appointment.patient)?.email;
+    if (patientEmail) push({ to: { email: patientEmail }, type: 'turn', title, body, action: { type: 'link', to: '/my-turns' } });
+  };
   const secretary = allSecretaries.find(s => s.email === user?.email);
-  const doctors = buildSecretaryDoctors(secretary, allAssignments);
+  const doctors = buildSecretaryDoctors(secretary, allAssignments, findStaffDoctor);
 
   const {
     appointments, suspended,
@@ -100,6 +110,7 @@ const SecretaryDashboard = () => {
     if (type === 'cancel') {
       const alreadyWaiting = suspended.length;
       cancelAppointment(doctorId, appointment.id, sendToSuspend);
+      notifyTurnChange(doctorId, appointment, 'Turno cancelado', `se canceló el turno de las ${appointment.time}hs.`);
       if (alreadyWaiting > 0) {
         const waiting = alreadyWaiting + (sendToSuspend ? 1 : 0);
         notify(`Horario liberado. Hay ${waiting} pacientes en lista de espera. ¿Desea asignar este turno ahora?`);
@@ -115,9 +126,11 @@ const SecretaryDashboard = () => {
     let message;
     if (hasDate === 'no') {
       suspendAppointment(doctorId, appointment.id);
+      notifyTurnChange(doctorId, appointment, 'Turno a reprogramar', 'el turno quedó pendiente de nueva fecha.');
       message = `Se ha reprogramado el turno de ${appointment.patient} a la bolsa de suspenso.`;
     } else {
       moveAppointment(doctorId, appointment.id, customDate, customTime);
+      notifyTurnChange(doctorId, appointment, 'Turno reprogramado', `nuevo horario: ${formatDateToLocale(customDate)} a las ${customTime}hs.`);
       message = `Turno reprogramado para el ${formatDateToLocale(customDate)} a las ${customTime}hs.`;
     }
     notify(message, notifyPatient ? {} : { title: 'Cambios guardados' });
@@ -151,7 +164,7 @@ const SecretaryDashboard = () => {
   // Sin médicos asignados no hay agenda que mostrar.
   if (doctors.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans text-slate-800 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 overflow-x-clip">
         <Navbar />
         <main className="flex-grow max-w-3xl mx-auto w-full px-4 py-20 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Todavía no tenés agendas asignadas</h1>
@@ -163,7 +176,7 @@ const SecretaryDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900 overflow-x-clip">
       <Navbar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:pt-12">
@@ -176,9 +189,9 @@ const SecretaryDashboard = () => {
           onOpenChat={() => setShowChat(true)}
         />
 
-        <DateStrip dates={dateCarousel} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+        <FadeIn delay={100} className="relative z-20"><DateStrip dates={dateCarousel} selectedDate={selectedDate} onSelectDate={setSelectedDate} /></FadeIn>
 
-        {viewMode === 'single' ? (
+        <FadeIn delay={200}>{viewMode === 'single' ? (
           <AgendaTable
             doctor={currentDoctor}
             date={selectedDate}
@@ -201,7 +214,7 @@ const SecretaryDashboard = () => {
             onAction={handleAction}
             onPatientClick={handlePatientClick}
           />
-        )}
+        )}</FadeIn>
       </main>
       <Footer />
 

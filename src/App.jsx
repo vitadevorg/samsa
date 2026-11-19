@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ModalScrollManager from './components/ModalScrollManager';
 import { ROLES } from './constants/roles';
 
 import HomeRoute from './components/HomeRoute';
@@ -30,24 +31,25 @@ import SecretaryDashboard from './pages/secretary/SecretaryDashboard';
 import SecretaryPatients from './pages/secretary/SecretaryPatients';
 import SecretaryAccount from './pages/secretary/SecretaryAccount';
 
-import AdminDoctors from './pages/admin/AdminDoctors';
-import AdminSpecialties from './pages/admin/AdminSpecialties';
-import AdminOffices from './pages/admin/AdminOffices';
-import AdminPatients from './pages/admin/AdminPatients';
-import AdminInsurances from './pages/admin/AdminInsurances';
-import AdminProfile from './pages/admin/AdminProfile';
-
 import ClinicDataProvider from './pages/clinic/ClinicDataProvider';
 import { ForumProvider } from './context/ForumContext';
+import { CatalogProvider } from './context/CatalogContext';
+import { NotificationsProvider } from './context/NotificationsContext';
+import { SupportProvider } from './context/SupportContext';
+import SupportBar from './components/support/SupportBar';
+import SupportModalHost from './components/support/SupportModalHost';
+import FooterPresenceProvider from './components/support/FooterPresence';
 import ClinicDoctors from './pages/clinic/ClinicDoctors';
 import ClinicSecretaries from './pages/clinic/ClinicSecretaries';
 import ClinicRequests from './pages/clinic/ClinicRequests';
-import ClinicStaff from './pages/clinic/ClinicStaff';
+import ClinicSettings from './pages/clinic/ClinicSettings';
 import VitadevDashboard from './pages/vitadev/VitadevDashboard';
 import VitadevDoctors from './pages/vitadev/VitadevDoctors';
 import VitadevInstitutions from './pages/vitadev/VitadevInstitutions';
 import VitadevUsers from './pages/vitadev/VitadevUsers';
 import VitadevAccount from './pages/vitadev/VitadevAccount';
+import VitadevCatalog from './pages/vitadev/VitadevCatalog';
+import VitadevSupport from './pages/vitadev/VitadevSupport';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -64,10 +66,15 @@ function App() {
     <AuthProvider>
       <Router>
         <ScrollToTop />
+        <ModalScrollManager />
         {/* ClinicDataProvider comparte los datos de las instituciones con TODAS las rutas
             (pantallas de clínica, Navbar, perfil del médico...) */}
+        <NotificationsProvider>
+        <CatalogProvider>
         <ClinicDataProvider>
         <ForumProvider>
+        <SupportProvider>
+        <FooterPresenceProvider>
         <Routes>
 
           <Route path="/" element={<HomeRoute />} />
@@ -108,29 +115,22 @@ function App() {
             <Route path="/secretary/account" element={<SecretaryAccount />} />
           </Route>
 
-          <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
-            <Route path="/admin/doctors" element={<AdminDoctors />} />
-            <Route path="/admin/specialties" element={<AdminSpecialties />} />
-            <Route path="/admin/offices" element={<AdminOffices />} />
-            <Route path="/admin/patients" element={<AdminPatients />} />
-            <Route path="/admin/insurances" element={<AdminInsurances />} />
-            <Route path="/admin/profile" element={<AdminProfile />} />
-          </Route>
-
           {/* Administradores de institución: cada grupo solo es accesible para su rol */}
           <Route element={<ProtectedRoute roles={[ROLES.CLINIC_ADMIN]} />}>
             <Route path="/clinic/doctors" element={<ClinicDoctors />} />
             <Route path="/clinic/secretaries" element={<ClinicSecretaries />} />
-            <Route path="/clinic/staff" element={<ClinicStaff />} />
             <Route path="/clinic/requests" element={<ClinicRequests />} />
+            <Route path="/clinic/settings" element={<ClinicSettings />} />
+            <Route path="/clinic/account" element={<VitadevAccount />} />
           </Route>
 
           {/* El hospital usa las mismas pantallas que la clínica, bajo /hospital/... */}
           <Route element={<ProtectedRoute roles={[ROLES.HOSPITAL_ADMIN]} />}>
             <Route path="/hospital/doctors" element={<ClinicDoctors />} />
             <Route path="/hospital/secretaries" element={<ClinicSecretaries />} />
-            <Route path="/hospital/staff" element={<ClinicStaff />} />
             <Route path="/hospital/requests" element={<ClinicRequests />} />
+            <Route path="/hospital/settings" element={<ClinicSettings />} />
+            <Route path="/hospital/account" element={<VitadevAccount />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={[ROLES.VITADEV_ADMIN]} />}>
@@ -141,10 +141,18 @@ function App() {
             <Route path="/vitadev/hospitals" element={<VitadevInstitutions key="hospital" kind="hospital" />} />
             <Route path="/vitadev/users" element={<VitadevUsers />} />
             <Route path="/vitadev/account" element={<VitadevAccount />} />
+            <Route path="/vitadev/catalog" element={<VitadevCatalog />} />
+            <Route path="/vitadev/support" element={<VitadevSupport />} />
           </Route>
         </Routes>
+        <SupportBar />
+        <SupportModalHost />
+        </FooterPresenceProvider>
+        </SupportProvider>
         </ForumProvider>
         </ClinicDataProvider>
+        </CatalogProvider>
+        </NotificationsProvider>
       </Router>
     </AuthProvider>
   );

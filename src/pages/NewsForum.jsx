@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmModal from '../components/ConfirmModal';
+import FadeIn from '../components/FadeIn';
 import { useAuth } from '../context/useAuth';
 import { useForum } from '../context/useForum';
 import { ROLES } from '../constants/roles';
 import { getDoctorLabel, stripTitle } from '../utils/doctorName';
 import { useTimeouts } from '../hooks/useTimeouts';
 import ForumPostModal from './forum/ForumPostModal';
+import ModeratePostModal from './forum/ModeratePostModal';
+import { canModerate, canPublish as canPublishIn } from '../context/forum-context';
+import { useClinicData } from './clinic/clinicDataContext';
 import { formatPostDate } from './forum/forumPosts';
 import {
     Newspaper, Calendar, ArrowRight, X, HeartPulse, Activity, BellRing,
-    Plus, Pencil, Trash2, Stethoscope, CheckCircle, UserRound,
+    Plus, Pencil, Trash2, Stethoscope, CheckCircle, UserRound, ShieldAlert,
 } from 'lucide-react';
 
 const mockNews = [
@@ -136,19 +140,33 @@ const PostBody = ({ body }) => (
 
 const NewsForum = () => {
     const { user } = useAuth();
-    const { posts, addPost, updatePost, deletePost, isOwnPost } = useForum();
+    const { posts, addPost, updatePost, deletePost, isOwnPost, canModeratePost, moderatePost, noticesFor, dismissNotice, hiddenNoteIds, removeFixedNote } = useForum();
+    // Institución del administrador de clínica u hospital (undefined para el resto): firma sus notas.
+    const { clinic } = useClinicData();
     const { schedule } = useTimeouts();
     const isDoctor = user?.role === ROLES.DOCTOR;
+    const isVitadev = user?.role === ROLES.VITADEV_ADMIN;
+    const isInstitutionAdmin = Boolean(clinic) && (user?.role === ROLES.CLINIC_ADMIN || user?.role === ROLES.HOSPITAL_ADMIN);
+    // Publican médicos, VitaDev y los administradores de clínica u hospital. VitaDev modera todo el foro;
+    // la clínica o el hospital, solo las notas de sus médicos.
+    const canPublish = canPublishIn(user);
+    const isModerator = canModerate(user);
 
     const [selectedId, setSelectedId] = useState(null);
-    const [filter, setFilter] = useState('all'); // 'all' | 'mine' (solo médicos)
+    const [filter, setFilter] = useState('all'); // 'all' | 'mine' (solo quienes publican)
     const [editor, setEditor] = useState(null); // null | { post?: publicación a editar }
     const [postToDelete, setPostToDelete] = useState(null);
+    const [postToModerate, setPostToModerate] = useState(null);
+    const [noteToRemove, setNoteToRemove] = useState(null); // nota institucional fija que VitaDev va a quitar
     const [toast, setToast] = useState(null);
 
-    const isOwn = (item) => isDoctor && Boolean(item.post) && isOwnPost(item.post, user.email);
+    const isOwn = (item) => canPublish && Boolean(item.post) && isOwnPost(item.post, user.email);
+    // Notas ajenas que puede eliminar: VitaDev, cualquiera (también las fijas); la clínica u hospital, las de sus
+    // médicos. Las propias se borran con Borrar.
+    const canModerateItem = (item) => (item.post ? canModeratePost(user, item.post) : isModerator);
+    const notices = canPublish ? noticesFor(user.email) : [];
     const doctorItems = posts.map(toNewsItem);
-    const allItems = [...doctorItems, ...mockNews];
+    const allItems = [...doctorItems, ...mockNews.filter((note) => !hiddenNoteIds.has(note.id))];
     const visibleItems = filter === 'mine' ? doctorItems.filter(isOwn) : allItems;
     const selectedNote = allItems.find((item) => item.id === selectedId) ?? null;
     const ownCount = doctorItems.filter(isOwn).length;
@@ -164,7 +182,7 @@ const NewsForum = () => {
             showToast('Los cambios de tu publicación se guardaron.');
         } else {
             // "Dra. Gómez" no alcanza como firma: se muestra título + nombre completo.
-            const authorName = `${getDoctorLabel(user).split(' ')[0]} ${stripTitle(user.name)}`;
+            const authorName = isVitadev ? 'Equipo VitaDev' : isInstitutionAdmin ? clinic.name : `${getDoctorLabel(user).split(' ')[0]} ${stripTitle(user.name)}`;
             addPost(data, { email: user.email, name: authorName });
             setFilter('all');
             showToast('Tu nota ya está publicada en el foro.');
@@ -179,18 +197,35 @@ const NewsForum = () => {
         showToast('La publicación se eliminó del foro.');
     };
 
+    // Eliminar desde el detalle: notas con autor piden la aclaración; las institucionales, solo confirmación.
+    const requestModeration = (item) => (item.post ? setPostToModerate(item.post) : setNoteToRemove(item));
+
+    const handleConfirmRemoveNote = () => {
+        removeFixedNote(noteToRemove.id, user);
+        if (selectedId === noteToRemove.id) setSelectedId(null);
+        setNoteToRemove(null);
+        showToast('La publicación se eliminó del foro.');
+    };
+
+    const handleConfirmModerate = (reason) => {
+        moderatePost(postToModerate.id, reason, user);
+        if (selectedId === postToModerate.id) setSelectedId(null);
+        showToast(`La publicación se eliminó y se avisó a ${postToModerate.authorName}.`);
+        setPostToModerate(null);
+    };
+
     const editButtonClass = 'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors';
     const deleteButtonClass = 'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors';
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
+        <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-clip">
             <Navbar />
 
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative">
 
                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none opacity-50"></div>
 
-                <div className="relative z-10 mb-8 sm:mb-12 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                <FadeIn delay={0} className="relative z-10"><div className="relative z-10 mb-8 sm:mb-12 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
                     <div>
                         <div className="flex items-center gap-3 text-blue-600 mb-3">
                             <div className="bg-blue-100 p-2 rounded-xl">
@@ -199,13 +234,18 @@ const NewsForum = () => {
                             <span className="font-black tracking-widest uppercase text-sm text-blue-700">Comunidad SAMSA</span>
                         </div>
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-800 tracking-tight">Foro de Novedades</h1>
-                        <p className="text-slate-500 mt-4 text-base sm:text-lg max-w-2xl">
-                            {isDoctor
-                                ? 'Compartí tu experiencia con la comunidad SAMSA. Cada nota que publicás contribuye a que te conozcan más pacientes.'
-                                : 'Mantente informado con las últimas noticias de nuestra institución, avances médicos y consejos de salud preventiva redactados por nuestros profesionales.'}
-                        </p>
+                        {/* VitaDev no ve bajada: solo el título y sus acciones. */}
+                        {!isVitadev && (
+                            <p className="text-slate-500 mt-4 text-base sm:text-lg max-w-2xl">
+                                {isInstitutionAdmin
+                                    ? `Publicá novedades de ${clinic.name} y moderá las notas de tus médicos.`
+                                    : isDoctor
+                                    ? 'Compartí tu experiencia con la comunidad SAMSA. Cada nota que publicás contribuye a que te conozcan más pacientes.'
+                                    : 'Mantente informado con las últimas noticias de nuestra institución, avances médicos y consejos de salud preventiva redactados por nuestros profesionales.'}
+                            </p>
+                        )}
                     </div>
-                    {isDoctor && (
+                    {canPublish && (
                         <button
                             type="button"
                             onClick={() => setEditor({})}
@@ -215,10 +255,29 @@ const NewsForum = () => {
                             Publicar
                         </button>
                     )}
-                </div>
+                </div></FadeIn>
 
-                {isDoctor && (
-                    <div className="relative z-10 mb-6 sm:mb-8 flex gap-2" role="tablist" aria-label="Filtrar publicaciones">
+                {notices.length > 0 && (
+                    <div className="relative z-10 mb-6 sm:mb-8 space-y-3" aria-live="polite">
+                        {notices.map((notice) => (
+                            <div key={notice.id} role="status" className="flex items-start gap-3 sm:gap-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5">
+                                <div className="bg-amber-100 p-2 rounded-full shrink-0">
+                                    <ShieldAlert className="w-5 h-5 text-amber-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-amber-900 break-words">{notice.moderatorName ?? 'VitaDev'} eliminó tu publicación "{notice.postTitle}"</p>
+                                    <p className="text-sm text-amber-800 mt-1 break-words"><span className="font-semibold">Motivo:</span> {notice.reason}</p>
+                                </div>
+                                <button type="button" onClick={() => dismissNotice(notice.id, user.email)} aria-label="Descartar aviso" className="p-1.5 rounded-full text-amber-700 hover:bg-amber-100 transition shrink-0">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {canPublish && (
+                    <FadeIn delay={100} className="relative z-10"><div className="relative z-10 mb-6 sm:mb-8 flex gap-2" role="tablist" aria-label="Filtrar publicaciones">
                         {[{ key: 'all', label: 'Todas' }, { key: 'mine', label: `Mis publicaciones (${ownCount})` }].map(({ key, label }) => (
                             <button
                                 key={key}
@@ -231,7 +290,7 @@ const NewsForum = () => {
                                 {label}
                             </button>
                         ))}
-                    </div>
+                    </div></FadeIn>
                 )}
 
                 {visibleItems.length === 0 ? (
@@ -247,13 +306,13 @@ const NewsForum = () => {
                     </div>
                 ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 relative z-10">
-                    {visibleItems.map((news) => {
+                    {visibleItems.map((news, index) => {
                         const IconComponent = news.icon;
                         const own = isOwn(news);
                         return (
-                            <article
+                            <FadeIn delay={(index % 3) * 100} key={news.id} className="h-full"><article
                                 key={news.id}
-                                className="bg-white/70 backdrop-blur-md rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group hover:-translate-y-2 transition-all duration-300 flex flex-col"
+                                className="bg-white/70 backdrop-blur-md rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group hover:-translate-y-2 transition-all duration-300 flex flex-col h-full"
                             >
                                 <button type="button" onClick={() => setSelectedId(news.id)} className="text-left flex-1 flex flex-col cursor-pointer">
                                     <div className="h-48 w-full overflow-hidden relative">
@@ -292,17 +351,15 @@ const NewsForum = () => {
                                         </div>
                                     </div>
                                 </button>
+                                {/* Borrar o eliminar se hace desde la publicación abierta, no desde la tarjeta. */}
                                 {own && (
-                                    <div className="px-6 pb-6 flex gap-2">
-                                        <button type="button" onClick={() => setEditor({ post: news.post })} className={`flex-1 ${editButtonClass}`}>
+                                    <div className="px-6 pb-6">
+                                        <button type="button" onClick={() => setEditor({ post: news.post })} className={`w-full ${editButtonClass}`}>
                                             <Pencil className="w-4 h-4" /> Editar
-                                        </button>
-                                        <button type="button" onClick={() => setPostToDelete(news.post)} className={`flex-1 ${deleteButtonClass}`}>
-                                            <Trash2 className="w-4 h-4" /> Borrar
                                         </button>
                                     </div>
                                 )}
-                            </article>
+                            </article></FadeIn>
                         );
                     })}
                 </div>
@@ -355,6 +412,8 @@ const NewsForum = () => {
                                 {selectedNote.post ? <PostBody body={selectedNote.post.body} /> : selectedNote.content}
                             </div>
 
+                            {/* Acciones de la publicación (solo si hay alguna). Se cierra con la X de arriba o tocando afuera. */}
+                            {(isOwn(selectedNote) || canModerateItem(selectedNote)) && (
                             <div className="mt-12 flex flex-col sm:flex-row sm:justify-center gap-3">
                                 {isOwn(selectedNote) && (
                                     <>
@@ -366,14 +425,13 @@ const NewsForum = () => {
                                         </button>
                                     </>
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedId(null)}
-                                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-8 py-3 rounded-xl font-bold transition-colors"
-                                >
-                                    Cerrar y volver al foro
-                                </button>
+                                {canModerateItem(selectedNote) && (
+                                    <button type="button" onClick={() => requestModeration(selectedNote)} className={`${deleteButtonClass} px-6 py-3`}>
+                                        <Trash2 className="w-4 h-4" /> Eliminar
+                                    </button>
+                                )}
                             </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -388,6 +446,14 @@ const NewsForum = () => {
                 />
             )}
 
+            {postToModerate && (
+                <ModeratePostModal
+                    post={postToModerate}
+                    onCancel={() => setPostToModerate(null)}
+                    onConfirm={handleConfirmModerate}
+                />
+            )}
+
             <div className="relative z-[110]">
                 <ConfirmModal
                     isOpen={postToDelete !== null}
@@ -396,6 +462,14 @@ const NewsForum = () => {
                     title="¿Borrar publicación?"
                     message={postToDelete ? `"${postToDelete.title}" se quitará del foro para todos los usuarios.` : ''}
                     confirmLabel="Sí, borrar"
+                />
+                <ConfirmModal
+                    isOpen={noteToRemove !== null}
+                    onClose={() => setNoteToRemove(null)}
+                    onConfirm={handleConfirmRemoveNote}
+                    title="¿Eliminar publicación?"
+                    message={noteToRemove ? `"${noteToRemove.title}" es una nota institucional: se quitará del foro para todos los usuarios.` : ''}
+                    confirmLabel="Sí, eliminar"
                 />
             </div>
 

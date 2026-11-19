@@ -16,14 +16,13 @@ Documentación técnica de la estructura del frontend de **SAMSA**, sus roles de
 
 ## 2. Roles del Sistema (`src/constants/roles.js`)
 
-El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME`):
+El sistema define 6 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME`):
 
 | Constante | Valor | Ruta Home (`ROLE_HOME`) | Descripción |
 |-----------|-------|-------------------------|-------------|
 | `ROLES.PATIENT` | `'patient'` | `/turns` | Paciente: solicita turnos, consulta estudios, reseñas y perfil |
 | `ROLES.DOCTOR` | `'doctor'` | `/doctor/turns` | Profesional médico: gestiona su agenda, pacientes, protocolos y soporte |
 | `ROLES.SECRETARY` | `'secretary'` | `/secretary/dashboard` | Secretaria: administra turnos y directorio de pacientes |
-| `ROLES.ADMIN` | `'admin'` | `/admin/doctors` | Administrador general de consultorios, médicos, especialidades y obras sociales |
 | `ROLES.CLINIC_ADMIN` | `'clinic_admin'` | `/clinic/doctors` | Administrador de Clínica (médicos, secretarias, personal y solicitudes) |
 | `ROLES.HOSPITAL_ADMIN` | `'hospital_admin'` | `/hospital/doctors` | Administrador de Hospital (reutiliza las vistas de institución bajo `/hospital/...`) |
 | `ROLES.VITADEV_ADMIN` | `'vitadev_admin'` | `/vitadev/dashboard` | Superadministrador VitaDev: red neuronal del ecosistema, clínicas, hospitales, médicos particulares y usuarios |
@@ -59,13 +58,13 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
 * **Secretaria (`ROLES.SECRETARY`):**
   * `/secretary/dashboard` → `SecretaryDashboard.jsx`
   * `/secretary/patients` → `SecretaryPatients.jsx`
-* **Administrador (`ROLES.ADMIN`):**
-  * `/admin/doctors`, `/admin/specialties`, `/admin/offices`, `/admin/patients`, `/admin/insurances`, `/admin/profile`
 * **Administrador de Clínica / Hospital (`ROLES.CLINIC_ADMIN` / `ROLES.HOSPITAL_ADMIN`):**
   * `/clinic/doctors` y `/hospital/doctors` → `ClinicDoctors.jsx`
   * `/clinic/secretaries` y `/hospital/secretaries` → `ClinicSecretaries.jsx`
-  * `/clinic/staff` y `/hospital/staff` → `ClinicStaff.jsx`
   * `/clinic/requests` y `/hospital/requests` → `ClinicRequests.jsx`
+  * `/clinic/settings` y `/hospital/settings` → `ClinicSettings.jsx` (contacto, obras sociales y estudios)
+  * `/clinic/account` y `/hospital/account` → `VitadevAccount.jsx` (Mi cuenta, compartida con VitaDev)
+  * `/news` → `NewsForum.jsx` (publican y moderan las notas de sus médicos)
 * **Administrador VitaDev (`ROLES.VITADEV_ADMIN`):**
   * `/vitadev/dashboard` → `VitadevDashboard.jsx` (`NetworkGraph.jsx` + `SynapseCanvas.jsx`)
   * `/vitadev/doctors` → `VitadevDoctors.jsx` (`ParticularDoctorsPanel.jsx` + `ParticularSecretariesPanel.jsx`)
@@ -73,6 +72,7 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
   * `/vitadev/hospitals` → `VitadevInstitutions.jsx` (`kind="hospital"`)
   * `/vitadev/users` → `VitadevUsers.jsx`
   * `/vitadev/account` → `VitadevAccount.jsx`
+  * `/vitadev/support` → `VitadevSupport.jsx` (tickets de soporte de todos los usuarios)
 
 ---
 
@@ -82,3 +82,5 @@ El sistema define 7 roles en `ROLES` y su ruta de inicio por defecto (`ROLE_HOME
   * Gestiona la sesión activa, login, registro, recuperación/reseteo de contraseña, cambio de contraseña y estado de cuentas (activas, inhabilitadas o dadas de baja).
 * **`ClinicDataProvider` (`src/pages/clinic/ClinicDataProvider.jsx`):**
   * Envuelve todas las rutas en `App.jsx` para compartir el estado de instituciones, médicos, secretarias, personal y solicitudes pendientes (consumido tanto por las pantallas de clínica/hospital/VitaDev como por el contador de notificaciones en `Navbar.jsx`).
+* **`NotificationsProvider` y `SupportProvider` (`src/context/`):**
+  * Campana de notificaciones por persona o rol y tickets de soporte (mock en memoria). `SupportBar` y el `Footer` ofrecen "Contactar soporte" en todos los módulos.

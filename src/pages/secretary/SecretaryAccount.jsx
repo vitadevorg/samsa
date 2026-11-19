@@ -5,6 +5,7 @@ import {
   CreditCard, Lock, Stethoscope,
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
+import FadeIn from '../../components/FadeIn';
 import { useAuth } from '../../context/useAuth';
 import { useTimeouts } from '../../hooks/useTimeouts';
 import { verifyPassword, setOwnPassword, updateAccount, getRegisteredEmails } from '../../services/authService';
@@ -34,9 +35,9 @@ const SecretaryAccount = () => {
   const fileInputRef = useRef(null);
   // Médicos cuya agenda maneja: los mismos que ve en la Agenda Diaria (solo lectura).
   const clinicData = useClinicData();
-  const { allSecretaries, allAssignments, updateSecretary } = clinicData;
+  const { allSecretaries, allAssignments, updateSecretary, findDoctor } = clinicData;
   const secretary = allSecretaries.find((s) => s.email === user?.email);
-  const doctors = buildSecretaryDoctors(secretary, allAssignments);
+  const doctors = buildSecretaryDoctors(secretary, allAssignments, findDoctor);
 
   const [isEditing, setIsEditing] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '', email: user?.email || '', currentPassword: '' });
@@ -195,10 +196,10 @@ const SecretaryAccount = () => {
   }[confirming];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-clip">
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 sm:p-8 text-white shadow-lg mb-6 sm:mb-8">
+        <FadeIn><div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 sm:p-8 text-white shadow-lg mb-6 sm:mb-8">
           <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/3 -translate-y-1/3 pointer-events-none">
             <ClipboardList className="w-64 h-64" />
           </div>
@@ -239,12 +240,12 @@ const SecretaryAccount = () => {
               <p className="text-base sm:text-lg text-white/80 font-medium mt-1 break-all">{user.email}</p>
             </div>
           </div>
-        </div>
+        </div></FadeIn>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Columna izquierda en un solo contenedor: la separación entre tarjetas no depende de la altura de Seguridad. */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8 relative overflow-hidden">
+          <FadeIn delay={100}><section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -284,9 +285,9 @@ const SecretaryAccount = () => {
               )}
             </form>
             {isEditing && <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-400 animate-pulse"></div>}
-          </section>
+          </section></FadeIn>
 
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8">
+          <FadeIn delay={200}><section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8">
             <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
               <Stethoscope className="w-5 h-5 text-blue-600" /> Médicos de tu agenda
             </h2>
@@ -311,10 +312,10 @@ const SecretaryAccount = () => {
                 ))}
               </ul>
             )}
-          </section>
+          </section></FadeIn>
           </div>
 
-          <div className="space-y-6 sm:space-y-8">
+          <FadeIn delay={150}><div className="space-y-6 sm:space-y-8">
             <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 md:p-8">
               <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <Key className="w-5 h-5 text-blue-600" /> Seguridad
@@ -351,7 +352,7 @@ const SecretaryAccount = () => {
             >
               <LogOut className="w-4 h-4" /> Cerrar sesión
             </button>
-          </div>
+          </div></FadeIn>
         </div>
       </main>
 
