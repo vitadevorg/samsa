@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ProfessionalB2BSection from '../components/ProfessionalB2BSection';
 import SharedReveal from '../components/Reveal';
+import ScrollImageReveal, { ScrollMaskReveal } from '../components/ScrollImageReveal';
 const homeStyles = `
   html {
     scroll-behavior: smooth;
@@ -120,10 +121,13 @@ const Home = () => {
                 </Reveal>
                 <div className="lg:hidden relative w-full h-64 sm:h-72 md:h-96 my-6 rounded-2xl overflow-hidden pointer-events-none animate-float">
                     <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent z-10"></div>
-                    <img
-                      className="w-full h-full object-cover object-top"
+                    <ScrollImageReveal
                       src="/img/claudioMoya.png"
                       alt="Equipo Médico SAMSA"
+                      mask="scale"
+                      parallax={16}
+                      className="w-full h-full"
+                      imgClassName="object-top"
                     />
                 </div>
                 <Reveal delay={400}>
@@ -191,8 +195,8 @@ const Home = () => {
             </Reveal>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Reveal key={service.title} delay={index * 100} className="h-full">
+            {services.map((service) => (
+              <ScrollMaskReveal key={service.title} mask="wipe" className="h-full">
                   <Link to={`/professionals?specialty=${encodeURIComponent(service.title)}`} className="block group relative bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 h-full hover:-translate-y-2 overflow-hidden">
                     <div className={`absolute top-0 right-0 w-32 h-32 ${service.color} opacity-0 group-hover:opacity-5 rounded-bl-[100%] transition-all duration-500 translate-x-10 -translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0`}></div>
                     <div className={`inline-flex items-center justify-center p-4 ${service.color} rounded-2xl shadow-lg shadow-${service.color}/30 mb-6 group-hover:scale-110 transition-transform duration-300`}>
@@ -208,7 +212,7 @@ const Home = () => {
                         Consultar <ArrowRight className="ml-2 w-4 h-4"/>
                     </div>
                   </Link>
-              </Reveal>
+              </ScrollMaskReveal>
             ))}
           </div>
         </div>
@@ -219,7 +223,7 @@ const Home = () => {
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-900/80 to-slate-900/80"></div>
           </div>
           <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-              <Reveal>
+              <ScrollMaskReveal mask="curtain">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">¿Listo para cuidar tu salud?</h2>
                   <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto">
                       Unite a los miles de pacientes que ya gestionan sus turnos de forma rápida y segura con S.A.M.S.A.
@@ -231,7 +235,7 @@ const Home = () => {
                           </button>
                       </Link>
                   </div>
-              </Reveal>
+              </ScrollMaskReveal>
           </div>
       </section>
       <ProfessionalB2BSection />
