@@ -5,6 +5,7 @@ import AdhesionModal from './adhesion/AdhesionModal';
 import Reveal from './Reveal';
 import { ScrollMaskReveal } from './ScrollImageReveal';
 import Marquee from './Marquee';
+import BorderBeam from './BorderBeam';
 import { useInView } from '../hooks/useInView';
 
 const AnimatedStepsFlow = () => {
@@ -523,7 +524,8 @@ const ProfessionalB2BSection = () => {
                             Sumate a SAMSA y llevá tu práctica profesional a una nueva forma de gestionar pacientes, sin fricciones.
                         </p>
 
-                        <button type="button" onClick={() => setShowApplicationModal(true)} className="w-full sm:w-auto justify-center px-6 sm:px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-xl font-black text-base sm:text-lg transition-all shadow-lg hover:shadow-white/20 hover:-translate-y-1 group flex items-center gap-2 mx-auto relative z-10">
+                        <button type="button" onClick={() => setShowApplicationModal(true)} className="relative overflow-hidden w-full sm:w-auto justify-center px-6 sm:px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-xl font-black text-base sm:text-lg transition-all shadow-lg hover:shadow-white/20 hover:-translate-y-1 group flex items-center gap-2 mx-auto z-10">
+                            <BorderBeam size={72} duration={4.5} colorFrom="#2563eb" colorTo="#4f46e5" borderWidth={2} />
                             Enviar Solicitud de Adhesión <ArrowRight className="w-5 h-5 shrink-0 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>

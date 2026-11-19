@@ -44,6 +44,8 @@ Para no superar el límite del envío por mail, cada archivo puede pesar **hasta
 
 Antes de abrir el PR se trajeron los cambios nuevos de `development` (PR #32). Ese PR modificaba `ProfessionalApplicationModal.jsx`, que esta rama elimina: el conflicto se resolvió manteniendo la eliminación y llevando sus cambios al modal nuevo (indicador `AnimatedStepper`, `SamsaLogo` en el comprobante, opciones oscuras del desplegable de especialidad, matrícula solo numérica, foto y CV obligatorios y el 404 de `/api` en desarrollo tomado como enviado). Los cambios de `ProfessionalB2BSection.jsx` (carrusel de reseñas) se fusionaron sin conflicto.
 
+Después se unió el PR #33 (`BorderBeam` en los botones principales). El botón "Enviar Solicitud de Adhesión" conserva el borde animado de ese PR y el ancho completo en mobile de esta rama.
+
 ## Archivos clave tocados
 
 * `src/components/adhesion/AdhesionModal.jsx` (nuevo): elección del camino, pasos, ventana de salida, envío y pantalla de éxito.
