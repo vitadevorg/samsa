@@ -13,3 +13,21 @@ export const timeAgo = (iso) => {
   if (days < 30) return `Hace ${days} d`;
   return new Date(iso).toLocaleDateString('es-AR');
 };
+
+// Formatos de la historia clínica: siempre dd/mm/aaaa y hora de Argentina.
+const AR_TZ = 'America/Argentina/Buenos_Aires';
+
+export const formatDateAR = (iso) =>
+  iso ? new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: AR_TZ }) : '-';
+
+export const formatDateTimeAR = (iso) =>
+  iso
+    ? `${formatDateAR(iso)} ${new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: AR_TZ })}`
+    : '-';
+
+// Valor para <input type="date"> (aaaa-mm-dd) desplazado `days` días desde hoy.
+export const dateInputValue = (days = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString('en-CA', { timeZone: AR_TZ });
+};

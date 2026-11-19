@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import ProfessionalB2BSection from '../components/ProfessionalB2BSection';
 import SharedReveal from '../components/Reveal';
 import ScrollImageReveal, { ScrollMaskReveal } from '../components/ScrollImageReveal';
+import { RevealGateContext } from '../context/reveal-gate-context';
 const homeStyles = `
   html {
     scroll-behavior: smooth;
@@ -56,7 +57,7 @@ const IntroOverlay = ({ onComplete }) => {
   const [stage, setStage] = useState(0);
   useEffect(() => {
     const t1 = setTimeout(() => setStage(1), 2800); 
-    const t2 = setTimeout(() => onComplete(), 3600); 
+    const t2 = setTimeout(() => onComplete(), 3900); 
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onComplete]);
   return (
@@ -100,6 +101,7 @@ const Home = () => {
   return (
     <>
       {showIntro && <IntroOverlay onComplete={handleIntroComplete} />}
+      <RevealGateContext.Provider value={!showIntro}>
       <div className={`font-sans text-slate-800 bg-slate-50 selection:bg-blue-100 selection:text-blue-900 ${showIntro ? 'h-screen overflow-hidden' : ''}`}>
         <style>{homeStyles}</style>
       <Navbar />
@@ -119,7 +121,8 @@ const Home = () => {
                     <span className="block text-slate-800 text-4xl sm:text-5xl md:text-6xl mt-2">Sin filas, sin demoras.</span>
                     </h1>
                 </Reveal>
-                <div className="lg:hidden relative w-full h-64 sm:h-72 md:h-96 my-6 rounded-2xl overflow-hidden pointer-events-none animate-float">
+                <Reveal delay={300} className="lg:hidden">
+                  <div className="relative w-full h-64 sm:h-72 md:h-96 my-6 rounded-2xl overflow-hidden pointer-events-none animate-float">
                     <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-transparent z-10"></div>
                     <ScrollImageReveal
                       src="/img/claudioMoya.png"
@@ -129,7 +132,8 @@ const Home = () => {
                       className="w-full h-full"
                       imgClassName="object-top"
                     />
-                </div>
+                  </div>
+                </Reveal>
                 <Reveal delay={400}>
                     <p className="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0 leading-relaxed">
                     Gestioná tus turnos médicos de manera eficiente con el sistema líder en Argentina. Tecnología y calidez humana al servicio de tu bienestar.
@@ -241,6 +245,7 @@ const Home = () => {
       <ProfessionalB2BSection />
       <Footer />
     </div>
+      </RevealGateContext.Provider>
     </>
   );
 };
