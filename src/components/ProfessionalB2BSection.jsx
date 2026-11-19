@@ -165,7 +165,7 @@ const ProfessionalB2BSection = () => {
                             </Link>
                         </div>
 
-                        <div className="absolute -bottom-4 right-2 sm:-bottom-6 sm:-right-6 bg-slate-800 border border-slate-700 p-3 sm:p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
+                        <div className="absolute -bottom-14 right-2 sm:-right-6 bg-slate-800 border border-slate-700 p-3 sm:p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
                             <div className="flex items-center gap-3">
                                 <div className="bg-green-500/20 p-2 rounded-full">
                                     <Activity className="w-5 h-5 text-green-400" />
@@ -177,7 +177,7 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        <div className="absolute -top-6 left-2 sm:-top-10 sm:-left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-3 sm:p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
+                        <div className="absolute -top-16 left-2 sm:-left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-3 sm:p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
                             <div className="flex items-center gap-4">
                                 <div className="relative w-12 h-12">
                                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
