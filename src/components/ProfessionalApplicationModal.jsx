@@ -2,6 +2,8 @@ import React, { useState, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Printer, ChevronRight, ChevronLeft, Upload, File, Image as ImageIcon } from 'lucide-react';
 import { useCatalog } from '../context/catalog-context';
+import AnimatedStepper from './AnimatedStepper';
+import SamsaLogo from './SamsaLogo';
 import { generateTransactionId } from '../utils/ids';
 import { formatCuil, isValidCuil, dniFromCuil, formatDni } from '../utils/cuil';
 import TermsCheckbox from './TermsCheckbox';
@@ -52,11 +54,15 @@ const ProfessionalApplicationModal = ({ onClose }) => {
     }, [isSuccess]);
 
 
+    const [direction, setDirection] = useState(1);
+
     const handleNext = () => {
+        setDirection(1);
         setStep(prev => Math.min(prev + 1, 3));
     };
 
     const handlePrev = () => {
+        setDirection(-1);
         setStep(prev => Math.max(prev - 1, 1));
     };
 
@@ -104,7 +110,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                 body: JSON.stringify(payload),
             });
 
-            if (response.ok) {
+            if (response.ok || (import.meta.env.DEV && response.status === 404)) {
                 setReceiptNumber(generateTransactionId());
                 setIsSuccess(true);
             } else {
@@ -183,11 +189,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
 
                         <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6 mb-12">
                             <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
-                                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                    </svg>
-                                </div>
+                                <SamsaLogo className="h-12 w-auto shrink-0" />
                                 <div>
                                     <h1 className="text-5xl font-black text-slate-900 tracking-tighter mb-1">SAMSA<span className="text-blue-600">.</span></h1>
                                     <p className="text-slate-500 uppercase tracking-widest text-xs font-bold font-sans">Sistema de Adhesión Médica</p>
@@ -276,7 +278,11 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
-
+                    <AnimatedStepper
+                        steps={['Datos Personales', 'Perfil Profesional', 'Disponibilidad']}
+                        currentStep={step}
+                        direction={direction}
+                    >
                     {step === 1 && (
                         <div className="space-y-6 animate-fadeIn">
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -337,14 +343,24 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
                                     <label htmlFor={`${fieldId}-especialidad-principal`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Especialidad Principal</label>
-                                    <select id={`${fieldId}-especialidad-principal`} name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
-                                        <option value="">Seleccione una especialidad</option>
-                                        {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                                    <select id={`${fieldId}-especialidad-principal`} name="specialty" value={formData.specialty} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                                        <option value="" className="bg-slate-900 text-slate-400">Seleccione una especialidad</option>
+                                        {SPECIALTIES.map(s => <option key={s} value={s} className="bg-slate-900 text-white">{s}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor={`${fieldId}-numero-de-matricula`} className="text-sm font-bold text-slate-400 uppercase tracking-wider">Número de Matrícula (Provincial o Nacional)</label>
-                                    <input id={`${fieldId}-numero-de-matricula`} type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Ej. MP 12345" />
+                                    <input
+                                        id={`${fieldId}-numero-de-matricula`}
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        name="licenseNumber"
+                                        value={formData.licenseNumber}
+                                        onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value.replace(/\D/g, '') })}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                                        placeholder="Ej. 12345"
+                                    />
                                 </div>
                                 <div className="space-y-3">
                                     <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Tipo de Profesional</p>
@@ -414,6 +430,7 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                             </div>
                         </div>
                     )}
+                    </AnimatedStepper>
 
                 </div>
 
@@ -436,8 +453,8 @@ const ProfessionalApplicationModal = ({ onClose }) => {
                     ) : (
                         <button 
                             onClick={handleSubmit} 
-                            disabled={isSubmitting}
-                            className={`px-8 py-3 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-black flex items-center gap-2 shadow-lg shadow-blue-900/50 transition-all ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            disabled={isSubmitting || !formData.profilePic || !formData.cv}
+                            className={`px-8 py-3 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-black flex items-center gap-2 shadow-lg shadow-blue-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
                         </button>
