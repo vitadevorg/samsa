@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
-  motion,
+  motion as Motion,
   useScroll,
   useSpring,
   useTransform,
@@ -86,7 +86,7 @@ const ScrollImageReveal = ({
 
   return (
     <div ref={frameRef} className={`overflow-hidden relative ${className}`}>
-      <motion.div
+      <Motion.div
         className="w-full h-full"
         style={{
           clipPath: mask !== 'scale' && mask !== 'blinds' ? clipPath : undefined,
@@ -95,7 +95,7 @@ const ScrollImageReveal = ({
           scale: mask === 'scale' ? frameScale : 1,
         }}
       >
-        <motion.img
+        <Motion.img
           src={src}
           alt={alt}
           className={`w-full h-full object-cover ${imgClassName}`}
@@ -105,7 +105,7 @@ const ScrollImageReveal = ({
             marginTop: overscan ? `-${overscan}px` : 0,
           }}
         />
-      </motion.div>
+      </Motion.div>
     </div>
   );
 };
@@ -157,7 +157,7 @@ export const ScrollMaskReveal = ({
 
   return (
     <div ref={frameRef} className={`overflow-hidden ${className}`}>
-      <motion.div
+      <Motion.div
         className="w-full h-full"
         style={{
           clipPath: mask !== 'scale' ? clipPath : undefined,
@@ -165,7 +165,7 @@ export const ScrollMaskReveal = ({
         }}
       >
         {children}
-      </motion.div>
+      </Motion.div>
     </div>
   );
 };
