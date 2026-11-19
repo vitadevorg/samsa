@@ -145,12 +145,12 @@ const ProfessionalB2BSection = () => {
                                 </div>
                             </div>
 
-                            <button className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2 group">
+                            <Link to="/turns" className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2 group">
                                 Reservar Turno <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </button>
+                            </Link>
                         </div>
 
-                        <div className="absolute -bottom-6 -right-6 bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
+                        <div className="absolute -bottom-6 -right-6 hidden sm:block bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '7s' }}>
                             <div className="flex items-center gap-3">
                                 <div className="bg-green-500/20 p-2 rounded-full">
                                     <Activity className="w-5 h-5 text-green-400" />
@@ -162,7 +162,7 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        <div className="absolute -top-10 -left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
+                        <div className="absolute -top-10 -left-2 sm:-left-6 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '9s', animationDelay: '1s' }}>
                             <div className="flex items-center gap-4">
                                 <div className="relative w-12 h-12">
                                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -178,7 +178,8 @@ const ProfessionalB2BSection = () => {
                             </div>
                         </div>
 
-                        <div className="absolute top-1/2 -right-12 transform -translate-y-1/2 bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10 hidden sm:block" style={{ animationDuration: '8s', animationDelay: '2s' }}>
+                        <div className="absolute top-1/2 -right-12 -translate-y-1/2 z-10 hidden xl:block">
+                            <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700 p-4 rounded-2xl shadow-xl animate-float z-10" style={{ animationDuration: '8s', animationDelay: '2s' }}>
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="bg-blue-500/20 p-1.5 rounded-lg">
                                     <TrendingUp className="w-4 h-4 text-blue-400" />
@@ -190,6 +191,7 @@ const ProfessionalB2BSection = () => {
                                 <path d="M0,30 L10,25 L20,28 L30,20 L40,22 L50,15 L60,18 L70,10 L80,12 L100,5" fill="none" stroke="#3b82f6" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                             </svg>
                             <p className="text-emerald-400 text-xs font-bold mt-1 text-right">+24% este mes</p>
+                        </div>
                         </div>
                     </Reveal>
 
@@ -276,7 +278,7 @@ const ProfessionalB2BSection = () => {
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden flex items-center justify-center h-72">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[18rem]">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
                                     <div className="text-center relative z-10">
                                         <AnimatedChartTrigger threshold={0.5}>
@@ -307,7 +309,7 @@ const ProfessionalB2BSection = () => {
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden min-h-[18rem] flex flex-col justify-center">
                                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
                                     <h5 className="text-white font-bold mb-6 text-center">Tiempo promedio para reservar</h5>
                                     <AnimatedChartTrigger threshold={0.5}>
@@ -339,22 +341,22 @@ const ProfessionalB2BSection = () => {
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden min-h-[18rem] flex flex-col justify-center">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-                                    <h5 className="text-white font-bold mb-8 text-center">Origen de los turnos</h5>
+                                    <h5 className="text-white font-bold mb-6 text-center">Origen de los turnos</h5>
 
                                     <AnimatedChartTrigger threshold={0.5}>
                                         {(isVisible) => (
-                                            <div className="flex items-end justify-center gap-16 h-32 border-b border-slate-700 pb-2 px-8">
+                                            <div className="flex items-end justify-center gap-8 sm:gap-16 min-h-[11rem] border-b border-slate-700 pb-2 px-2 sm:px-8">
                                                 <div className="flex flex-col items-center gap-2 group w-1/3">
                                                     <span className="text-amber-400 font-black text-xl"><AnimatedNumber end={85} isVisible={isVisible} suffix="%" /></span>
                                                     <div className="w-full bg-amber-500 rounded-t-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-[1500ms] ease-out" style={{ height: isVisible ? '6rem' : '0' }}></div>
-                                                    <span className="text-slate-400 text-xs font-bold uppercase">Online / App</span>
+                                                    <span className="text-slate-400 text-xs font-bold uppercase text-center">Online / App</span>
                                                 </div>
                                                 <div className="flex flex-col items-center gap-2 w-1/3">
                                                     <span className="text-slate-400 font-bold text-sm"><AnimatedNumber end={15} isVisible={isVisible} suffix="%" /></span>
                                                     <div className="w-full bg-slate-700 rounded-t-lg transition-all duration-[1500ms] ease-out delay-300" style={{ height: isVisible ? '1.5rem' : '0' }}></div>
-                                                    <span className="text-slate-400 text-xs font-bold uppercase">Recepción</span>
+                                                    <span className="text-slate-400 text-xs font-bold uppercase text-center">Recepción</span>
                                                 </div>
                                             </div>
                                         )}
@@ -374,9 +376,9 @@ const ProfessionalB2BSection = () => {
                                 </p>
                             </Reveal>
                             <Reveal className="w-full md:w-1/2" delay={200}>
-                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden h-72 flex flex-col justify-center">
+                                <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden min-h-[18rem] flex flex-col justify-center">
                                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
-                                    <div className="flex justify-between items-center mb-6">
+                                    <div className="flex flex-wrap justify-between items-center gap-2 mb-6">
                                         <h5 className="text-white font-bold">Ocupación de Consultorios</h5>
                                         <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-lg border border-purple-500/30">ÓPTIMA: 92%</span>
                                     </div>
