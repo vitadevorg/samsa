@@ -2,7 +2,7 @@ import React, { useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Mail, Phone, Key, Camera, Trash2, Save, X, Shield, LogOut, AlertCircle, Lock, Stethoscope,
-  Award, BadgeCheck, Building2, MapPin, Clock, Send, Info, FileText, Eye, ShieldCheck, Pencil,
+  Award, BadgeCheck, Star, Building2, MapPin, Clock, Send, Info, FileText, Eye, ShieldCheck, Pencil,
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import FadeIn from '../../components/FadeIn';
@@ -24,6 +24,7 @@ import {
   validateAddress, validateSchedule, errorBorder,
 } from '../clinic/clinicValidation';
 import ScheduleRequestModal from './ScheduleRequestModal';
+import DoctorReviews from './DoctorReviews';
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 const BIO_MAX_LENGTH = 400;
@@ -60,7 +61,9 @@ const DoctorAccount = () => {
   const licenseNumber = user?.licenseNumber ?? baseDoctor.licenseNumber ?? particularDoctor?.licenseNumber;
   const doctorAssignments = doctorId ? bookableAssignments.filter((a) => a.doctorId === doctorId) : [];
   const isManagedByInstitution = doctorAssignments.length > 0;
-  const hasPublicProfile = Boolean(doctorId && doctorsData.some((d) => d.id === doctorId));
+  // Perfil público (doctors.js): de ahí salen las reseñas de los pacientes y el puntaje.
+  const publicProfile = doctorId ? doctorsData.find((d) => d.id === doctorId) : undefined;
+  const hasPublicProfile = Boolean(publicProfile);
   const today = todayISO();
   const title = user?.title ?? 'Dr.';
 
@@ -406,6 +409,12 @@ const DoctorAccount = () => {
               </span>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight break-words">{title} {stripTitle(user.name)}</h1>
               {specialty && <p className="text-base sm:text-lg text-white/90 font-semibold mt-1">{specialty}</p>}
+              {publicProfile?.rating != null && (
+                <a href={`#${fieldId}-resenas`} className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 text-sm font-bold transition-colors">
+                  <Star className="w-4 h-4 text-amber-300 fill-amber-300" /> {publicProfile.rating.toFixed(1)}
+                  <span className="font-medium text-white/80">· {(publicProfile.reviewsCount ?? publicProfile.reviews?.length ?? 0).toLocaleString('es-AR')} reseñas</span>
+                </a>
+              )}
               <p className="text-sm sm:text-base text-white/75 font-medium mt-1 break-all">{user.email}</p>
               {hasPublicProfile && (
                 <Link to={`/professionals/${doctorId}`} className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-white/15 hover:bg-white/25 rounded-xl text-sm font-bold transition-colors">
@@ -624,6 +633,13 @@ const DoctorAccount = () => {
                 </div>
               )}
             </section></FadeIn>
+
+            {/* Reseñas de pacientes (solo lectura) */}
+            {publicProfile && (
+              <FadeIn delay={280}><div id={`${fieldId}-resenas`} className="scroll-mt-28">
+                <DoctorReviews className={cardClass} rating={publicProfile.rating} reviewsCount={publicProfile.reviewsCount} reviews={publicProfile.reviews} />
+              </div></FadeIn>
+            )}
 
             {/* Documentación (solo particulares: la registra VitaDev) */}
             {particularDoctor && (
