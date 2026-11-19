@@ -114,7 +114,7 @@ flowchart LR
 | [`src/pages/`](src/pages/) y [`src/components/`](src/components/) | Pantallas por módulo y componentes reutilizables. |
 | [`src/context/`](src/context/) y [`src/services/`](src/services/) | Sesión y operaciones de autenticación de demostración. |
 | [`src/data/`](src/data/) y [`src/utils/`](src/utils/) | Datos iniciales, reglas de validación y utilidades. |
-| [`api/submit-form.js`](api/submit-form.js) | Envío del formulario de adhesión profesional mediante Resend cuando el entorno está configurado. |
+| [`api/submit-form.js`](api/submit-form.js) | Envío de la solicitud de adhesión (instituciones y médicos particulares) mediante Resend cuando el entorno está configurado. |
 
 ## Ejecución local
 

@@ -25,7 +25,7 @@ const Section = ({ heading, items, dark }) => (
 );
 
 // Ventana flotante con los Términos y la Política de Privacidad de una pantalla (ver legalTexts.js).
-// Se monta en <body> y queda por encima de otros modales (ej. la solicitud de adhesión profesional).
+// Se monta en <body> y queda por encima de otros modales (ej. la solicitud de adhesión).
 const LegalModal = ({ doc, onClose, dark = false }) => {
     const titleId = useId();
     const content = LEGAL_DOCS[doc];

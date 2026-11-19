@@ -2,6 +2,8 @@
 // Cada función devuelve el mensaje de error para mostrar debajo del campo,
 // o '' (texto vacío) si el valor es válido.
 
+import { cuilDigits, isValidCuil } from '../../utils/cuil';
+
 // Letras (con tildes y ñ), espacios, guiones y apóstrofos: "María José O'Neill-Paz".
 const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$/;
 const NAME_MAX_LENGTH = 60;
@@ -122,6 +124,36 @@ export const validateInstitutionName = (value) => {
   if (name.length < 3) return 'El nombre tiene que tener al menos 3 caracteres.';
   if (name.length > 80) return 'El nombre no puede superar los 80 caracteres.';
   if (!INSTITUTION_NAME_PATTERN.test(name)) return 'El nombre solo puede tener letras, números, espacios y . , & - apóstrofos.';
+  return '';
+};
+
+// Razón social: obligatoria, entre 3 y 120 caracteres.
+export const validateLegalName = (value) => {
+  const text = value.trim();
+  if (!text) return 'Ingresá la razón social.';
+  if (text.length < 3) return 'La razón social es demasiado corta.';
+  if (text.length > 120) return 'La razón social no puede superar los 120 caracteres.';
+  return '';
+};
+
+// Código REFES (Registro Federal de Establecimientos de Salud): 14 dígitos.
+export const refesDigits = (value) => value.replace(/\D/g, '');
+export const validateRefes = (value, taken = []) => {
+  const digits = refesDigits(value);
+  if (!digits) return 'Ingresá el código REFES.';
+  if (digits.length !== 14) return 'El código REFES tiene que tener 14 dígitos.';
+  if (taken.includes(digits)) return 'Ya hay una institución con ese código REFES.';
+  return '';
+};
+
+// CUIT de la institución: XX-XXXXXXXX-X, de persona jurídica (30, 33 o 34) y con dígito verificador válido.
+export const validateInstitutionCuit = (value, taken = []) => {
+  const digits = cuilDigits(value);
+  if (!digits) return 'Ingresá el CUIT.';
+  if (digits.length !== 11) return 'El CUIT tiene que tener 11 dígitos (XX-XXXXXXXX-X).';
+  if (!['30', '33', '34'].includes(digits.slice(0, 2))) return 'El CUIT de una institución empieza con 30, 33 o 34.';
+  if (!isValidCuil(digits)) return 'CUIT inválido: revisá el último dígito.';
+  if (taken.includes(digits)) return 'Ya hay una institución con ese CUIT.';
   return '';
 };
 
