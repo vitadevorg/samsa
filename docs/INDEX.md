@@ -11,6 +11,7 @@ Punto de entrada a toda la documentación técnica, estándares de diseño, fluj
 | [`docs/flujo-codigo-trello.md`](./flujo-codigo-trello.md) | **Flujo de trabajo oficial:** Reglas duras de Git, convención de tarjetas de Trello, nombres de ramas, Conventional Commits, prueba manual local y checklist de calidad antes del PR. |
 | [`docs/design-system.md`](./design-system.md) | **Design System y UI/UX:** Paleta de colores, jerarquía tipográfica, estilos de botones, tarjetas *glassmorphism*, animaciones y reglas de responsiveness (Mobile, Tablet y Desktop). |
 | [`docs/arquitectura-y-roles.md`](./arquitectura-y-roles.md) | **Arquitectura y Roles:** Stack tecnológico, los 6 roles del sistema (`ROLES`), mapa completo de rutas públicas y protegidas, y contextos globales (`AuthContext`, `ClinicDataProvider`). |
+| [`docs/carruseles-instagram.md`](./carruseles-instagram.md) | **Guía y Prompt para Carruseles de Instagram:** Paleta HEX oficial de SAMSA, formato editorial `1080 × 1350 px` y prompt estandarizado listo para copiar por todo el equipo. |
 | [`docs/tareas/INDEX.md`](./tareas/INDEX.md) | **Índice de Tareas e Historias de Usuario:** Registro de tarjetas, estado, criterios de aceptación y decisiones pendientes. |
 
 ---
